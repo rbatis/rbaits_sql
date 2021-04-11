@@ -28,7 +28,22 @@ impl Add<i64> for Value {
                 s.as_i64().unwrap_or(0) + rhs
             }
             _ => {
-                0
+                rhs
+            }
+        };
+    }
+}
+
+impl Add<i32> for Value {
+    type Output = i64;
+
+    fn add(self, rhs: i32) -> Self::Output {
+        return match self.inner {
+            serde_json::Value::Number(s) => {
+                s.as_i64().unwrap_or(0) + rhs as i64
+            }
+            _ => {
+                rhs as i64
             }
         };
     }
@@ -43,7 +58,7 @@ impl Add<f64> for Value {
                 s.as_f64().unwrap_or(0.0) + rhs
             }
             _ => {
-                0.0
+                rhs
             }
         };
     }
@@ -58,7 +73,7 @@ impl Add<u64> for Value {
                 s.as_u64().unwrap_or(0) + rhs
             }
             _ => {
-                0
+                rhs
             }
         };
     }
