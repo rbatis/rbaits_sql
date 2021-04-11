@@ -14,6 +14,35 @@ pub struct Value {
     pub inner: serde_json::Value
 }
 
+impl Value{
+    pub fn as_i64(&self) -> Option<i64> {
+        self.inner.as_i64()
+    }
+    pub fn as_f64(&self) -> Option<f64> {
+        self.inner.as_f64()
+    }
+    pub fn as_u64(&self) -> Option<u64> {
+        self.inner.as_u64()
+    }
+    pub fn as_str(&self) -> Option<&str> {
+        self.inner.as_str()
+    }
+    pub fn as_bool(&self) -> Option<bool> {
+        self.inner.as_bool()
+    }
+    pub fn as_null(&self) -> Option<()> {
+        self.inner.as_null()
+    }
+    pub fn as_object(&self) -> Option<&serde_json::Map<String, serde_json::Value>> {
+        self.inner.as_object()
+    }
+    pub fn as_array(&self) -> Option<&Vec<serde_json::Value>> {
+        self.inner.as_array()
+    }
+}
+
+
+
 impl AsProxy for serde_json::Value {
     fn as_proxy(self) -> Value {
         Value {
