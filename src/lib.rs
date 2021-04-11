@@ -1,8 +1,8 @@
 pub mod error;
 #[macro_use]
 pub mod bencher;
-pub mod opt;
-pub use opt::Value;
+pub mod ops;
+pub use ops::Value;
 
 #[macro_use]
 extern crate xmlsql_macro;
