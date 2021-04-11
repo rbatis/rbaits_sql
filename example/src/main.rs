@@ -59,7 +59,7 @@ mod test {
         "e":[1],
         "f":[{"field":1}]
          });
-        #[expr("-1 == -a")]
+        #[expr("-1i64 == -a")]
         pub fn fff(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
         assert_eq!(fff(&arg).unwrap(), json!(true));
         #[expr("d.a == null")]
