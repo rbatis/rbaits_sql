@@ -179,3 +179,16 @@ impl PartialEq<f64> for Value {
         (*other as i64).eq(&self.as_i64().unwrap_or(0))
     }
 }
+
+
+impl PartialEq<Value> for serde_json::Value {
+    fn eq(&self, other: &Value) -> bool {
+        (*self).eq(&other.inner)
+    }
+}
+
+impl PartialEq<serde_json::Value> for Value {
+    fn eq(&self, other: &serde_json::Value) -> bool {
+        (*other).eq(&self.inner)
+    }
+}
