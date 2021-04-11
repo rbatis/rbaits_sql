@@ -199,7 +199,10 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                     //cast int to i64
                     return syn::parse_str::<Expr>(&format!("{}i64", i)).unwrap();
                 }
-                Lit::Float(_) => {}
+                Lit::Float(f) => {
+                    //cast int to f64
+                    return syn::parse_str::<Expr>(&format!("{}f64", f)).unwrap();
+                }
                 Lit::Bool(_) => {}
                 Lit::Verbatim(_) => {}
             }
