@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Rem};
 use serde::{Serializer, Deserializer};
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
 
 
 pub trait AsProxy {
@@ -38,6 +38,12 @@ impl Value {
     }
     pub fn as_array(&self) -> Option<&Vec<serde_json::Value>> {
         self.inner.as_array()
+    }
+}
+
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(&self.inner, f)
     }
 }
 

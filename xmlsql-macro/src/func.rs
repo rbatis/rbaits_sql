@@ -93,7 +93,7 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
     let mut return_ty = f.sig.output.to_token_stream();
     return quote!(pub fn #func_name_ident(#func_args)  #return_ty {
                      use xmlsql::ops::AsProxy;
-                     let result=#t;
+                     let result={#t};
                      return Ok(serde_json::json!(result));
                   })
         .to_token_stream().into();
