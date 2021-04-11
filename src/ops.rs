@@ -259,6 +259,12 @@ impl PartialEq<serde_json::Value> for &Value {
 PartialOrd
 **/
 
+impl PartialOrd<Value> for Value {
+    fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
+        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&other.inner.as_f64().unwrap_or(0.0))
+    }
+}
+
 impl PartialOrd<i32> for &Value {
     fn partial_cmp(&self, other: &i32) -> Option<Ordering> {
         self.inner.as_i64().unwrap_or(0).partial_cmp(&(*other as i64))
