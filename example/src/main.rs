@@ -49,6 +49,8 @@ mod test {
     use xmlsql;
 
     use serde_json::json;
+    use xmlsql::ops::AsProxy;
+
     #[test]
     fn test_node_run() {
         let arg = json!({
@@ -60,75 +62,58 @@ mod test {
         "f":[{"field":1}]
          });
 
-        #[expr("-1 == -a")]
-        pub fn fff(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff(&arg).unwrap(), json!(true));
-        #[expr("d.a == null")]
-        pub fn fff2(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff2(&arg).unwrap(), json!(true));
-        #[expr("1.0 == 1.0")]
-        pub fn fff3(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff3(&arg).unwrap(), json!(true));
-        #[expr("'2019-02-26' == '2019-02-26'")]
-        pub fn fff4(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff4(&arg).unwrap(), json!(true));
-        #[expr("'f\'uc'.string()+'k'")]
-        pub fn fff5(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff5(&arg).unwrap(), json!("f'uck"));
-        #[expr("'f'.string()+'s'")]
-        pub fn fff6(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff6(&arg).unwrap(), json!("fs"));
-        #[expr("a +1 > b * 8")]
-        pub fn fff7(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff7(&arg).unwrap(), json!(false));
-        #[expr("a >= 0")]
-        pub fn fff8(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-        assert_eq!(fff8(&arg).unwrap(), json!(true));
-        // assert_eq!(exec_expr(&arg, "a >= 0"), json!(true));
-        // assert_eq!(exec_expr(&arg, "'a'+c"), json!("ac"));
-        // assert_eq!(exec_expr(&arg, "b"), json!(2));
-        // assert_eq!(exec_expr(&arg, "a < 1"), json!(false));
-        // assert_eq!(exec_expr(&arg, "a +1 > b*8"), json!(false));
-        // assert_eq!(exec_expr(&arg, "a * b == 2"), json!(true));
-        // assert_eq!(exec_expr(&arg, "a - b == 0"), json!(false));
-        // assert_eq!(exec_expr(&arg, "a >= 0 && a != 0"), json!(true));
-        // assert_eq!(exec_expr(&arg, "a == 1 && a != 0"), json!(true));
-        // assert_eq!(exec_expr(&arg, "1 > 3 "), json!(false));
-        // assert_eq!(exec_expr(&arg, "1 + 2 != null"), json!(true));
-        // assert_eq!(exec_expr(&arg, "1 != null"), json!(true));
-        // assert_eq!(exec_expr(&arg, "1 + 2 != null && 1 > 0 "), json!(true));
-        // assert_eq!(exec_expr(&arg, "1 + 2 != null && 2 < b*8 "), json!(true));
-        // assert_eq!(exec_expr(&arg, "-1 != null"), json!(true));
-        // assert_eq!(exec_expr(&arg, "-1 != -2 && -1 == 2-3 "), json!(true));
-        // assert_eq!(exec_expr(&arg, "-3 == b*-1-1 "), json!(true));
-        // assert_eq!(exec_expr(&arg, "0-1 + a*0-1 "), json!(-2));
-        // assert_eq!(exec_expr(&arg, "2 ** 3"), json!(8.0));
-        // assert_eq!(exec_expr(&arg, "0-1 + -1*0-1 "), json!(-2));
-        // assert_eq!(exec_expr(&arg, "1-"), json!(1));
-        // assert_eq!(exec_expr(&arg, "-1"), json!(-1));
-        // assert_eq!(exec_expr(&arg, "1- -1"), json!(1 - -1));
-        // assert_eq!(exec_expr(&arg, "1-2 -1+"), json!(1 - 2 - 1));
-        // assert_eq!(exec_expr(&arg, "e[1]"), json!(null));
-        // assert_eq!(exec_expr(&arg, "e[0]"), json!(1));
-        // assert_eq!(exec_expr(&arg, "f[0].field"), json!(1));
-        // assert_eq!(exec_expr(&arg, "f.0.field"), json!(1));
-        // assert_eq!(exec_expr(&arg, "0.1"), json!(0.1));
-        // assert_eq!(exec_expr(&arg, "1"), json!(1));
-        // assert_eq!(exec_expr(&arg, "(1+1)"), json!(2));
-        // assert_eq!(exec_expr(&arg, "(1+5)>5"), json!((1 + 5) > 5));
-        // assert_eq!(exec_expr(&arg, "(18*19)<19*19"), json!((18 * 19) < 19 * 19));
-        // assert_eq!(exec_expr(&arg, "2*(1+1)"), json!(2 * (1 + 1)));
-        // assert_eq!(
-        //     exec_expr(&arg, "2*(1+(1+1)+1)"),
-        //     json!(2 * (1 + (1 + 1) + 1))
-        // );
-        // assert_eq!(
-        //     exec_expr(&arg, "(((34 + 21) / 5) - 12) * 348"),
-        //     json!((((34 + 21) / 5) - 12) * 348)
-        // );
-        // assert_eq!(exec_expr(&arg, "11 ^ 1"), json!(11 ^ 1));
-        // assert_eq!(exec_expr(&arg, "null ^ null"), json!(0 ^ 0));
-        // assert_eq!(exec_expr(&arg, "null >= 0"), json!(true));
-        // assert_eq!(exec_expr(&arg, "null <= a"), json!(true));
+        macro_rules! call {
+            ($func_name:ident,$s:expr,$value:expr) => {
+                #[expr($s)]
+                pub fn $func_name(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+                     assert_eq!($func_name(&arg).unwrap(), $value);
+                };
+        }
+
+        call!(fn1,"-1 == -a", json!(true));
+        call!(fn2,"d.a == &null", json!(true));
+        call!(fn3,"1.0 == 1.0", json!(true));
+        call!(fn4,"'2019-02-26' == '2019-02-26'", json!(true));
+        call!(fn5,"'f\'uc'.string()+'k'", json!("f'uck"));
+        call!(fn6,"'f'.string()+'s'",json!("fs"));
+        call!(fn7,"a +1 > b * 8",json!(false));
+        call!(fn8,"a >= 0",json!(true));
+        call!(fn9,"'a'+c",json!("ac"));
+        call!(fn10,"'a'+c", json!("ac"));
+        call!(fn11,"b", json!(2));
+        call!(fn12,"a < 1", json!(false));
+        call!(fn13,"a +1 > b*8", json!(false));
+        call!(fn14,"a * b == 2", json!(true));
+        call!(fn15,"a - b == 0", json!(false));
+        call!(fn16,"a >= 0 && a != 0", json!(true));
+        call!(fn17,"a == 1 && a != 0", json!(true));
+        call!(fn18,"1 > 3 ", json!(false));
+        call!(fn19,"1 + 2 != null", json!(true));
+        call!(fn20,"1 != null", json!(true));
+        call!(fn21,"1 + 2 != null && 1 > 0 ", json!(true));
+        call!(fn22,"1 + 2 != null && 2 < b*8 ", json!(true));
+        call!(fn23,"-1 != null", json!(true));
+        call!(fn24,"-1 != -2 && -1 == 2-3 ", json!(true));
+        call!(fn25,"-3 == b*-1-1 ", json!(true));
+        call!(fn26,"0-1 + a*0-1 ", json!(-2));
+        call!(fn28,"0-1 + -1*0-1 ", json!(-2));
+        call!(fn29,"1-0", json!(1));
+        call!(fn30,"-1", json!(-1));
+        call!(fn31,"1- -1", json!(1 - -1));
+        call!(fn32,"1-2 -1+0", json!(1 - 2 - 1));
+        call!(fn33,"e[1]", json!(null));
+        call!(fn34,"e[0]", json!(1));
+        call!(fn35,"f[0].field", json!(1));
+        call!(fn37,"0.1", json!(0.1));
+        call!(fn38,"1", json!(1));
+        call!(fn39,"(1+1)", json!(2));
+        call!(fn40,"(1+5)>5", json!((1 + 5) > 5));
+        call!(fn41,"(18*19)<19*19", json!((18 * 19) < 19 * 19));
+        call!(fn42,"2*(1+1)", json!(2 * (1 + 1)));
+        call!(fn43, "2*(1+(1+1)+1)",json!(2 * (1 + (1 + 1) + 1)));
+        call!(fn44, "(((34 + 21) / 5) - 12) * 348",json!((((34 + 21) / 5) - 12) * 348));
+        call!(fn45,"11 ^ 1", json!(11 ^ 1));
+        call!(fn47,"&null >= 0", json!(true));
+        call!(fn48,"&null <= a", json!(true));
     }
 }

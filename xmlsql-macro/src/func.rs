@@ -101,7 +101,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
     match arg {
         Expr::Path(b) => {
             if b.to_token_stream().to_string().trim() == "null" {
-                return syn::parse_str::<Expr>("&serde_json::Value::Null.as_proxy()").unwrap();
+                return syn::parse_str::<Expr>("serde_json::Value::Null.as_proxy()").unwrap();
             }
             //println!("Path:{}", b.to_token_stream());
             return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy_clone()", b.to_token_stream().to_string().trim())).unwrap();
