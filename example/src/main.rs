@@ -4,7 +4,7 @@ extern crate xmlsql;
 use serde_json::json;
 
 
-#[expr("a.arr2[0].name")]
+#[expr("a.arr2[0].name=='ff'")]
 pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
 
 
