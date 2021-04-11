@@ -71,7 +71,7 @@ mod test {
         }
 
         call!(fn1,"-1 == -a", json!(true));
-        call!(fn2,"d.a == nil", json!(true));
+        call!(fn2,"d.a.is_null()", json!(true));
         call!(fn3,"1.0 == 1.0", json!(true));
         call!(fn4,"'2019-02-26' == '2019-02-26'", json!(true));
         call!(fn5,"'f\'uc'.string()+'k'", json!("f'uck"));

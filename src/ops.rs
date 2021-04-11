@@ -40,6 +40,45 @@ impl Value {
     pub fn as_array(&self) -> Option<&Vec<serde_json::Value>> {
         self.inner.as_array()
     }
+
+
+    pub fn is_null(&self) -> bool {
+        self.inner.is_null()
+    }
+    pub fn is_f64(&self) -> bool {
+        self.inner.is_f64()
+    }
+    pub fn is_i64(&self) -> bool {
+        self.inner.is_i64()
+    }
+    pub fn is_u64(&self) -> bool {
+        self.inner.is_u64()
+    }
+    pub fn is_bool(&self) -> bool {
+        self.inner.is_boolean()
+    }
+    pub fn is_empty(&self) -> bool {
+        return match &self.inner {
+            serde_json::Value::Null => {
+                true
+            }
+            serde_json::Value::Bool(_) => {
+                false
+            }
+            serde_json::Value::Number(_) => {
+                false
+            }
+            serde_json::Value::String(s) => {
+                s.is_empty()
+            }
+            serde_json::Value::Array(arr) => {
+                arr.is_empty()
+            }
+            serde_json::Value::Object(m) => {
+                m.is_empty()
+            }
+        };
+    }
 }
 
 impl std::fmt::Display for Value {
