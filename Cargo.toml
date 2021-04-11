@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    ".",
+    "xmlsql-macro",
+    "example"
+]
+
+[package]
+name = "xmlsql"
+version = "1.0.7"
+description = "Rust Json Object access Runtime"
+authors = ["zhuxiujie <zhuxiujia@qq.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[features]
+default = []
+debug_mode=["xmlsql-macro/debug_mode"]
+
+
+[dependencies]
+
+#serde
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+dashmap = { version = "4" }
+
+xmlsql-macro={version="0.1.0",path="xmlsql-macro"}

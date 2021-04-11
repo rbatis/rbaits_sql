@@ -1,0 +1,17 @@
+[package]
+name = "xmlsql-macro"
+version = "0.1.0"
+authors = ["zxj_pc <zhuxiujia@qq.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+debug_mode=[]
+[lib]
+proc-macro = true
+[dependencies]
+proc-macro2 = "1.0.26"
+quote = "1.0.9"
+syn = {version="1.0.68",features=["full"]}
