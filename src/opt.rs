@@ -4,6 +4,21 @@ pub struct Value {
     pub inner: serde_json::Value
 }
 
+impl From<serde_json::Value> for Value{
+    fn from(arg: serde_json::Value) -> Self {
+        Value{
+            inner:arg
+        }
+    }
+}
+impl From<&serde_json::Value> for Value{
+    fn from(arg: &serde_json::Value) -> Self {
+        Value{
+            inner:arg.clone()
+        }
+    }
+}
+
 impl Add<&str> for Value {
     type Output = String;
 
