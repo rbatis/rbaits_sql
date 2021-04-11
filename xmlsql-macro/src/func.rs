@@ -1,7 +1,7 @@
 use quote::quote;
 use quote::ToTokens;
 use syn;
-use syn::{Expr, ItemFn, Member};
+use syn::{Expr, ItemFn, Member, Lit};
 use crate::proc_macro::TokenStream;
 
 // fn is_name_char(arg: char) -> bool {
@@ -97,7 +97,7 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
 }
 
 fn convert_to_arg_access(arg: Expr) -> Expr {
-    // println!("tk:{},expr:{}",expr_type(arg.clone()),arg.to_token_stream());
+    println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
     match arg {
         Expr::Path(b) => {
             if b.to_token_stream().to_string().trim() == "null" {
@@ -188,6 +188,22 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
             //return result;
             //remove inner . as_proxy_clone(),keep  out . as_proxy_clone()
             return syn::parse_str::<Expr>(&format!("{}.as_proxy_clone()", result.to_token_stream().to_string().replace(". as_proxy_clone()", ""))).unwrap();
+        }
+        Expr::Lit(mut b) => {
+            match b.lit.clone() {
+                Lit::Str(_) => {}
+                Lit::ByteStr(_) => {}
+                Lit::Byte(_) => {}
+                Lit::Char(_) => {}
+                Lit::Int(i) => {
+                    //cast int to i64
+                    return syn::parse_str::<Expr>(&format!("{}i64", i)).unwrap();
+                }
+                Lit::Float(_) => {}
+                Lit::Bool(_) => {}
+                Lit::Verbatim(_) => {}
+            }
+            return Expr::Lit(b);
         }
         _ => {
             println!("_def:{:?}", expr_type(arg.clone()));

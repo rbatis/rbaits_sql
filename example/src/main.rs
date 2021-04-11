@@ -4,13 +4,12 @@ extern crate xmlsql;
 use serde_json::json;
 
 
-#[expr("a.arr2[0].name=='ff'")]
+#[expr("-1 == -e")]
 pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
 
 
 fn main() {
     let arg = serde_json::json!({
-
           "a":{
             "arr2":[{"name":"ff"}],
             "arr": [1,2,3],
@@ -59,7 +58,7 @@ mod test {
         "e":[1],
         "f":[{"field":1}]
          });
-        #[expr("-1i64 == -a")]
+        #[expr("-1 == -a")]
         pub fn fff(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
         assert_eq!(fff(&arg).unwrap(), json!(true));
         #[expr("d.a == null")]
