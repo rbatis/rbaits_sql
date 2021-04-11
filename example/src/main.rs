@@ -10,7 +10,7 @@ pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> 
 
 fn main() {
     let arg = serde_json::json!({
-        
+
           "a":{
             "arr2":[{"name":"ff"}],
             "arr": [1,2,3],
@@ -69,7 +69,13 @@ mod test {
         pub fn fff3(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
         assert_eq!(fff3(&arg).unwrap(), json!(true));
 
-        // assert_eq!(exec_expr(&arg, "'2019-02-26' == '2019-02-26'"), json!(true));
+        #[expr("'2019-02-26' == '2019-02-26'")]
+        pub fn fff4(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+        assert_eq!(fff4(&arg).unwrap(), json!(true));
+
+        #[expr("'f\'uc'.string()+'k'")]
+        pub fn fff5(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+        assert_eq!(fff5(&arg).unwrap(), json!("f'uck"));
         // assert_eq!(exec_expr(&arg, "`f`+`s`"), json!("fs"));
         // assert_eq!(exec_expr(&arg, "a +1 > b * 8"), json!(false));
         // assert_eq!(exec_expr(&arg, "a >= 0"), json!(true));
