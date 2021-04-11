@@ -34,6 +34,10 @@ fn is_param_char(arg: char) -> bool {
 pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> TokenStream {
     let mut string_data = args.to_string();
     string_data = string_data[1..string_data.len() - 1].to_string();
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("[rexpr]expr: {}", string_data);
+        }
 
     string_data = string_data.replace(".as_i32()", ".as_i64().unwrap_or(0)");
     string_data = string_data.replace(".as_i64()", ".as_i64().unwrap_or(0)");
@@ -66,7 +70,7 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
     if t.is_err() {
         panic!("[rexpr]syn::parse_str fail for: {}", t.err().unwrap().to_string())
     } else {
-        println!("[rexpr]parse expr:{} success!", string_data);
+        //println!("[rexpr]parse expr:{} success!", string_data);
     }
     let mut t = t.unwrap();
     t = convert_to_arg_access(t);
@@ -74,17 +78,16 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
     string_data = string_data.replace(" . ", ".");
 
     //let s = syn::parse_str::<syn::LitStr>(&string_data).unwrap();
-    println!("[rexpr]expr:{}", string_data);
     let t = syn::parse_str::<Expr>(&string_data);
     if t.is_err() {
         panic!("[rexpr]syn::parse_str fail for: {}", t.err().unwrap().to_string())
     } else {
-        println!("[rexpr]parse expr:{} success!", string_data);
+        //println!("[rexpr]parse expr:{} success!", string_data);
     }
     let t = t.unwrap();
     //t = convert_to_arg_access(t);
 
-    println!("[rexpr]gen expr: {}", t.to_token_stream());
+    //println!("[rexpr]gen expr: {}", t.to_token_stream());
     let func_args = f.sig.inputs.to_token_stream();
     let func_name_ident = f.sig.ident.to_token_stream();
     let return_ty = f.sig.output.to_token_stream();
@@ -97,11 +100,14 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
 }
 
 fn convert_to_arg_access(arg: Expr) -> Expr {
-    println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
+    // println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
     match arg {
         Expr::Path(b) => {
             if b.to_token_stream().to_string().trim() == "null" {
                 return syn::parse_str::<Expr>("serde_json::Value::Null.as_proxy()").unwrap();
+            }
+            if b.to_token_stream().to_string().trim() == "nil" {
+                return syn::parse_str::<Expr>("&serde_json::Value::Null.as_proxy()").unwrap();
             }
             //println!("Path:{}", b.to_token_stream());
             return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy_clone()", b.to_token_stream().to_string().trim())).unwrap();
