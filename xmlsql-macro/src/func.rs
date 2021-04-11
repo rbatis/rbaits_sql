@@ -128,12 +128,12 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
         }
         Expr::Unary(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
-            if b.op.to_token_stream().to_string().trim()=="-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy_clone()"){
+            if b.op.to_token_stream().to_string().trim() == "-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy_clone()") {
                 return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
             }
             return Expr::Unary(b);
         }
-        Expr::Paren(mut b)=>{
+        Expr::Paren(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
             return Expr::Paren(b);
         }
@@ -149,9 +149,27 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                             token.push_str(".");
                             token.push_str(x.trim());
                         } else {
-                            token.push_str("[\"");
-                            token.push_str(x.trim());
-                            token.push_str("\"]");
+                            let x = x.trim();
+                            //format index
+                            let xs: Vec<&str> = x.split("[").collect();
+                            if xs.len() > 1 {
+                                let mut is_first = true;
+                                for x in xs {
+                                    if is_first {
+                                        token.push_str("[\"");
+                                        token.push_str(x.trim());
+                                        token.push_str("\"]");
+                                    } else {
+                                        token.push_str("[");
+                                        token.push_str(x.trim());
+                                    }
+                                    is_first = false;
+                                }
+                            } else {
+                                token.push_str("[\"");
+                                token.push_str(x.trim());
+                                token.push_str("\"]");
+                            }
                         }
                     }
                     return syn::parse_str::<Expr>(&format!("&arg{}.as_proxy_clone()", token)).unwrap();
@@ -171,7 +189,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
             let result = Expr::Index(b);
             //return result;
             //remove inner . as_proxy_clone(),keep  out . as_proxy_clone()
-            return syn::parse_str::<Expr>(&format!("{}.as_proxy_clone()", result.to_token_stream().to_string().replace(". as_proxy_clone()",""))).unwrap();
+            return syn::parse_str::<Expr>(&format!("{}.as_proxy_clone()", result.to_token_stream().to_string().replace(". as_proxy_clone()", ""))).unwrap();
         }
         _ => {
             println!("_def:{:?}", expr_type(arg.clone()));
