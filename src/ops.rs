@@ -45,6 +45,9 @@ impl Value {
     pub fn is_null(&self) -> bool {
         self.inner.is_null()
     }
+    pub fn is_string(&self) -> bool {
+        self.inner.is_string()
+    }
     pub fn is_f64(&self) -> bool {
         self.inner.is_f64()
     }
@@ -56,6 +59,12 @@ impl Value {
     }
     pub fn is_bool(&self) -> bool {
         self.inner.is_boolean()
+    }
+    pub fn is_object(&self) -> bool {
+        self.inner.is_object()
+    }
+    pub fn is_array(&self) -> bool {
+        self.inner.is_array()
     }
     pub fn is_empty(&self) -> bool {
         return match &self.inner {
