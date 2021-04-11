@@ -92,6 +92,7 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
     let func_name_ident = f.sig.ident.to_token_stream();
     let mut return_ty = f.sig.output.to_token_stream();
     return quote!(pub fn #func_name_ident(#func_args)  #return_ty {
+                     use xmlsql::opt::AsProxy;
                      let result=#t;
                      return Ok(serde_json::json!(result));
                   })
@@ -105,7 +106,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                 return syn::parse_str::<Expr>("&serde_json::Value::Null").unwrap();
             }
             //println!("Path:{}", b.to_token_stream());
-            return syn::parse_str::<Expr>(&format!("&arg[\"{}\"]", b.to_token_stream().to_string().trim())).unwrap();
+            return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy_clone()", b.to_token_stream().to_string().trim())).unwrap();
         }
         Expr::MethodCall(mut b) => {
             let ex = *(b.receiver.clone());
@@ -150,7 +151,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                             token.push_str("\"]");
                         }
                     }
-                    return syn::parse_str::<Expr>(&format!("&arg{}", token)).unwrap();
+                    return syn::parse_str::<Expr>(&format!("&arg{}.as_proxy_clone()", token)).unwrap();
                 }
                 Member::Unnamed(unamed) => {
                     return Expr::Field(b);
@@ -165,7 +166,9 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
         Expr::Index(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
             let result = Expr::Index(b);
-            return result;
+            //return result;
+            //remove inner . as_proxy_clone(),keep  out . as_proxy_clone()
+            return syn::parse_str::<Expr>(&format!("{}.as_proxy_clone()", result.to_token_stream().to_string().replace(". as_proxy_clone()",""))).unwrap();
         }
         _ => {
             println!("_def:{:?}", expr_type(arg.clone()));

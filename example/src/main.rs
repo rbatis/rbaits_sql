@@ -4,7 +4,7 @@ extern crate xmlsql;
 use serde_json::json;
 
 
-#[expr("a.c")]
+#[expr("(a.d+1)")]
 pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
 
 

@@ -2,46 +2,67 @@ use std::ops::Add;
 use serde::{Serializer, Deserializer};
 use std::fmt::Debug;
 
+
+pub trait AsProxy {
+    fn as_proxy(self) -> Value;
+    fn as_proxy_clone(&self) -> Value;
+}
+
+
 #[derive(Eq, PartialEq)]
 pub struct Value {
     pub inner: serde_json::Value
 }
 
+impl AsProxy for serde_json::Value {
+    fn as_proxy(self) -> Value {
+        Value {
+            inner: self
+        }
+    }
+
+    fn as_proxy_clone(&self) -> Value {
+        Value {
+            inner: self.clone()
+        }
+    }
+}
 
 
-
-impl From<serde_json::Value> for Value{
+impl From<serde_json::Value> for Value {
     fn from(arg: serde_json::Value) -> Self {
-        Value{
-            inner:arg
-        }
-    }
-}
-impl From<&serde_json::Value> for Value{
-    fn from(arg: &serde_json::Value) -> Self {
-        Value{
-            inner:arg.clone()
+        Value {
+            inner: arg
         }
     }
 }
 
-impl serde::Serialize for Value{
+impl From<&serde_json::Value> for Value {
+    fn from(arg: &serde_json::Value) -> Self {
+        Value {
+            inner: arg.clone()
+        }
+    }
+}
+
+impl serde::Serialize for Value {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> where
         S: Serializer {
         self.inner.serialize(serializer)
     }
 }
-impl <'de>serde::Deserialize<'de> for Value{
+
+impl<'de> serde::Deserialize<'de> for Value {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error> where
         D: Deserializer<'de> {
-        let r=serde_json::Value::deserialize(deserializer);
-        match r{
-            Ok(o)=>{
-                return Ok(Value{
-                    inner:o
+        let r = serde_json::Value::deserialize(deserializer);
+        match r {
+            Ok(o) => {
+                return Ok(Value {
+                    inner: o
                 });
             }
-            Err(e)=>{
+            Err(e) => {
                 return Err(e);
             }
         }
