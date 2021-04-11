@@ -190,3 +190,152 @@ impl Add<&serde_json::Value> for &Value {
         };
     }
 }
+
+/**
+base
+**/
+impl Add<Value> for &str {
+    type Output = String;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::String(s) => {
+               self.to_string()+&s
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+impl Add<Value> for i64 {
+    type Output = i64;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                self +s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Add<Value> for i32 {
+    type Output = i64;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                s.as_i64().unwrap_or(0) + self as i64
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+
+impl Add<Value> for f64 {
+    type Output = f64;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                s.as_f64().unwrap_or(0.0) + self
+            }
+            _ => {
+                0.0
+            }
+        };
+    }
+}
+
+impl Add<Value> for u64 {
+    type Output = u64;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                s.as_u64().unwrap_or(0) + self
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+
+/**
+base ref
+**/
+impl Add<&Value> for &str {
+    type Output = String;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::String(s) => {
+                self.to_string()+&s
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+impl Add<&Value> for i64 {
+    type Output = i64;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                self +s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Add<&Value> for i32 {
+    type Output = i64;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                s.as_i64().unwrap_or(0) + self as i64
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+
+impl Add<&Value> for f64 {
+    type Output = f64;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                s.as_f64().unwrap_or(0.0) + self
+            }
+            _ => {
+                0.0
+            }
+        };
+    }
+}
+
+impl Add<&Value> for u64 {
+    type Output = u64;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                s.as_u64().unwrap_or(0) + self
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
