@@ -103,7 +103,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
     match arg {
         Expr::Path(b) => {
             if b.to_token_stream().to_string().trim() == "null" {
-                return syn::parse_str::<Expr>("&serde_json::Value::Null").unwrap();
+                return syn::parse_str::<Expr>("&serde_json::Value::Null.as_proxy()").unwrap();
             }
             //println!("Path:{}", b.to_token_stream());
             return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy_clone()", b.to_token_stream().to_string().trim())).unwrap();
@@ -128,6 +128,9 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
         }
         Expr::Unary(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
+            if b.op.to_token_stream().to_string().trim()=="-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy_clone()"){
+                return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
+            }
             return Expr::Unary(b);
         }
         Expr::Paren(mut b)=>{
