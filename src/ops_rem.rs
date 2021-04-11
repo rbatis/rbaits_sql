@@ -161,3 +161,122 @@ impl Rem<&serde_json::Value> for &Value {
     }
 }
 
+
+/**
+base
+**/
+impl Rem<Value> for i64 {
+    type Output = i64;
+    fn rem(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                self as i64 % s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Rem<Value> for i32 {
+    type Output = i64;
+    fn rem(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                self as i64 % s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Rem<Value> for f64 {
+    type Output = f64;
+    fn rem(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                self as f64 % s.as_f64().unwrap_or(0.0)
+            }
+            _ => {
+                0.0
+            }
+        };
+    }
+}
+
+impl Rem<Value> for u64 {
+    type Output = u64;
+    fn rem(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                self % s.as_u64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+
+/**
+base ref
+**/
+impl Rem<&Value> for i64 {
+    type Output = i64;
+    fn rem(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                self as i64 % s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Rem<&Value> for i32 {
+    type Output = i64;
+    fn rem(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                self as i64 % s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Rem<&Value> for f64 {
+    type Output = f64;
+    fn rem(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                self as f64 % s.as_f64().unwrap_or(0.0)
+            }
+            _ => {
+                0.0
+            }
+        };
+    }
+}
+
+impl Rem<&Value> for u64 {
+    type Output = u64;
+    fn rem(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                self % s.as_u64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
