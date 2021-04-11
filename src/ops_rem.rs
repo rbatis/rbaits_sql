@@ -32,20 +32,6 @@ impl Rem<i32> for Value {
     }
 }
 
-impl Rem<i32> for &Value {
-    type Output = i64;
-    fn rem(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) % rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
 impl Rem<f64> for Value {
     type Output = f64;
     fn rem(self, rhs: f64) -> Self::Output {

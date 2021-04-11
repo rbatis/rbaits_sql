@@ -34,19 +34,6 @@ impl Sub<i32> for Value {
     }
 }
 
-impl Sub<i32> for &Value {
-    type Output = i64;
-    fn sub(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) - rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
 
 impl Sub<f64> for Value {
     type Output = f64;

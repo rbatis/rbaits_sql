@@ -43,19 +43,6 @@ impl Add<i32> for Value {
     }
 }
 
-impl Add<i32> for &Value {
-    type Output = i64;
-    fn add(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
 
 impl Add<f64> for Value {
     type Output = f64;
