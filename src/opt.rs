@@ -1,8 +1,14 @@
 use std::ops::Add;
+use serde::{Serializer, Deserializer};
+use std::fmt::Debug;
 
+#[derive(Eq, PartialEq)]
 pub struct Value {
     pub inner: serde_json::Value
 }
+
+
+
 
 impl From<serde_json::Value> for Value{
     fn from(arg: serde_json::Value) -> Self {
@@ -18,6 +24,30 @@ impl From<&serde_json::Value> for Value{
         }
     }
 }
+
+impl serde::Serialize for Value{
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> where
+        S: Serializer {
+        self.inner.serialize(serializer)
+    }
+}
+impl <'de>serde::Deserialize<'de> for Value{
+    fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error> where
+        D: Deserializer<'de> {
+        let r=serde_json::Value::deserialize(deserializer);
+        match r{
+            Ok(o)=>{
+                return Ok(Value{
+                    inner:o
+                });
+            }
+            Err(e)=>{
+                return Err(e);
+            }
+        }
+    }
+}
+
 
 impl Add<&str> for Value {
     type Output = String;
@@ -54,6 +84,21 @@ impl Add<i32> for Value {
 
     fn add(self, rhs: i32) -> Self::Output {
         return match self.inner {
+            serde_json::Value::Number(s) => {
+                s.as_i64().unwrap_or(0) + rhs as i64
+            }
+            _ => {
+                rhs as i64
+            }
+        };
+    }
+}
+
+impl Add<i32> for &Value {
+    type Output = i64;
+
+    fn add(self, rhs: i32) -> Self::Output {
+        return match &self.inner {
             serde_json::Value::Number(s) => {
                 s.as_i64().unwrap_or(0) + rhs as i64
             }

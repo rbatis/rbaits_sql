@@ -105,7 +105,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                 return syn::parse_str::<Expr>("serde_json::Value::Null").unwrap();
             }
             //println!("Path:{}", b.to_token_stream());
-            return syn::parse_str::<Expr>(&format!("arg[\"{}\"]", b.to_token_stream().to_string().trim())).unwrap();
+            return syn::parse_str::<Expr>(&format!("&arg[\"{}\"]", b.to_token_stream().to_string().trim())).unwrap();
         }
         Expr::MethodCall(mut b) => {
             let ex = *(b.receiver.clone());
@@ -129,6 +129,10 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
             return Expr::Unary(b);
         }
+        Expr::Paren(mut b)=>{
+            b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
+            return Expr::Paren(b);
+        }
         Expr::Field(mut b) => {
             //println!("field:{}",b.to_token_stream());
             return match b.member.clone() {
@@ -146,7 +150,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                             token.push_str("\"]");
                         }
                     }
-                    return syn::parse_str::<Expr>(&format!("arg{}", token)).unwrap();
+                    return syn::parse_str::<Expr>(&format!("&arg{}", token)).unwrap();
                 }
                 Member::Unnamed(unamed) => {
                     return Expr::Field(b);
@@ -155,11 +159,13 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
         }
         Expr::Reference(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
-            return Expr::Reference(b);
+            let result = Expr::Reference(b);
+            return result;
         }
         Expr::Index(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
-            return Expr::Index(b);
+            let result = Expr::Index(b);
+            return result;
         }
         _ => {
             println!("_def:{:?}", expr_type(arg.clone()));

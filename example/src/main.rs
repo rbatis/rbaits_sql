@@ -4,10 +4,8 @@ extern crate xmlsql;
 use serde_json::json;
 
 
-
-#[expr("null")]
+#[expr("a.c")]
 pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-
 
 
 fn main() {
@@ -16,12 +14,12 @@ fn main() {
             "arr":[1,2,3],
             "b":"8",
             "c": true,
-        }
+        },
+        "d":1
     });
     let v = gen(&arg);
     println!("{}", v.unwrap());
 }
-
 
 
 #[test]
