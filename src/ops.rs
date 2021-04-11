@@ -202,21 +202,42 @@ impl PartialEq<f32> for &Value {
 
 impl PartialEq<Value> for f64 {
     fn eq(&self, other: &Value) -> bool {
-        (*self as i64).eq(&other.as_i64().unwrap_or(0))
+        (*self as f64).eq(&other.as_f64().unwrap_or(0.0))
     }
 }
 
 impl PartialEq<f64> for Value {
     fn eq(&self, other: &f64) -> bool {
-        (*other as i64).eq(&self.as_i64().unwrap_or(0))
+        (*other as f64).eq(&self.as_f64().unwrap_or(0.0))
     }
 }
 
 impl PartialEq<f64> for &Value {
     fn eq(&self, other: &f64) -> bool {
-        (*other as i64).eq(&self.as_i64().unwrap_or(0))
+        (*other as f64).eq(&self.as_f64().unwrap_or(0.0))
     }
 }
+
+
+impl PartialEq<Value> for u64 {
+    fn eq(&self, other: &Value) -> bool {
+        (*self as u64).eq(&other.as_u64().unwrap_or(0))
+    }
+}
+
+impl PartialEq<u64> for Value {
+    fn eq(&self, other: &u64) -> bool {
+        (*other as u64).eq(&self.as_u64().unwrap_or(0))
+    }
+}
+
+impl PartialEq<u64> for &Value {
+    fn eq(&self, other: &u64) -> bool {
+        (*other as u64).eq(&self.as_u64().unwrap_or(0))
+    }
+}
+
+
 
 
 impl PartialEq<Value> for serde_json::Value {
