@@ -209,3 +209,151 @@ impl Div<&serde_json::Value> for &Value {
         };
     }
 }
+
+
+/**
+base
+**/
+
+
+impl Div<Value> for i64 {
+    type Output = i64;
+    fn div(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0 {
+                    return 0;
+                }
+                self / s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Div<Value> for i32 {
+    type Output = i64;
+    fn div(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0 {
+                    return 0;
+                }
+                self as i64 / s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Div<Value> for f64 {
+    type Output = f64;
+    fn div(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0.0 {
+                    return 0.0;
+                }
+               self / s.as_f64().unwrap_or(0.0)
+            }
+            _ => {
+                0.0
+            }
+        };
+    }
+}
+
+impl Div<Value> for u64 {
+    type Output = u64;
+    fn div(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0 {
+                    return 0;
+                }
+                self / s.as_u64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+
+/**
+base ref
+**/
+
+
+impl Div<&Value> for i64 {
+    type Output = i64;
+    fn div(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0 {
+                    return 0;
+                }
+                self / s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Div<&Value> for i32 {
+    type Output = i64;
+    fn div(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0 {
+                    return 0;
+                }
+                self as i64 / s.as_i64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}
+
+impl Div<&Value> for f64 {
+    type Output = f64;
+    fn div(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0.0 {
+                    return 0.0;
+                }
+                self / s.as_f64().unwrap_or(0.0)
+            }
+            _ => {
+                0.0
+            }
+        };
+    }
+}
+
+impl Div<&Value> for u64 {
+    type Output = u64;
+    fn div(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::Number(s) => {
+                if self == 0 {
+                    return 0;
+                }
+                self / s.as_u64().unwrap_or(0)
+            }
+            _ => {
+                0
+            }
+        };
+    }
+}

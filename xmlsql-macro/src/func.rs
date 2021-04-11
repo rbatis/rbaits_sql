@@ -84,13 +84,13 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
     } else {
         println!("[rexpr]parse expr:{} success!", string_data);
     }
-    let mut t = t.unwrap();
+    let t = t.unwrap();
     //t = convert_to_arg_access(t);
 
     println!("[rexpr]gen expr: {}", t.to_token_stream());
     let func_args = f.sig.inputs.to_token_stream();
     let func_name_ident = f.sig.ident.to_token_stream();
-    let mut return_ty = f.sig.output.to_token_stream();
+    let return_ty = f.sig.output.to_token_stream();
     return quote!(pub fn #func_name_ident(#func_args)  #return_ty {
                      use xmlsql::ops::AsProxy;
                      let result={#t};
