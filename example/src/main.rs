@@ -113,6 +113,7 @@ mod test {
         call!(fn43, "2*(1+(1+1)+1)",json!(2 * (1 + (1 + 1) + 1)));
         call!(fn44, "(((34 + 21) / 5) - 12) * 348",json!((((34 + 21) / 5) - 12) * 348));
         call!(fn45,"11 ^ 1", json!(11 ^ 1));
+        call!(fn46,"e[0] != &null", json!(true));
         call!(fn47,"&null >= 0", json!(true));
         call!(fn48,"&null <= a", json!(true));
     }
