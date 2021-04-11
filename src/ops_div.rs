@@ -357,3 +357,38 @@ impl Div<&Value> for u64 {
         };
     }
 }
+
+/**
+value
+**/
+impl Div<&Value> for &Value {
+    type Output = serde_json::Value;
+    fn div(self, rhs: &Value) -> Self::Output {
+        return match &self.inner {
+            serde_json::Value::Number(s) => {
+                if s.is_i64() {
+                    let rhs = rhs.as_i64().unwrap_or(0);
+                    if rhs == 0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_i64().unwrap_or(0) / rhs)
+                } else if s.is_f64() {
+                    let rhs = rhs.as_f64().unwrap_or(0.0);
+                    if rhs == 0.0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_f64().unwrap_or(0.0) / rhs)
+                } else {
+                    let rhs = rhs.as_u64().unwrap_or(0);
+                    if rhs == 0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_u64().unwrap_or(0) / rhs)
+                }
+            }
+            _ => {
+                return serde_json::Value::Null;
+            }
+        };
+    }
+}

@@ -292,3 +292,26 @@ impl Sub<&Value> for u64 {
         };
     }
 }
+
+/**
+value
+**/
+impl Sub<&Value> for &Value {
+    type Output = serde_json::Value;
+    fn sub(self, rhs: &Value) -> Self::Output {
+        return match &self.inner {
+            serde_json::Value::Number(s) => {
+                if s.is_i64() {
+                    serde_json::json!(s.as_i64().unwrap_or(0) - rhs.as_i64().unwrap_or(0))
+                } else if s.is_f64() {
+                    serde_json::json!(s.as_f64().unwrap_or(0.0) - rhs.as_f64().unwrap_or(0.0))
+                } else {
+                    serde_json::json!(s.as_u64().unwrap_or(0) - rhs.as_u64().unwrap_or(0))
+                }
+            }
+            _ => {
+                return serde_json::Value::Null;
+            }
+        };
+    }
+}
