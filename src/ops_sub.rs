@@ -21,11 +21,11 @@ impl Sub<i64> for Value {
 }
 
 impl Sub<i32> for Value {
-    type Output = i32;
+    type Output = i64;
     fn sub(self, rhs: i32) -> Self::Output {
         return match self.inner {
             serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) as i32 - rhs
+                s.as_i64().unwrap_or(0)  - rhs as i64
             }
             _ => {
                 0
@@ -105,11 +105,11 @@ impl Sub<i64> for &Value {
 }
 
 impl Sub<i32> for &Value {
-    type Output = i32;
+    type Output = i64;
     fn sub(self, rhs: i32) -> Self::Output {
         return match &self.inner {
             serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) as i32 - rhs as i32
+                s.as_i64().unwrap_or(0) - rhs as i64
             }
             _ => {
                 0
@@ -189,11 +189,11 @@ impl Sub<Value> for i64 {
 }
 
 impl Sub<Value> for i32 {
-    type Output = i32;
+    type Output = i64;
     fn sub(self, rhs: Value) -> Self::Output {
         return match rhs.inner {
             serde_json::Value::Number(s) => {
-                self as i32 - s.as_i64().unwrap_or(0) as i32
+                self as i64 - s.as_i64().unwrap_or(0)
             }
             _ => {
                 0
@@ -251,11 +251,11 @@ impl Sub<&Value> for i64 {
 }
 
 impl Sub<&Value> for i32 {
-    type Output = i32;
+    type Output = i64;
     fn sub(self, rhs: &Value) -> Self::Output {
         return match &rhs.inner {
             serde_json::Value::Number(s) => {
-                self as i32 - s.as_i64().unwrap_or(0) as i32
+                self as i64 - s.as_i64().unwrap_or(0)
             }
             _ => {
                 0

@@ -183,11 +183,11 @@ impl Mul<Value> for i64 {
 }
 
 impl Mul<Value> for i32 {
-    type Output = i32;
+    type Output = i64;
     fn mul(self, rhs: Value) -> Self::Output {
         return match rhs.inner {
             serde_json::Value::Number(s) => {
-                self as i32 * s.as_i64().unwrap_or(0) as i32
+                self as i64 * s.as_i64().unwrap_or(0)
             }
             _ => {
                 0
@@ -245,11 +245,11 @@ impl Mul<&Value> for i64 {
 }
 
 impl Mul<&Value> for i32 {
-    type Output = i32;
+    type Output = i64;
     fn mul(self, rhs: &Value) -> Self::Output {
         return match &rhs.inner {
             serde_json::Value::Number(s) => {
-                self as i32 * s.as_i64().unwrap_or(0) as i32
+                self as i64 * s.as_i64().unwrap_or(0)
             }
             _ => {
                 0
