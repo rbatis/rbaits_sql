@@ -97,7 +97,7 @@ pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> Token
 }
 
 fn convert_to_arg_access(arg: Expr) -> Expr {
-    println!("tk:{},expr:{}",expr_type(arg.clone()),arg.to_token_stream());
+    // println!("tk:{},expr:{}",expr_type(arg.clone()),arg.to_token_stream());
     match arg {
         Expr::Path(b) => {
             if b.to_token_stream().to_string().trim() == "null" {
