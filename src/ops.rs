@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub, Mul, Div, Rem};
 use serde::{Serializer, Deserializer};
 use std::fmt::{Debug, Formatter};
+use std::cmp::Ordering;
 
 
 pub trait AsProxy {
@@ -143,8 +144,6 @@ impl PartialEq<String> for &Value {
     }
 }
 
-
-
 impl PartialEq<Value> for i32 {
     fn eq(&self, other: &Value) -> bool {
         (*self as i64).eq(&other.as_i64().unwrap_or(0))
@@ -237,9 +236,6 @@ impl PartialEq<u64> for &Value {
     }
 }
 
-
-
-
 impl PartialEq<Value> for serde_json::Value {
     fn eq(&self, other: &Value) -> bool {
         (*self).eq(&other.inner)
@@ -255,5 +251,40 @@ impl PartialEq<serde_json::Value> for Value {
 impl PartialEq<serde_json::Value> for &Value {
     fn eq(&self, other: &serde_json::Value) -> bool {
         (*other).eq(&self.inner)
+    }
+}
+
+
+/**
+PartialOrd
+**/
+
+impl PartialOrd<i32> for &Value {
+    fn partial_cmp(&self, other: &i32) -> Option<Ordering> {
+        self.inner.as_i64().unwrap_or(0).partial_cmp(&(*other as i64))
+    }
+}
+
+impl PartialOrd<i64> for &Value {
+    fn partial_cmp(&self, other: &i64) -> Option<Ordering> {
+        self.inner.as_i64().unwrap_or(0).partial_cmp(&(*other))
+    }
+}
+
+impl PartialOrd<f32> for &Value {
+    fn partial_cmp(&self, other: &f32) -> Option<Ordering> {
+        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&(*other as f64))
+    }
+}
+
+impl PartialOrd<f64> for &Value {
+    fn partial_cmp(&self, other: &f64) -> Option<Ordering> {
+        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&(*other))
+    }
+}
+
+impl PartialOrd<u64> for &Value {
+    fn partial_cmp(&self, other: &u64) -> Option<Ordering> {
+        self.inner.as_u64().unwrap_or(0).partial_cmp(&(*other))
     }
 }

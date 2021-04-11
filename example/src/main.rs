@@ -59,6 +59,7 @@ mod test {
         "e":[1],
         "f":[{"field":1}]
          });
+
         #[expr("-1 == -a")]
         pub fn fff(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
         assert_eq!(fff(&arg).unwrap(), json!(true));
@@ -74,8 +75,15 @@ mod test {
         #[expr("'f\'uc'.string()+'k'")]
         pub fn fff5(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
         assert_eq!(fff5(&arg).unwrap(), json!("f'uck"));
-        // assert_eq!(exec_expr(&arg, "`f`+`s`"), json!("fs"));
-        // assert_eq!(exec_expr(&arg, "a +1 > b * 8"), json!(false));
+        #[expr("'f'.string()+'s'")]
+        pub fn fff6(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+        assert_eq!(fff6(&arg).unwrap(), json!("fs"));
+        #[expr("a +1 > b * 8")]
+        pub fn fff7(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+        assert_eq!(fff7(&arg).unwrap(), json!(false));
+        #[expr("a >= 0")]
+        pub fn fff8(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+        assert_eq!(fff8(&arg).unwrap(), json!(true));
         // assert_eq!(exec_expr(&arg, "a >= 0"), json!(true));
         // assert_eq!(exec_expr(&arg, "'a'+c"), json!("ac"));
         // assert_eq!(exec_expr(&arg, "b"), json!(2));
