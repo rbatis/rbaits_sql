@@ -10,12 +10,13 @@ pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> 
 
 fn main() {
     let arg = serde_json::json!({
-        "a":{
-            "arr":[1,2,3],
-            "b":"8",
+          "a":{
+            "arr": [1,2,3],
+            "b": "8",
             "c": true,
+            "d": 1,
         },
-        "d":1
+        "e":1
     });
     let v = gen(&arg);
     println!("{}", v.unwrap());
