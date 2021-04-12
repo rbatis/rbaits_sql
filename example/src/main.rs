@@ -3,9 +3,8 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-
-#[expr("f == 3.14")]
-pub fn gen(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
+#[expr("1.2 == 3.14")]
+pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
 fn main() {
@@ -21,7 +20,7 @@ fn main() {
         "f":3.14,
     });
     let v = gen(&arg);
-    println!("{}", v.unwrap());
+    println!("{}", v);
 }
 
 
@@ -45,10 +44,10 @@ fn bench() {
 
 #[cfg(test)]
 mod test {
+    use serde_json::json;
+
     #[macro_use]
     use xmlsql;
-
-    use serde_json::json;
     use xmlsql::ops::AsProxy;
 
     #[test]
@@ -61,15 +60,13 @@ mod test {
         "e":[1],
         "f":[{"field":1}]
          });
-
         macro_rules! call {
             ($func_name:ident,$s:expr,$value:expr) => {
                 #[expr($s)]
-                pub fn $func_name(arg: &serde_json::Value) -> xmlsql::error::Result<serde_json::Value> {}
-                     assert_eq!($func_name(&arg).unwrap(), $value);
+                pub fn $func_name(arg: &serde_json::Value) -> serde_json::Value {}
+                     assert_eq!($func_name(&arg), $value);
                 };
         }
-
         call!(fn1,"-1 == -a", json!(true));
         call!(fn2,"d.a.is_null()", json!(true));
         call!(fn3,"1.0 == 1.0", json!(true));
