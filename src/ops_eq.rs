@@ -96,3 +96,10 @@ partialeq_numeric! {
     eq_f64[f32 f64]
     eq_bool[bool]
 }
+
+
+impl PartialEq<Value> for &Value {
+    fn eq(&self, other: &Value) -> bool {
+        self.inner.eq(&other.inner)
+    }
+}
