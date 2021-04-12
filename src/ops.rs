@@ -4,12 +4,15 @@ use std::fmt::{Debug, Formatter};
 use std::cmp::Ordering;
 
 
+/// convert serde_json::Value to Value
 pub trait AsProxy {
     fn as_proxy(self) -> Value;
     fn as_proxy_clone(&self) -> Value;
 }
 
 
+/// proxy serde_json::Value struct
+/// This structure has a certain amount of computing power
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub struct Value {
     pub inner: serde_json::Value
