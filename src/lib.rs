@@ -4,6 +4,12 @@ pub mod bencher;
 pub mod ops;
 pub use ops::Value;
 
+
+pub mod ops_eq;
+pub mod ops_cmp;
+
+
+
 pub mod ops_add;
 pub mod ops_div;
 pub mod ops_mul;
