@@ -75,3 +75,9 @@ impl PartialOrd<Value> for &Value {
         self.inner.as_f64().unwrap_or(0.0).partial_cmp(&other.inner.as_f64().unwrap_or(0.0))
     }
 }
+
+impl PartialOrd<&Value> for Value{
+    fn partial_cmp(&self, other: &&Value) -> Option<Ordering> {
+        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&other.inner.as_f64().unwrap_or(0.0))
+    }
+}

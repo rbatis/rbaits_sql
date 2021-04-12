@@ -1,5 +1,18 @@
 use crate::Value;
 
+
+impl PartialEq<Value> for &Value {
+    fn eq(&self, other: &Value) -> bool {
+        self.inner.eq(&other.inner)
+    }
+}
+
+impl PartialEq<&Value> for Value{
+    fn eq(&self, other: &&Value) -> bool {
+        self.inner.eq(&other.inner)
+    }
+}
+
 /**
 eq base
 **/
@@ -95,11 +108,4 @@ partialeq_numeric! {
     eq_u64[u8 u16 u32 u64 usize]
     eq_f64[f32 f64]
     eq_bool[bool]
-}
-
-
-impl PartialEq<Value> for &Value {
-    fn eq(&self, other: &Value) -> bool {
-        self.inner.eq(&other.inner)
-    }
 }
