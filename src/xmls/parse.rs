@@ -30,13 +30,13 @@ mod test {
                     break;
                 }
                 Ok(XmlEvent::Characters(s)) => {
-                    println!("{}", s);
+                    println!("{}{}", depth_to_space(depth), s.trim());
                 }
                 Ok(XmlEvent::Comment(s)) => {
-                    println!("{}", s);
+                    println!("{}{}", depth_to_space(depth), s.trim());
                 }
                 Ok(XmlEvent::CData(s)) => {
-                    println!("{}", s);
+                    println!("{}{}", depth_to_space(depth), s.trim());
                 }
                 _ => {
                     // println!("DefaultStr");
