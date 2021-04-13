@@ -6,8 +6,8 @@ use std::cmp::Ordering;
 
 /// convert serde_json::Value to Value
 pub trait AsProxy {
-    fn as_proxy(self) -> Value;
-    fn as_proxy_clone(&self) -> Value;
+    fn into_proxy(self) -> Value;
+    fn as_proxy(&self) -> Value;
 }
 
 
@@ -101,13 +101,13 @@ impl std::fmt::Display for Value {
 
 
 impl AsProxy for serde_json::Value {
-    fn as_proxy(self) -> Value {
+    fn into_proxy(self) -> Value {
         Value {
             inner: self
         }
     }
 
-    fn as_proxy_clone(&self) -> Value {
+    fn as_proxy(&self) -> Value {
         Value {
             inner: self.clone()
         }
