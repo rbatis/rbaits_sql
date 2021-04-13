@@ -7,7 +7,7 @@ mod test{
     use std::fs::File;
     use std::io::BufReader;
     use xml::EventReader;
-    use xml::reader::XmlEvent;
+    use xml::reader::{XmlEvent, Error};
 
     #[test]
     fn test_load_xml(){
@@ -29,7 +29,18 @@ mod test{
                     println!("Error: {}", e);
                     break;
                 }
-                _ => {}
+                Ok(XmlEvent::Characters(s)) => {
+                    println!("Characters:{}",s);
+                }
+                Ok(XmlEvent::Comment(s)) => {
+                    println!("Comment:{}",s);
+                }
+                Ok(XmlEvent::CData(s)) => {
+                    println!("CData:{}",s);
+                }
+                _ => {
+                   // println!("DefaultStr");
+                }
             }
         }
     }
