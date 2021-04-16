@@ -3,21 +3,18 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-#[expr("1.2 == 3.14")]
+#[expr("a == 1")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
 fn main() {
     let arg = serde_json::json!({
-          "a":{
-            "arr2":[{"name":"ff"}],
-            "arr": [1,2,3],
-            "b": "8",
-            "c": true,
-            "d": 1,
-        },
-        "e":1,
-        "f":3.14,
+        "a":1,
+        "b":2,
+        "c":"c",
+        "d":null,
+        "e":[1],
+        "f":[{"field":1}]
     });
     let v = gen(&arg);
     println!("{}", v);
@@ -27,13 +24,12 @@ fn main() {
 #[test]
 fn bench() {
     let arg = serde_json::json!({
-           "a":{
-            "arr": [1,2,3],
-            "b": "8",
-            "c": true,
-            "d": 1,
-        },
-        "e":1
+        "a":1,
+        "b":2,
+        "c":"c",
+        "d":null,
+        "e":[1],
+        "f":[{"field":1}]
     });
     gen(&arg);
     bench!(100000,{
