@@ -30,6 +30,13 @@ macro_rules! impl_numeric_add {
                 }
             }
 
+            impl Add<&Value> for $ty {
+                type Output = $return_ty;
+                fn add(self, other: &Value) -> Self::Output {
+                    $eq(other, self as _)
+                }
+            }
+
             impl<'a> Add<$ty> for &'a Value {
                 type Output = $return_ty;
                 fn add(self, other: $ty) -> Self::Output {

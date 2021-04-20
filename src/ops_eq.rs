@@ -88,6 +88,12 @@ macro_rules! impl_numeric_eq {
                 }
             }
 
+            impl PartialEq<&Value> for $ty {
+                fn eq(&self, other: &&Value)  -> bool {
+                    $eq(*other, *self as _)
+                }
+            }
+
             impl<'a> PartialEq<$ty> for &'a Value {
                 fn eq(&self, other: &$ty) -> bool {
                     $eq(*self, *other as _)
