@@ -1,78 +1,70 @@
-use crate::Value;
 use std::ops::Div;
 
-/**
-div
-**/
+use crate::Value;
 
+fn div_i64(value: &Value, other: i64) -> i64 {
+    if other == 0 {
+        return 0;
+    }
+    value.as_i64().unwrap_or(0) / other
+}
 
-impl Div<i64> for Value {
-    type Output = i64;
-    fn div(self, rhs: i64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0 {
-                    return 0;
+fn div_u64(value: &Value, other: u64) -> u64 {
+    if other == 0 {
+        return 0;
+    }
+    value.as_u64().unwrap_or(0) / other
+}
+
+fn div_f64(value: &Value, other: f64) -> f64 {
+    if other == 0.0 {
+        return 0.0;
+    }
+    value.as_f64().unwrap_or(0.0) / other
+}
+
+macro_rules! impl_numeric_div {
+    ($($div:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+        $($(
+            impl Div<$ty> for Value {
+                type Output = $return_ty;
+                fn div(self, other: $ty) -> Self::Output {
+                    $div(&self, other as _)
                 }
-                s.as_i64().unwrap_or(0) / rhs
             }
-            _ => {
-                0
+
+            impl Div<Value> for $ty {
+                type Output = $return_ty;
+                fn div(self, other: Value) -> Self::Output {
+                    $div(&other, self as _)
+                }
             }
-        };
+
+            impl<'a> Div<$ty> for &'a Value {
+                type Output = $return_ty;
+                fn div(self, other: $ty) -> Self::Output {
+                    $div(self, other as _)
+                }
+            }
+
+            impl<'a> Div<$ty> for &'a mut Value {
+                type Output = $return_ty;
+                fn div(self, other: $ty) -> Self::Output {
+                    $div(self, other as _)
+                }
+            }
+        )*)*
     }
 }
 
-impl Div<i32> for Value {
-    type Output = i64;
-    fn div(self, rhs: i32) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0 {
-                    return 0;
-                }
-                s.as_i64().unwrap_or(0) / rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
+
+impl_numeric_div! {
+    div_i64[i8 i16 i32 i64 isize] -> i64
+    div_u64[u8 u16 u32 u64 usize] -> u64
+    div_f64[f32 f64] -> f64
 }
 
-impl Div<f64> for Value {
-    type Output = f64;
-    fn div(self, rhs: f64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0.0 {
-                    return 0.0;
-                }
-                s.as_f64().unwrap_or(0.0) / rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
 
-impl Div<u64> for Value {
-    type Output = u64;
-    fn div(self, rhs: u64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0 {
-                    return 0;
-                }
-                s.as_u64().unwrap_or(0) / rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
 
 impl Div<&serde_json::Value> for Value {
     type Output = serde_json::Value;
@@ -101,78 +93,6 @@ impl Div<&serde_json::Value> for Value {
             }
             _ => {
                 return serde_json::Value::Null;
-            }
-        };
-    }
-}
-
-/**
-ref
-**/
-
-impl Div<i64> for &Value {
-    type Output = i64;
-    fn div(self, rhs: i64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0 {
-                    return 0;
-                }
-                s.as_i64().unwrap_or(0) / rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Div<i32> for &Value {
-    type Output = i64;
-    fn div(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0 {
-                    return 0;
-                }
-                s.as_i64().unwrap_or(0) / rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Div<f64> for &Value {
-    type Output = f64;
-    fn div(self, rhs: f64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0.0 {
-                    return 0.0;
-                }
-                s.as_f64().unwrap_or(0.0) / rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Div<u64> for &Value {
-    type Output = u64;
-    fn div(self, rhs: u64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                if rhs == 0 {
-                    return 0;
-                }
-                s.as_u64().unwrap_or(0) / rhs
-            }
-            _ => {
-                0
             }
         };
     }
@@ -210,157 +130,6 @@ impl Div<&serde_json::Value> for &Value {
     }
 }
 
-
-/**
-base
-**/
-
-
-impl Div<Value> for i64 {
-    type Output = i64;
-    fn div(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0 {
-                    return 0;
-                }
-                self / s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Div<Value> for i32 {
-    type Output = i64;
-    fn div(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0 {
-                    return 0;
-                }
-                self as i64 / s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Div<Value> for f64 {
-    type Output = f64;
-    fn div(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0.0 {
-                    return 0.0;
-                }
-               self / s.as_f64().unwrap_or(0.0)
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Div<Value> for u64 {
-    type Output = u64;
-    fn div(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0 {
-                    return 0;
-                }
-                self / s.as_u64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-/**
-base ref
-**/
-
-
-impl Div<&Value> for i64 {
-    type Output = i64;
-    fn div(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0 {
-                    return 0;
-                }
-                self / s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Div<&Value> for i32 {
-    type Output = i64;
-    fn div(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0 {
-                    return 0;
-                }
-                self as i64 / s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Div<&Value> for f64 {
-    type Output = f64;
-    fn div(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0.0 {
-                    return 0.0;
-                }
-                self / s.as_f64().unwrap_or(0.0)
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Div<&Value> for u64 {
-    type Output = u64;
-    fn div(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                if self == 0 {
-                    return 0;
-                }
-                self / s.as_u64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-/**
-value
-**/
 impl Div<&Value> for &Value {
     type Output = serde_json::Value;
     fn div(self, rhs: &Value) -> Self::Output {
