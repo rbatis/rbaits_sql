@@ -114,6 +114,12 @@ macro_rules! impl_numeric_sub {
                 }
             }
 
+            impl Sub<&mut Value> for $ty {
+                type Output = $return_ty;
+                fn sub(self, other: &mut Value) -> Self::Output {
+                    $sub_value(other, self as _)
+                }
+            }
 
             impl<'a> Sub<$ty> for &'a Value {
                 type Output = $return_ty;

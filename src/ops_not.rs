@@ -22,3 +22,13 @@ impl Not for &Value {
         }
     }
 }
+
+impl Not for &mut Value {
+    type Output = bool;
+    fn not(self) -> Self::Output {
+        match self.inner {
+            serde_json::Value::Bool(b) => { !b }
+            _ => { true }
+        }
+    }
+}

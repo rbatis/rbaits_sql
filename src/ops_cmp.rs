@@ -47,6 +47,12 @@ macro_rules! impl_numeric_cmp {
                 }
             }
 
+            impl PartialOrd<&mut Value> for $ty {
+                fn partial_cmp(&self, other: &&mut Value)  -> Option<Ordering> {
+                    $eq(*other, *self as _)
+                }
+            }
+
             impl<'a> PartialOrd<$ty> for &'a Value {
                 fn partial_cmp(&self, other: &$ty) -> Option<Ordering> {
                     $eq(*self, *other as _)

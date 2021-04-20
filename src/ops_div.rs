@@ -72,6 +72,13 @@ macro_rules! impl_numeric_div {
                 }
             }
 
+            impl Div<&mut Value> for $ty {
+                type Output = $return_ty;
+                fn div(self, other: &mut Value) -> Self::Output {
+                    $div_value(other, self as _)
+                }
+            }
+
             impl<'a> Div<$ty> for &'a Value {
                 type Output = $return_ty;
                 fn div(self, other: $ty) -> Self::Output {

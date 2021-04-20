@@ -20,7 +20,7 @@ pub mod ops_rem;
 pub mod ops_not;
 pub mod ops_bit_and;
 pub mod ops_bit_or;
-pub mod ops_bool;
+pub mod from_bool;
 
 
 #[macro_use]
