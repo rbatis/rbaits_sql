@@ -63,19 +63,33 @@ impl Rem<&Value> for &Value {
 
 
 fn rem_i64(value: &Value, other: i64) -> i64 {
-    value.as_i64().unwrap_or_default() * other
+    value.as_i64().unwrap_or_default() % other
 }
 
 fn rem_u64(value: &Value, other: u64) -> u64 {
-    value.as_u64().unwrap_or_default() * other
+    value.as_u64().unwrap_or_default() % other
 }
 
 fn rem_f64(value: &Value, other: f64) -> f64 {
-    value.as_f64().unwrap_or_default() * other
+    value.as_f64().unwrap_or_default() % other
 }
 
+
+fn rem_i64_value(value: &Value, other: i64) -> i64 {
+    other % value.as_i64().unwrap_or_default()
+}
+
+fn rem_u64_value(value: &Value, other: u64) -> u64 {
+    other % value.as_u64().unwrap_or_default()
+}
+
+fn rem_f64_value(value: &Value, other: f64) -> f64 {
+    other % value.as_f64().unwrap_or_default()
+}
+
+
 macro_rules! impl_numeric_rem {
-    ($($rem:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+    ($($rem:ident,$rem_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
             impl Rem<$ty> for Value {
                 type Output = $return_ty;
@@ -87,14 +101,14 @@ macro_rules! impl_numeric_rem {
             impl Rem<Value> for $ty {
                 type Output = $return_ty;
                 fn rem(self, other: Value) -> Self::Output {
-                    $rem(&other, self as _)
+                    $rem_value(&other, self as _)
                 }
             }
 
             impl Rem<&Value> for $ty {
                 type Output = $return_ty;
                 fn rem(self, other: &Value) -> Self::Output {
-                    $rem(other, self as _)
+                    $rem_value(other, self as _)
                 }
             }
 
@@ -117,9 +131,9 @@ macro_rules! impl_numeric_rem {
 
 
 impl_numeric_rem! {
-    rem_i64[i8 i16 i32 i64 isize] -> i64
-    rem_u64[u8 u16 u32 u64 usize] -> u64
-    rem_f64[f32 f64] -> f64
+    rem_i64,rem_i64_value[i8 i16 i32 i64 isize] -> i64
+    rem_u64,rem_u64_value[u8 u16 u32 u64 usize] -> u64
+    rem_f64,rem_f64_value[f32 f64] -> f64
 }
 
 

@@ -76,8 +76,22 @@ fn sub_f64(value: &Value, other: f64) -> f64 {
     value.as_f64().unwrap_or_default() - other
 }
 
+
+fn sub_i64_value(value: &Value, other: i64) -> i64 {
+    other - value.as_i64().unwrap_or_default()
+}
+
+fn sub_u64_value(value: &Value, other: u64) -> u64 {
+    other - value.as_u64().unwrap_or_default()
+}
+
+fn sub_f64_value(value: &Value, other: f64) -> f64 {
+    other - value.as_f64().unwrap_or_default()
+}
+
+
 macro_rules! impl_numeric_sub {
-    ($($sub:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+    ($($sub:ident,$sub_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
             impl Sub<$ty> for Value {
                 type Output = $return_ty;
@@ -89,14 +103,14 @@ macro_rules! impl_numeric_sub {
             impl Sub<Value> for $ty {
                 type Output = $return_ty;
                 fn sub(self, other: Value) -> Self::Output {
-                    $sub(&other, self as _)
+                    $sub_value(&other, self as _)
                 }
             }
 
             impl Sub<&Value> for $ty {
                 type Output = $return_ty;
                 fn sub(self, other: &Value) -> Self::Output {
-                    $sub(other, self as _)
+                    $sub_value(other, self as _)
                 }
             }
 
@@ -120,9 +134,9 @@ macro_rules! impl_numeric_sub {
 
 
 impl_numeric_sub! {
-    sub_i64[i8 i16 i32 i64 isize] -> i64
-    sub_u64[u8 u16 u32 u64 usize] -> u64
-    sub_f64[f32 f64] -> f64
+    sub_i64,sub_i64_value[i8 i16 i32 i64 isize] -> i64
+    sub_u64,sub_u64_value[u8 u16 u32 u64 usize] -> u64
+    sub_f64,sub_f64_value[f32 f64] -> f64
 }
 
 

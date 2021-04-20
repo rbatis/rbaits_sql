@@ -23,8 +23,33 @@ fn div_f64(value: &Value, other: f64) -> f64 {
     value.as_f64().unwrap_or_default() / other
 }
 
+
+fn div_i64_value(value: &Value, other: i64) -> f64 {
+    let v = value.as_i64().unwrap_or_default();
+    if v == 0 {
+        return 0.0;
+    }
+    (other / v) as f64
+}
+
+fn div_u64_value(value: &Value, other: u64) -> f64 {
+    let v = value.as_u64().unwrap_or_default();
+    if v == 0 {
+        return 0.0;
+    }
+    (other / v) as f64
+}
+
+fn div_f64_value(value: &Value, other: f64) -> f64 {
+    let v = value.as_f64().unwrap_or_default();
+    if v == 0.0 {
+        return 0.0;
+    }
+    (other / v) as f64
+}
+
 macro_rules! impl_numeric_div {
-    ($($div:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+    ($($div:ident,$div_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
             impl Div<$ty> for Value {
                 type Output = $return_ty;
@@ -36,14 +61,14 @@ macro_rules! impl_numeric_div {
             impl Div<Value> for $ty {
                 type Output = $return_ty;
                 fn div(self, other: Value) -> Self::Output {
-                    $div(&other, self as _)
+                    $div_value(&other, self as _)
                 }
             }
 
             impl Div<&Value> for $ty {
                 type Output = $return_ty;
                 fn div(self, other: &Value) -> Self::Output {
-                    $div(other, self as _)
+                    $div_value(other, self as _)
                 }
             }
 
@@ -66,9 +91,9 @@ macro_rules! impl_numeric_div {
 
 
 impl_numeric_div! {
-    div_i64[i8 i16 i32 i64 isize] -> f64
-    div_u64[u8 u16 u32 u64 usize] -> f64
-    div_f64[f32 f64] -> f64
+    div_i64,div_i64_value[i8 i16 i32 i64 isize] -> f64
+    div_u64,div_u64_value[u8 u16 u32 u64 usize] -> f64
+    div_f64,div_f64_value[f32 f64] -> f64
 }
 
 
