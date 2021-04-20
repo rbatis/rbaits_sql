@@ -2,15 +2,15 @@ use std::ops::Add;
 use crate::Value;
 
 fn add_i64(value: &Value, other: i64) -> i64 {
-    value.as_i64().unwrap_or(0) + other
+    value.as_i64().unwrap_or_default() + other
 }
 
 fn add_u64(value: &Value, other: u64) -> u64 {
-    value.as_u64().unwrap_or(0) + other
+    value.as_u64().unwrap_or_default() + other
 }
 
 fn add_f64(value: &Value, other: f64) -> f64 {
-    value.as_f64().unwrap_or(0.0) + other
+    value.as_f64().unwrap_or_default() + other
 }
 
 macro_rules! impl_numeric_add {
@@ -77,11 +77,11 @@ impl Add<&serde_json::Value> for Value {
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or(0) + rhs.as_i64().unwrap_or(0))
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or(0.0) + rhs.as_f64().unwrap_or(0.0))
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or(0) + rhs.as_u64().unwrap_or(0))
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
@@ -116,11 +116,11 @@ impl Add<&serde_json::Value> for &Value {
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or(0) + rhs.as_i64().unwrap_or(0))
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or(0.0) + rhs.as_f64().unwrap_or(0.0))
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or(0) + rhs.as_u64().unwrap_or(0))
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
@@ -176,11 +176,11 @@ impl Add<&Value> for &Value {
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or(0) + rhs.as_i64().unwrap_or(0))
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or(0.0) + rhs.as_f64().unwrap_or(0.0))
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or(0) + rhs.as_u64().unwrap_or(0))
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {

@@ -7,15 +7,15 @@ PartialOrd
 **/
 
 fn eq_i64(value: &Value, other: i64) -> Option<Ordering> {
-    value.as_i64().unwrap_or(0).partial_cmp(&other)
+    value.as_i64().unwrap_or_default().partial_cmp(&other)
 }
 
 fn eq_u64(value: &Value, other: u64) -> Option<Ordering> {
-    value.as_u64().unwrap_or(0).partial_cmp(&other)
+    value.as_u64().unwrap_or_default().partial_cmp(&other)
 }
 
 fn eq_f64(value: &Value, other: f64) -> Option<Ordering> {
-    value.as_f64().unwrap_or(0.0).partial_cmp(&other)
+    value.as_f64().unwrap_or_default().partial_cmp(&other)
 }
 
 fn eq_bool(value: &Value, other: bool) -> Option<Ordering> {
@@ -66,18 +66,18 @@ impl_numeric_cmp! {
 
 impl PartialOrd<Value> for Value {
     fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
-        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&other.inner.as_f64().unwrap_or(0.0))
+        self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }
 }
 
 impl PartialOrd<Value> for &Value {
     fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
-        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&other.inner.as_f64().unwrap_or(0.0))
+        self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }
 }
 
 impl PartialOrd<&Value> for Value{
     fn partial_cmp(&self, other: &&Value) -> Option<Ordering> {
-        self.inner.as_f64().unwrap_or(0.0).partial_cmp(&other.inner.as_f64().unwrap_or(0.0))
+        self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }
 }
