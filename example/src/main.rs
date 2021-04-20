@@ -3,7 +3,7 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-#[expr("g & false")]
+#[expr("false & g")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 

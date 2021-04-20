@@ -8,6 +8,13 @@ impl BitAnd for Value{
         self.as_bool().unwrap_or(false) & rhs.as_bool().unwrap_or(false)
     }
 }
+impl BitAnd<&Value> for Value{
+    type Output = bool;
+
+    fn bitand(self, rhs: &Value) -> Self::Output {
+        self.as_bool().unwrap_or(false) & rhs.as_bool().unwrap_or(false)
+    }
+}
 impl BitAnd<&Value> for &Value{
     type Output = bool;
 
@@ -28,6 +35,13 @@ impl BitAnd<Value> for bool{
     type Output = bool;
 
     fn bitand(self, rhs: Value) -> Self::Output {
+        self & rhs.as_bool().unwrap_or(false)
+    }
+}
+impl BitAnd<&Value> for bool{
+    type Output = bool;
+
+    fn bitand(self, rhs: &Value) -> Self::Output {
         self & rhs.as_bool().unwrap_or(false)
     }
 }
