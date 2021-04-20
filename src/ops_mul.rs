@@ -76,33 +76,33 @@ fn mul_f64(value: &Value, other: f64) -> f64 {
 }
 
 macro_rules! impl_numeric_mul {
-    ($($div:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+    ($($mul:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
             impl Mul<$ty> for Value {
                 type Output = $return_ty;
                 fn mul(self, other: $ty) -> Self::Output {
-                    $div(&self, other as _)
+                    $mul(&self, other as _)
                 }
             }
 
             impl Mul<Value> for $ty {
                 type Output = $return_ty;
                 fn mul(self, other: Value) -> Self::Output {
-                    $div(&other, self as _)
+                    $mul(&other, self as _)
                 }
             }
 
             impl<'a> Mul<$ty> for &'a Value {
                 type Output = $return_ty;
                 fn mul(self, other: $ty) -> Self::Output {
-                    $div(self, other as _)
+                    $mul(self, other as _)
                 }
             }
 
             impl<'a> Mul<$ty> for &'a mut Value {
                 type Output = $return_ty;
                 fn mul(self, other: $ty) -> Self::Output {
-                    $div(self, other as _)
+                    $mul(self, other as _)
                 }
             }
         )*)*
