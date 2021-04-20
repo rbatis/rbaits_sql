@@ -59,6 +59,7 @@ mod test {
 
     #[test]
     fn test_node_run() {
+
         let arg = json!({
         "a":1,
         "b":2,
@@ -123,5 +124,6 @@ mod test {
         call!(fn48,"null <= a", json!(true));
         call!(fn49,"nil >= 0", json!(true));
         call!(fn50,"nil <= a", json!(true));
+        call!(fn51,"a == 1 && g", json!(true));
     }
 }
