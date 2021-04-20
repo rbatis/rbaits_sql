@@ -2,18 +2,18 @@ use std::ops::Div;
 
 use crate::Value;
 
-fn div_i64(value: &Value, other: i64) -> i64 {
+fn div_i64(value: &Value, other: i64) -> f64 {
     if other == 0 {
-        return 0;
+        return 0.0;
     }
-    value.as_i64().unwrap_or(0) / other
+    (value.as_i64().unwrap_or(0) / other) as f64
 }
 
-fn div_u64(value: &Value, other: u64) -> u64 {
+fn div_u64(value: &Value, other: u64) -> f64 {
     if other == 0 {
-        return 0;
+        return 0.0;
     }
-    value.as_u64().unwrap_or(0) / other
+    (value.as_u64().unwrap_or(0) / other) as f64
 }
 
 fn div_f64(value: &Value, other: f64) -> f64 {
