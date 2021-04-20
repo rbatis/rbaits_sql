@@ -1,67 +1,6 @@
 use crate::Value;
 use std::ops::Mul;
 
-/**
-mul
-**/
-
-
-impl Mul<i64> for Value {
-    type Output = i64;
-    fn mul(self, rhs: i64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) * rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<i32> for Value {
-    type Output = i64;
-    fn mul(self, rhs: i32) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) * rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<f64> for Value {
-    type Output = f64;
-    fn mul(self, rhs: f64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) * rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Mul<u64> for Value {
-    type Output = u64;
-    fn mul(self, rhs: u64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) * rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
 impl Mul<&serde_json::Value> for Value {
     type Output = serde_json::Value;
     fn mul(self, rhs: &serde_json::Value) -> Self::Output {
@@ -77,66 +16,6 @@ impl Mul<&serde_json::Value> for Value {
             }
             _ => {
                 return serde_json::Value::Null;
-            }
-        };
-    }
-}
-
-/**
-ref
-**/
-
-impl Mul<i64> for &Value {
-    type Output = i64;
-    fn mul(self, rhs: i64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) * rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<i32> for &Value {
-    type Output = i64;
-    fn mul(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) * rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<f64> for &Value {
-    type Output = f64;
-    fn mul(self, rhs: f64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) * rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Mul<u64> for &Value {
-    type Output = u64;
-    fn mul(self, rhs: u64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) * rhs
-            }
-            _ => {
-                0
             }
         };
     }
@@ -162,133 +41,6 @@ impl Mul<&serde_json::Value> for &Value {
     }
 }
 
-
-/**
-base
-**/
-
-
-impl Mul<Value> for i64 {
-    type Output = i64;
-    fn mul(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self * s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<Value> for i32 {
-    type Output = i64;
-    fn mul(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as i64 * s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<Value> for f64 {
-    type Output = f64;
-    fn mul(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as f64 * s.as_f64().unwrap_or(0.0)
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Mul<Value> for u64 {
-    type Output = u64;
-    fn mul(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as u64 * s.as_u64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-/**
-base ref
-**/
-
-
-impl Mul<&Value> for i64 {
-    type Output = i64;
-    fn mul(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self * s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<&Value> for i32 {
-    type Output = i64;
-    fn mul(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as i64 * s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Mul<&Value> for f64 {
-    type Output = f64;
-    fn mul(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as f64 * s.as_f64().unwrap_or(0.0)
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Mul<&Value> for u64 {
-    type Output = u64;
-    fn mul(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as u64 * s.as_u64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-/**
-value
-**/
 impl Mul<&Value> for &Value {
     type Output = serde_json::Value;
     fn mul(self, rhs: &Value) -> Self::Output {
@@ -307,4 +59,59 @@ impl Mul<&Value> for &Value {
             }
         };
     }
+}
+
+
+
+fn mul_i64(value: &Value, other: i64) -> i64 {
+    value.as_i64().unwrap_or(0) * other
+}
+
+fn mul_u64(value: &Value, other: u64) -> u64 {
+    value.as_u64().unwrap_or(0) * other
+}
+
+fn mul_f64(value: &Value, other: f64) -> f64 {
+    value.as_f64().unwrap_or(0.0) * other
+}
+
+macro_rules! impl_numeric_mul {
+    ($($div:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+        $($(
+            impl Mul<$ty> for Value {
+                type Output = $return_ty;
+                fn mul(self, other: $ty) -> Self::Output {
+                    $div(&self, other as _)
+                }
+            }
+
+            impl Mul<Value> for $ty {
+                type Output = $return_ty;
+                fn mul(self, other: Value) -> Self::Output {
+                    $div(&other, self as _)
+                }
+            }
+
+            impl<'a> Mul<$ty> for &'a Value {
+                type Output = $return_ty;
+                fn mul(self, other: $ty) -> Self::Output {
+                    $div(self, other as _)
+                }
+            }
+
+            impl<'a> Mul<$ty> for &'a mut Value {
+                type Output = $return_ty;
+                fn mul(self, other: $ty) -> Self::Output {
+                    $div(self, other as _)
+                }
+            }
+        )*)*
+    }
+}
+
+
+impl_numeric_mul! {
+    mul_i64[i8 i16 i32 i64 isize] -> i64
+    mul_u64[u8 u16 u32 u64 usize] -> u64
+    mul_f64[f32 f64] -> f64
 }
