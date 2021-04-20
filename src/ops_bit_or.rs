@@ -15,6 +15,13 @@ impl BitOr<&Value> for Value{
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
+impl BitOr<Value> for &Value{
+    type Output = bool;
+
+    fn bitor(self, rhs: Value) -> Self::Output {
+        self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
+    }
+}
 impl BitOr<&Value> for &Value{
     type Output = bool;
 
