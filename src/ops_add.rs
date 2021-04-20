@@ -1,5 +1,58 @@
-use crate::Value;
 use std::ops::Add;
+use crate::Value;
+
+fn add_i64(value: &Value, other: i64) -> i64 {
+    value.as_i64().unwrap_or(0) + other
+}
+
+fn add_u64(value: &Value, other: u64) -> u64 {
+    value.as_u64().unwrap_or(0) + other
+}
+
+fn add_f64(value: &Value, other: f64) -> f64 {
+    value.as_f64().unwrap_or(0.0) + other
+}
+
+macro_rules! partial_ord_numeric_add {
+    ($($eq:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+        $($(
+            impl Add<$ty> for Value {
+                type Output = $return_ty;
+                fn add(self, other: $ty) -> Self::Output {
+                    $eq(&self, other as _)
+                }
+            }
+
+            impl Add<Value> for $ty {
+                type Output = $return_ty;
+                fn add(self, other: Value) -> Self::Output {
+                    $eq(&other, self as _)
+                }
+            }
+
+            impl<'a> Add<$ty> for &'a Value {
+                type Output = $return_ty;
+                fn add(self, other: $ty) -> Self::Output {
+                    $eq(self, other as _)
+                }
+            }
+
+            impl<'a> Add<$ty> for &'a mut Value {
+                type Output = $return_ty;
+                fn add(self, other: $ty) -> Self::Output {
+                    $eq(self, other as _)
+                }
+            }
+        )*)*
+    }
+}
+
+
+partial_ord_numeric_add! {
+    add_i64[i8 i16 i32 i64 isize] -> i64
+    add_u64[u8 u16 u32 u64 usize] -> u64
+    add_f64[f32 f64] -> f64
+}
 
 impl Add<&str> for Value {
     type Output = String;
@@ -10,63 +63,6 @@ impl Add<&str> for Value {
             }
             _ => {
                 String::new()
-            }
-        };
-    }
-}
-
-impl Add<i64> for Value {
-    type Output = i64;
-    fn add(self, rhs: i64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Add<i32> for Value {
-    type Output = i64;
-    fn add(self, rhs: i32) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Add<f64> for Value {
-    type Output = f64;
-    fn add(self, rhs: f64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) + rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Add<u64> for Value {
-    type Output = u64;
-    fn add(self, rhs: u64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) + rhs
-            }
-            _ => {
-                0
             }
         };
     }
@@ -111,63 +107,6 @@ impl Add<&str> for &Value {
     }
 }
 
-impl Add<i64> for &Value {
-    type Output = i64;
-    fn add(self, rhs: i64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Add<i32> for &Value {
-    type Output = i64;
-    fn add(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Add<f64> for &Value {
-    type Output = f64;
-    fn add(self, rhs: f64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) + rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Add<u64> for &Value {
-    type Output = u64;
-    fn add(self, rhs: u64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) + rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
 impl Add<&serde_json::Value> for &Value {
     type Output = serde_json::Value;
     fn add(self, rhs: &serde_json::Value) -> Self::Output {
@@ -199,7 +138,7 @@ impl Add<Value> for &str {
     fn add(self, rhs: Value) -> Self::Output {
         return match rhs.inner {
             serde_json::Value::String(s) => {
-               self.to_string()+&s
+                self.to_string() + &s
             }
             _ => {
                 String::new()
@@ -207,64 +146,6 @@ impl Add<Value> for &str {
         };
     }
 }
-
-impl Add<Value> for i64 {
-    type Output = i64;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self +s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Add<Value> for i32 {
-    type Output = i64;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + self as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Add<Value> for f64 {
-    type Output = f64;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) + self
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Add<Value> for u64 {
-    type Output = u64;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) + self
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
 
 /**
 base ref
@@ -274,67 +155,10 @@ impl Add<&Value> for &str {
     fn add(self, rhs: &Value) -> Self::Output {
         return match &rhs.inner {
             serde_json::Value::String(s) => {
-                self.to_string()+&s
+                self.to_string() + &s
             }
             _ => {
                 String::new()
-            }
-        };
-    }
-}
-
-impl Add<&Value> for i64 {
-    type Output = i64;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self +s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Add<&Value> for i32 {
-    type Output = i64;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) + self as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Add<&Value> for f64 {
-    type Output = f64;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) + self
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Add<&Value> for u64 {
-    type Output = u64;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) + self
-            }
-            _ => {
-                0
             }
         };
     }
