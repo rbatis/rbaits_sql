@@ -3,7 +3,7 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-#[expr("a == 1")]
+#[expr("!g")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
@@ -14,7 +14,8 @@ fn main() {
         "c":"c",
         "d":null,
         "e":[1],
-        "f":[{"field":1}]
+        "f":[{"field":1}],
+        "g":true
     });
     let v = gen(&arg);
     println!("{}", v);
@@ -29,7 +30,8 @@ fn bench() {
         "c":"c",
         "d":null,
         "e":[1],
-        "f":[{"field":1}]
+        "f":[{"field":1}],
+        "g":true
     });
     gen(&arg);
     bench!(100000,{
@@ -54,7 +56,8 @@ mod test {
         "c":"c",
         "d":null,
         "e":[1],
-        "f":[{"field":1}]
+        "f":[{"field":1}],
+        "g":true
          });
         macro_rules! call {
             ($func_name:ident,$s:expr,$value:expr) => {

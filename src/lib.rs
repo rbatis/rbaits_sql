@@ -17,6 +17,7 @@ pub mod ops_div;
 pub mod ops_mul;
 pub mod ops_sub;
 pub mod ops_rem;
+pub mod ops_not;
 
 
 #[macro_use]
