@@ -1,68 +1,6 @@
 use crate::Value;
 use std::ops::Sub;
 
-/**
-sub
-**/
-
-
-impl Sub<i64> for Value {
-    type Output = i64;
-    fn sub(self, rhs: i64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) - rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Sub<i32> for Value {
-    type Output = i64;
-    fn sub(self, rhs: i32) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0)  - rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Sub<f64> for Value {
-    type Output = f64;
-    fn sub(self, rhs: f64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) - rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Sub<u64> for Value {
-    type Output = u64;
-    fn sub(self, rhs: u64) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) - rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
 impl Sub<&serde_json::Value> for Value {
     type Output = serde_json::Value;
     fn sub(self, rhs: &serde_json::Value) -> Self::Output {
@@ -78,70 +16,6 @@ impl Sub<&serde_json::Value> for Value {
             }
             _ => {
                 return serde_json::Value::Null;
-            }
-        };
-    }
-}
-
-
-
-/**
-ref
-**/
-
-
-impl Sub<i64> for &Value {
-    type Output = i64;
-    fn sub(self, rhs: i64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) - rhs
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Sub<i32> for &Value {
-    type Output = i64;
-    fn sub(self, rhs: i32) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_i64().unwrap_or(0) - rhs as i64
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Sub<f64> for &Value {
-    type Output = f64;
-    fn sub(self, rhs: f64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_f64().unwrap_or(0.0) - rhs
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Sub<u64> for &Value {
-    type Output = u64;
-    fn sub(self, rhs: u64) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::Number(s) => {
-                s.as_u64().unwrap_or(0) - rhs
-            }
-            _ => {
-                0
             }
         };
     }
@@ -167,135 +41,6 @@ impl Sub<&serde_json::Value> for &Value {
     }
 }
 
-
-
-/**
-base
-**/
-
-
-impl Sub<Value> for i64 {
-    type Output = i64;
-    fn sub(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-               self -  s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Sub<Value> for i32 {
-    type Output = i64;
-    fn sub(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as i64 - s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Sub<Value> for f64 {
-    type Output = f64;
-    fn sub(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self - s.as_f64().unwrap_or(0.0)
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Sub<Value> for u64 {
-    type Output = u64;
-    fn sub(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::Number(s) => {
-                self - s.as_u64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-/**
-base ref
-**/
-
-
-impl Sub<&Value> for i64 {
-    type Output = i64;
-    fn sub(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self -  s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-impl Sub<&Value> for i32 {
-    type Output = i64;
-    fn sub(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self as i64 - s.as_i64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-
-impl Sub<&Value> for f64 {
-    type Output = f64;
-    fn sub(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self - s.as_f64().unwrap_or(0.0)
-            }
-            _ => {
-                0.0
-            }
-        };
-    }
-}
-
-impl Sub<&Value> for u64 {
-    type Output = u64;
-    fn sub(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::Number(s) => {
-                self - s.as_u64().unwrap_or(0)
-            }
-            _ => {
-                0
-            }
-        };
-    }
-}
-
-/**
-value
-**/
 impl Sub<&Value> for &Value {
     type Output = serde_json::Value;
     fn sub(self, rhs: &Value) -> Self::Output {
@@ -315,3 +60,62 @@ impl Sub<&Value> for &Value {
         };
     }
 }
+
+
+
+
+fn sub_i64(value: &Value, other: i64) -> i64 {
+    value.as_i64().unwrap_or(0) - other
+}
+
+fn sub_u64(value: &Value, other: u64) -> u64 {
+    value.as_u64().unwrap_or(0) - other
+}
+
+fn sub_f64(value: &Value, other: f64) -> f64 {
+    value.as_f64().unwrap_or(0.0) - other
+}
+
+macro_rules! impl_numeric_sub {
+    ($($sub:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
+        $($(
+            impl Sub<$ty> for Value {
+                type Output = $return_ty;
+                fn sub(self, other: $ty) -> Self::Output {
+                    $sub(&self, other as _)
+                }
+            }
+
+            impl Sub<Value> for $ty {
+                type Output = $return_ty;
+                fn sub(self, other: Value) -> Self::Output {
+                    $sub(&other, self as _)
+                }
+            }
+
+            impl<'a> Sub<$ty> for &'a Value {
+                type Output = $return_ty;
+                fn sub(self, other: $ty) -> Self::Output {
+                    $sub(self, other as _)
+                }
+            }
+
+            impl<'a> Sub<$ty> for &'a mut Value {
+                type Output = $return_ty;
+                fn sub(self, other: $ty) -> Self::Output {
+                    $sub(self, other as _)
+                }
+            }
+        )*)*
+    }
+}
+
+
+impl_numeric_sub! {
+    sub_i64[i8 i16 i32 i64 isize] -> i64
+    sub_u64[u8 u16 u32 u64 usize] -> u64
+    sub_f64[f32 f64] -> f64
+}
+
+
+
