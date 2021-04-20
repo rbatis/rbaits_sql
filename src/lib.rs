@@ -19,6 +19,7 @@ pub mod ops_sub;
 pub mod ops_rem;
 pub mod ops_not;
 pub mod ops_bit_and;
+pub mod ops_bit_or;
 
 
 #[macro_use]
