@@ -59,8 +59,8 @@ macro_rules! impl_numeric_div {
 
 
 impl_numeric_div! {
-    div_i64[i8 i16 i32 i64 isize] -> i64
-    div_u64[u8 u16 u32 u64 usize] -> u64
+    div_i64[i8 i16 i32 i64 isize] -> f64
+    div_u64[u8 u16 u32 u64 usize] -> f64
     div_f64[f32 f64] -> f64
 }
 
