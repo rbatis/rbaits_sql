@@ -1,7 +1,8 @@
 use quote::quote;
 use quote::ToTokens;
 use syn;
-use syn::{Expr, ItemFn, Member, Lit};
+use syn::{BinOp, Expr, ItemFn, Lit, Member};
+
 use crate::proc_macro::TokenStream;
 
 // fn is_name_char(arg: char) -> bool {
@@ -128,6 +129,17 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
         Expr::Binary(mut b) => {
             b.left = Box::new(convert_to_arg_access(*b.left.clone()));
             b.right = Box::new(convert_to_arg_access(*b.right.clone()));
+            match b.op {
+                BinOp::And(_) => {
+                    b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
+                    b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.right.to_token_stream().to_string().trim())).unwrap());
+                }
+                BinOp::Or(_) => {
+                    b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
+                    b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.right.to_token_stream().to_string().trim())).unwrap());
+                }
+                _ => {}
+            }
             return Expr::Binary(b);
         }
         Expr::Unary(mut b) => {
