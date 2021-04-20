@@ -26,7 +26,7 @@ fn eq_bool(value: &Value, other: bool) -> Option<Ordering> {
 //     value.as_str().unwrap_or("").partial_cmp(& other)
 // }
 
-macro_rules! partial_ord_numeric {
+macro_rules! impl_numeric_cmp {
     ($($eq:ident [$($ty:ty)*])*) => {
         $($(
             impl PartialOrd<$ty> for Value {
@@ -56,7 +56,7 @@ macro_rules! partial_ord_numeric {
     }
 }
 
-partial_ord_numeric! {
+impl_numeric_cmp! {
     eq_i64[i8 i16 i32 i64 isize]
     eq_u64[u8 u16 u32 u64 usize]
     eq_f64[f32 f64]

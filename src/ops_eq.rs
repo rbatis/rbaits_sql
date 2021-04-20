@@ -73,7 +73,7 @@ impl PartialEq<Value> for String {
     }
 }
 
-macro_rules! partialeq_numeric {
+macro_rules! impl_numeric_eq {
     ($($eq:ident [$($ty:ty)*])*) => {
         $($(
             impl PartialEq<$ty> for Value {
@@ -103,7 +103,7 @@ macro_rules! partialeq_numeric {
     }
 }
 
-partialeq_numeric! {
+impl_numeric_eq! {
     eq_i64[i8 i16 i32 i64 isize]
     eq_u64[u8 u16 u32 u64 usize]
     eq_f64[f32 f64]

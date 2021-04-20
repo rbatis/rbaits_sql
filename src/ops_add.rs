@@ -13,7 +13,7 @@ fn add_f64(value: &Value, other: f64) -> f64 {
     value.as_f64().unwrap_or(0.0) + other
 }
 
-macro_rules! partial_ord_numeric_add {
+macro_rules! impl_numeric_add {
     ($($eq:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
             impl Add<$ty> for Value {
@@ -48,7 +48,7 @@ macro_rules! partial_ord_numeric_add {
 }
 
 
-partial_ord_numeric_add! {
+impl_numeric_add! {
     add_i64[i8 i16 i32 i64 isize] -> i64
     add_u64[u8 u16 u32 u64 usize] -> u64
     add_f64[f32 f64] -> f64
