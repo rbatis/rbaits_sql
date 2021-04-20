@@ -188,10 +188,10 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                             }
                         }
                     }
-                    return syn::parse_str::<Expr>(&format!("&arg{}.as_proxy()", token)).unwrap();
+                    syn::parse_str::<Expr>(&format!("&arg{}.as_proxy()", token)).unwrap()
                 }
                 Member::Unnamed(unamed) => {
-                    return Expr::Field(b);
+                    Expr::Field(b)
                 }
             };
         }

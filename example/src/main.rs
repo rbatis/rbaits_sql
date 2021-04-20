@@ -1,3 +1,11 @@
+#![allow(unreachable_patterns)]
+#![allow(unused_variables)]
+#![allow(unused_assignments)]
+#![allow(unused_must_use)]
+#![allow(dead_code)]
+#![allow(unused_attributes)]
+#![allow(unused_imports)]
+
 #[macro_use]
 extern crate xmlsql;
 
@@ -42,6 +50,7 @@ fn bench() {
 
 #[cfg(test)]
 mod test {
+
     use serde_json::json;
 
     #[macro_use]
