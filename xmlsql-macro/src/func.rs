@@ -126,8 +126,8 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                     b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.right.to_token_stream().to_string().trim())).unwrap());
                 }
                 BinOp::Add(_)=>{
-                    let leftToken=b.left.to_token_stream().to_string();
-                    if leftToken.trim().ends_with("\"") && leftToken.trim().starts_with("\""){
+                    let left_token =b.left.to_token_stream().to_string();
+                    if left_token.trim().ends_with("\"") && left_token.trim().starts_with("\""){
                         b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
                     }
                 }
