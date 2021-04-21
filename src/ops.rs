@@ -18,6 +18,32 @@ pub struct Value {
 }
 
 impl Value {
+
+
+    pub fn i64(&self) -> i64 {
+        self.inner.as_i64().unwrap_or_default()
+    }
+    pub fn f64(&self) -> f64 {
+        self.inner.as_f64().unwrap_or_default()
+    }
+    pub fn u64(&self) -> u64 {
+        self.inner.as_u64().unwrap_or_default()
+    }
+    pub fn str(&self) -> &str {
+        self.inner.as_str().unwrap_or("")
+    }
+    pub fn string(&self) -> String {
+        self.inner.as_str().unwrap_or_default().to_string()
+    }
+    pub fn bool(&self) -> bool {
+        self.inner.as_bool().unwrap_or_default()
+    }
+    pub fn null(&self) -> () {
+        self.inner.as_null().unwrap_or_default()
+    }
+
+
+
     pub fn as_i64(&self) -> Option<i64> {
         self.inner.as_i64()
     }
