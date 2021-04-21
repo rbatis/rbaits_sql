@@ -11,7 +11,7 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-#[expr("'a'+'b'")]
+#[expr("a+a+a")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
@@ -25,7 +25,9 @@ fn main() {
         "f":[{"field":1}],
         "g":true
     });
-    let v = gen(&arg);
+    & arg ["a"] . as_proxy() + & arg ["a"] . as_proxy() + & arg ["a"] .
+        as_proxy()
+    dit let v = gen(&arg);
     println!("{}", v);
 }
 
