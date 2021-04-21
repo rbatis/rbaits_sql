@@ -1,6 +1,7 @@
 use std::ops::Div;
 
 use crate::Value;
+use crate::ops::AsProxy;
 
 fn div_i64(value: &Value, other: i64) -> f64 {
     if other == 0 {
@@ -106,96 +107,96 @@ impl_numeric_div! {
 
 
 impl Div<&serde_json::Value> for Value {
-    type Output = serde_json::Value;
+    type Output = Value;
     fn div(self, rhs: &serde_json::Value) -> Self::Output {
         return match self.inner {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
                 }
             }
             _ => {
-                return serde_json::Value::Null;
+                return serde_json::Value::Null.into_proxy();
             }
         };
     }
 }
 
 impl Div<&serde_json::Value> for &Value {
-    type Output = serde_json::Value;
+    type Output = Value;
     fn div(self, rhs: &serde_json::Value) -> Self::Output {
         return match &self.inner {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
                 }
             }
             _ => {
-                return serde_json::Value::Null;
+                return serde_json::Value::Null.into_proxy();
             }
         };
     }
 }
 
 impl Div<&Value> for &Value {
-    type Output = serde_json::Value;
+    type Output = Value;
     fn div(self, rhs: &Value) -> Self::Output {
         return match &self.inner {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs);
+                        return serde_json::json!(rhs).into_proxy();
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
                 }
             }
             _ => {
-                return serde_json::Value::Null;
+                return serde_json::Value::Null.into_proxy();
             }
         };
     }

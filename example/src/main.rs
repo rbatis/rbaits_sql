@@ -11,7 +11,7 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-#[expr("a+a+a")]
+#[expr("a*a")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
