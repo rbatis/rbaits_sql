@@ -3,18 +3,18 @@ use std::ops::Div;
 use crate::Value;
 use crate::ops::AsProxy;
 
-fn div_i64(value: &Value, other: i64) -> f64 {
+fn div_i64(value: &Value, other: i64) -> i64 {
     if other == 0 {
-        return 0.0;
+        return 0;
     }
-    (value.as_i64().unwrap_or_default() / other) as f64
+    (value.as_i64().unwrap_or_default() / other)
 }
 
-fn div_u64(value: &Value, other: u64) -> f64 {
+fn div_u64(value: &Value, other: u64) -> u64 {
     if other == 0 {
-        return 0.0;
+        return 0;
     }
-    (value.as_u64().unwrap_or_default() / other) as f64
+    (value.as_u64().unwrap_or_default() / other)
 }
 
 fn div_f64(value: &Value, other: f64) -> f64 {
@@ -25,20 +25,20 @@ fn div_f64(value: &Value, other: f64) -> f64 {
 }
 
 
-fn div_i64_value(value: &Value, other: i64) -> f64 {
+fn div_i64_value(value: &Value, other: i64) -> i64 {
     let v = value.as_i64().unwrap_or_default();
     if v == 0 {
-        return 0.0;
+        return 0;
     }
-    (other / v) as f64
+    (other / v)
 }
 
-fn div_u64_value(value: &Value, other: u64) -> f64 {
+fn div_u64_value(value: &Value, other: u64) -> u64 {
     let v = value.as_u64().unwrap_or_default();
     if v == 0 {
-        return 0.0;
+        return 0;
     }
-    (other / v) as f64
+    (other / v)
 }
 
 fn div_f64_value(value: &Value, other: f64) -> f64 {
@@ -46,7 +46,7 @@ fn div_f64_value(value: &Value, other: f64) -> f64 {
     if v == 0.0 {
         return 0.0;
     }
-    (other / v) as f64
+    (other / v)
 }
 
 macro_rules! impl_numeric_div {
@@ -99,8 +99,8 @@ macro_rules! impl_numeric_div {
 
 
 impl_numeric_div! {
-    div_i64,div_i64_value[i8 i16 i32 i64 isize] -> f64
-    div_u64,div_u64_value[u8 u16 u32 u64 usize] -> f64
+    div_i64,div_i64_value[i8 i16 i32 i64 isize] -> i64
+    div_u64,div_u64_value[u8 u16 u32 u64 usize] -> u64
     div_f64,div_f64_value[f32 f64] -> f64
 }
 
