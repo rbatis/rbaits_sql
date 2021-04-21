@@ -25,6 +25,7 @@ fn main() {
         "f":[{"field":1}],
         "g":true
     });
+    let v = gen(&arg);
     println!("{}", v);
 }
 
