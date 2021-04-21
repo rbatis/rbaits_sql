@@ -68,20 +68,6 @@ impl_numeric_add! {
     add_f64[f32 f64] -> f64
 }
 
-impl Add<&str> for Value {
-    type Output = String;
-    fn add(self, rhs: &str) -> Self::Output {
-        return match self.inner {
-            serde_json::Value::String(s) => {
-                s + rhs
-            }
-            _ => {
-                String::new()
-            }
-        };
-    }
-}
-
 impl Add<&serde_json::Value> for Value {
     type Output = serde_json::Value;
     fn add(self, rhs: &serde_json::Value) -> Self::Output {
@@ -100,22 +86,6 @@ impl Add<&serde_json::Value> for Value {
             }
             _ => {
                 return serde_json::Value::Null;
-            }
-        };
-    }
-}
-
-//ref
-
-impl Add<&str> for &Value {
-    type Output = String;
-    fn add(self, rhs: &str) -> Self::Output {
-        return match &self.inner {
-            serde_json::Value::String(s) => {
-                s.to_string() + rhs
-            }
-            _ => {
-                String::new()
             }
         };
     }
@@ -144,43 +114,6 @@ impl Add<&serde_json::Value> for &Value {
     }
 }
 
-/**
-base
-**/
-impl Add<Value> for &str {
-    type Output = String;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner {
-            serde_json::Value::String(s) => {
-                self.to_string() + &s
-            }
-            _ => {
-                String::new()
-            }
-        };
-    }
-}
-
-/**
-base ref
-**/
-impl Add<&Value> for &str {
-    type Output = String;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match &rhs.inner {
-            serde_json::Value::String(s) => {
-                self.to_string() + &s
-            }
-            _ => {
-                String::new()
-            }
-        };
-    }
-}
-
-/**
-value
-**/
 impl Add<&Value> for &Value {
     type Output = serde_json::Value;
     fn add(self, rhs: &Value) -> Self::Output {
@@ -199,6 +132,179 @@ impl Add<&Value> for &Value {
             }
             _ => {
                 return serde_json::Value::Null;
+            }
+        };
+    }
+}
+
+
+//str
+/**
+base
+**/
+impl Add<Value> for &str {
+    type Output = String;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::String(s) => {
+                self.to_string() + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+/**
+base ref
+**/
+impl Add<&Value> for &str {
+    type Output = String;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::String(s) => {
+                self.to_string() + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+//ref
+impl Add<&str> for Value {
+    type Output = String;
+    fn add(self, rhs: &str) -> Self::Output {
+        return match self.inner {
+            serde_json::Value::String(s) => {
+                s + rhs
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+impl Add<&str> for &Value {
+    type Output = String;
+    fn add(self, rhs: &str) -> Self::Output {
+        return match &self.inner {
+            serde_json::Value::String(s) => {
+                s.to_string() + rhs
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+//string
+impl Add<Value> for String {
+    type Output = String;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::String(s) => {
+                self + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+impl Add<&Value> for String {
+    type Output = String;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::String(s) => {
+                self + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+impl Add<String> for Value {
+    type Output = String;
+    fn add(self, rhs: String) -> Self::Output {
+        return match self.inner {
+            serde_json::Value::String(s) => {
+                s + rhs.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+impl Add<String> for &Value {
+    type Output = String;
+    fn add(self, rhs: String) -> Self::Output {
+        return match &self.inner {
+            serde_json::Value::String(s) => {
+                s.to_string() + rhs.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+//string ref
+impl Add<Value> for &String {
+    type Output = String;
+    fn add(self, rhs: Value) -> Self::Output {
+        return match rhs.inner {
+            serde_json::Value::String(s) => {
+                self.to_string() + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+impl Add<&Value> for &String {
+    type Output = String;
+    fn add(self, rhs: &Value) -> Self::Output {
+        return match &rhs.inner {
+            serde_json::Value::String(s) => {
+                self.to_string() + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+impl Add<&String> for Value {
+    type Output = String;
+    fn add(self, rhs: &String) -> Self::Output {
+        return match self.inner {
+            serde_json::Value::String(s) => {
+                s + rhs.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+impl Add<&String> for &Value {
+    type Output = String;
+    fn add(self, rhs: &String) -> Self::Output {
+        return match &self.inner {
+            serde_json::Value::String(s) => {
+                s.to_string() + rhs.as_str()
+            }
+            _ => {
+                String::new()
             }
         };
     }
