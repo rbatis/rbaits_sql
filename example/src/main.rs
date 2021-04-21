@@ -11,7 +11,7 @@ extern crate xmlsql;
 
 use serde_json::json;
 
-#[expr("false || g")]
+#[expr("'a'+'b'")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
@@ -59,7 +59,6 @@ mod test {
 
     #[test]
     fn test_node_run() {
-
         let arg = json!({
         "a":1,
         "b":2,
@@ -80,8 +79,8 @@ mod test {
         call!(fn2,"d.a.is_null()", json!(true));
         call!(fn3,"1.0 == 1.0", json!(true));
         call!(fn4,"'2019-02-26' == '2019-02-26'", json!(true));
-        call!(fn5,"'f\'uc'.string()+'k'", json!("f'uck"));
-        call!(fn6,"'f'.string()+'s'",json!("fs"));
+        call!(fn5,"'f\'uc'+'k'", json!("f'uck"));
+        call!(fn6,"'f'+'s'",json!("fs"));
         call!(fn7,"a +1 > b * 8",json!(false));
         call!(fn8,"a >= 0",json!(true));
         call!(fn9,"'a'+c",json!("ac"));
