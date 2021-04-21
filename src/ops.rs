@@ -30,7 +30,7 @@ impl Value {
         self.inner.as_u64().unwrap_or_default()
     }
     pub fn str(&self) -> &str {
-        self.inner.as_str().unwrap_or("")
+        self.inner.as_str().unwrap_or_default()
     }
     pub fn string(&self) -> String {
         self.inner.as_str().unwrap_or_default().to_string()
