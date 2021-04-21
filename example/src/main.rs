@@ -25,9 +25,6 @@ fn main() {
         "f":[{"field":1}],
         "g":true
     });
-    & arg ["a"] . as_proxy() + & arg ["a"] . as_proxy() + & arg ["a"] .
-        as_proxy()
-    dit let v = gen(&arg);
     println!("{}", v);
 }
 
