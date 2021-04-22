@@ -1,15 +1,15 @@
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use serde_json::Number;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct VecMap<K, V> {
-    pub inner: Vec<(K, Option<V>)>
+    pub inner: Vec<(K, Option<V>)>,
 }
 
 impl<K, V> VecMap<K, V> {
     pub fn new() -> VecMap<K, V> {
         Self {
-            inner: vec![]
+            inner: vec![],
         }
     }
     pub fn insert(&mut self, key: K, v: V) {
@@ -18,6 +18,19 @@ impl<K, V> VecMap<K, V> {
 }
 
 impl<K, V> Index<K> for VecMap<K, V> where K: std::cmp::PartialEq {
+    type Output = Option<V>;
+
+    fn index(&self, index: K) -> &Self::Output {
+        for (k, v) in &self.inner {
+            if *k == index {
+                return v;
+            }
+        }
+        return &None;
+    }
+}
+
+impl<K, V> Index<K> for &VecMap<K, V> where K: std::cmp::PartialEq {
     type Output = Option<V>;
 
     fn index(&self, index: K) -> &Self::Output {
