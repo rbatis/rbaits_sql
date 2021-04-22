@@ -23,6 +23,19 @@ impl<K, V> VecMap<K, V> {
         }
         self.inner.push((key, Some(value)));
     }
+
+    pub fn remove(&mut self, key: K, value: V) -> (K, Option<V>)
+        where
+            K: Ord, {
+        let mut index=0;
+        for (k, v) in &mut self.inner {
+            if *k == key {
+               return self.inner.remove(index);
+            }
+            index+=1;
+        }
+        return (key,None);
+    }
 }
 
 impl<K, V> Index<K> for VecMap<K, V> where K: std::cmp::PartialEq {
