@@ -91,15 +91,15 @@ impl<'a, K, V> VecMap<K, V> {
         let mut index = 0;
         for (k, v) in &self.inner {
             if k.borrow().eq(key) {
-                match self.inner.get_mut(index){
-                    None => {return None;}
-                    Some((_,result_v)) => {
+                return match self.inner.get_mut(index) {
+                    None => { None }
+                    Some((_, result_v)) => {
                         match result_v {
                             None => {
-                                return None;
+                                None
                             }
                             Some(v) => {
-                                return Some(v);
+                                Some(v)
                             }
                         }
                     }
