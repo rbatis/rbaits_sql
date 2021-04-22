@@ -23,7 +23,7 @@ impl<K, V> VecMap<K, V> {
         self.inner.push((key, Some(value)));
     }
 
-    pub fn remove(&mut self, key: K, value: V) -> (K, Option<V>)
+    pub fn remove(&mut self, key: K) -> (K, Option<V>)
         where
             K: Ord, {
         let mut index = 0;
@@ -35,6 +35,20 @@ impl<K, V> VecMap<K, V> {
         }
         return (key, None);
     }
+
+    /// Returns the number of elements in the map.
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
+
+    /// Returns true if the map contains no elements.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.map.is_empty()
+    }
+
+
 }
 
 impl<K, V> Index<K> for VecMap<K, V> where K: std::cmp::PartialEq {
