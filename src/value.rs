@@ -111,19 +111,6 @@ impl From<serde_json::Value> for JsonValue {
         }
     }
 }
-use serde::ser::Error;
-
-// macro_rules! tri {
-//     ($e:expr) => {
-//         match $e {
-//             crate::error::Result::Ok(val) => val,
-//             crate::error::Result::Err(err) => return crate::error::Result::Err(err),
-//         }
-//     };
-//     ($e:expr,) => {
-//         tri!($e)
-//     };
-// }
 
 impl Serialize for JsonValue {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> where
