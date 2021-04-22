@@ -10,6 +10,8 @@
 extern crate xmlsql;
 
 use serde_json::json;
+use xmlsql::value::VecMap;
+
 
 #[expr("a+b*(e[0]+b)/2")]
 pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
@@ -47,6 +49,21 @@ fn bench() {
     });
 }
 
+
+#[test]
+fn bench_vec_map() {
+    let mut m=VecMap::new();
+    m.insert("a",1);
+    m.insert("b",1);
+    m.insert("c",1);
+    m.insert("d",1);
+    m.insert("e",1);
+
+    let e=&m["s"];
+    bench!(100000,{
+        let e=&m["e"];
+    });
+}
 
 #[cfg(test)]
 mod test {
