@@ -43,6 +43,16 @@ impl<K, V> Index<K> for &VecMap<K, V> where K: std::cmp::PartialEq {
     }
 }
 
+impl<K, V> IndexMut<K> for VecMap<K, V> where K: std::cmp::PartialEq {
+    fn index_mut(&mut self, index: K) -> &mut Self::Output {
+        for (k, v) in &mut self.inner {
+            if *k == index {
+                return v;
+            }
+        }
+        panic!("no entry found for key")
+    }
+}
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum JsonValue {
