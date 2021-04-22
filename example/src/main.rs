@@ -31,8 +31,11 @@ fn main() {
     let v = gen(&arg);
     println!("{}", v);
 
-    let v=JsonValue::from(arg);
+    let v = JsonValue::from(arg);
     println!("{:?}", v);
+
+    let s = v.to_string();
+    println!("json:{}", s);
 }
 
 

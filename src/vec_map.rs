@@ -1,10 +1,11 @@
 use std::ops::{Index, IndexMut};
 use std::collections::hash_map::{Iter, IterMut};
 use std::fmt::{Debug};
-use serde::{Serializer, Serialize};
+use serde::{Serializer, Serialize, Deserialize, Deserializer, de};
 use serde::ser::SerializeMap;
 use serde_json::ser::Formatter;
 use std::fmt;
+use crate::value::JsonValue;
 
 
 #[derive(Clone, Eq, PartialEq)]
@@ -149,5 +150,46 @@ impl<K, V> Serialize for VecMap<K, V>
             map.serialize_value(v);
         }
         map.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for VecMap<String, JsonValue> {
+    #[inline]
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+    {
+        struct Visitor;
+
+        impl<'de> de::Visitor<'de> for Visitor {
+            type Value = VecMap<String, JsonValue>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            #[inline]
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+                where
+                    E: de::Error,
+            {
+                Ok(VecMap::new())
+            }
+
+            #[inline]
+            fn visit_map<V>(self, mut visitor: V) -> Result<Self::Value, V::Error>
+                where
+                    V: de::MapAccess<'de>,
+            {
+                let mut values = VecMap::new();
+
+                while let Some((key, value)) = visitor.next_entry()? {
+                    values.insert(key, value);
+                }
+
+                Ok(values)
+            }
+        }
+        deserializer.deserialize_map(Visitor)
     }
 }
