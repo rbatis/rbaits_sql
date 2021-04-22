@@ -5,7 +5,7 @@ pub mod error;
 pub mod bencher;
 pub mod ops;
 pub use ops::Value;
-
+pub mod vec_map;
 
 pub mod ops_eq;
 pub mod ops_cmp;

@@ -10,7 +10,7 @@
 extern crate xmlsql;
 
 use serde_json::json;
-use xmlsql::value::VecMap;
+use xmlsql::vec_map::VecMap;
 
 
 #[expr("a+b*(e[0]+b)/2")]
