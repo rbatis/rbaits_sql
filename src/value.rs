@@ -4,6 +4,10 @@ use serde::{Serialize, Serializer, Deserialize, Deserializer, de};
 use std::fmt::Debug;
 use serde::de::{Visitor, SeqAccess, MapAccess, DeserializeSeed};
 use std::{fmt, io};
+use core::ops;
+use std::borrow::Borrow;
+use std::hash::Hash;
+use std::ops::Index;
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum JsonValue {

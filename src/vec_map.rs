@@ -1,11 +1,13 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Deref};
 use std::collections::hash_map::{Iter, IterMut};
 use std::fmt::{Debug};
 use serde::{Serializer, Serialize, Deserialize, Deserializer, de};
 use serde::ser::SerializeMap;
 use serde_json::ser::Formatter;
-use std::fmt;
+use std::{fmt, ops};
 use crate::value::JsonValue;
+use std::hash::{Hash, BuildHasher};
+use std::borrow::{Borrow, BorrowMut};
 
 
 #[derive(Clone, Eq, PartialEq)]
@@ -65,44 +67,78 @@ impl<'a, K, V> VecMap<K, V> {
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, (K, Option<V>)> {
         self.inner.iter_mut()
     }
-}
 
-impl<K, V> Index<K> for VecMap<K, V> where K: std::cmp::PartialEq {
-    type Output = Option<V>;
-
-    fn index(&self, index: K) -> &Self::Output {
+    #[inline]
+    pub fn get<Q: ?Sized>(&self, key: &Q) -> Option<&V>
+        where
+            K: Borrow<Q>,
+            Q: Hash + Eq,
+    {
         for (k, v) in &self.inner {
-            if *k == index {
-                return v;
+            if k.borrow().eq(key) {
+                return v.into();
             }
         }
-        return &None;
+        return None;
     }
-}
 
-impl<K, V> Index<K> for &VecMap<K, V> where K: std::cmp::PartialEq {
-    type Output = Option<V>;
-
-    fn index(&self, index: K) -> &Self::Output {
+    #[inline]
+    pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut V>
+        where
+            K: Borrow<Q>,
+            Q: Hash + Eq,
+    {
+        let mut index = 0;
         for (k, v) in &self.inner {
-            if *k == index {
-                return v;
+            if k.borrow().eq(key) {
+                match self.inner.get_mut(index){
+                    None => {return None;}
+                    Some((_,result_v)) => {
+                        match result_v {
+                            None => {
+                                return None;
+                            }
+                            Some(v) => {
+                                return Some(v);
+                            }
+                        }
+                    }
+                }
             }
+            index += 1;
         }
-        return &None;
+        return None;
     }
 }
 
-impl<K, V> IndexMut<K> for VecMap<K, V> where K: std::cmp::PartialEq {
-    fn index_mut(&mut self, index: K) -> &mut Self::Output {
-        for (k, v) in &mut self.inner {
-            if *k == index {
-                return v;
-            }
-        }
-        panic!("no entry found for key")
+impl<K, Q: ?Sized, V> Index<&Q> for VecMap<K, V>
+    where
+        K: Eq + Hash + Borrow<Q>,
+        Q: Eq + Hash,
+{
+    type Output = V;
+
+    /// Returns a reference to the value corresponding to the supplied key.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the key is not present in the `HashMap`.
+    #[inline]
+    fn index(&self, key: &Q) -> &V {
+        self.get(key).expect("no entry found for key")
     }
 }
+
+impl<K, Q: ?Sized, V> ops::IndexMut<&Q> for VecMap<K, V>
+    where
+        K: Eq + Hash + Borrow<Q>,
+        Q: Eq + Hash,
+{
+    fn index_mut(&mut self, index: &Q) -> &mut Self::Output {
+        self.get_mut(index).expect("no entry found for key")
+    }
+}
+
 
 impl<K, V> Iterator for VecMap<K, V> {
     type Item = (K, Option<V>);
@@ -117,23 +153,21 @@ impl<K, V> Iterator for VecMap<K, V> {
 }
 
 
-impl<K, V> Debug for VecMap<K, V> where   K: Serialize,
-                                          V: Serialize, {
+impl<K, V> Debug for VecMap<K, V> where K: Serialize,
+                                        V: Serialize, {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&serde_json::json!(self).to_string());
         return Ok(());
     }
 }
 
-impl<K, V> fmt::Display for VecMap<K,V> where   K: Serialize,
-                                          V: Serialize, {
+impl<K, V> fmt::Display for VecMap<K, V> where K: Serialize,
+                                               V: Serialize, {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&serde_json::json!(self).to_string());
         return Ok(());
     }
 }
-
-
 
 
 impl<K, V> Serialize for VecMap<K, V>
