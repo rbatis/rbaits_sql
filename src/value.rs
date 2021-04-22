@@ -27,14 +27,14 @@ impl<K, V> VecMap<K, V> {
     pub fn remove(&mut self, key: K, value: V) -> (K, Option<V>)
         where
             K: Ord, {
-        let mut index=0;
+        let mut index = 0;
         for (k, v) in &mut self.inner {
             if *k == key {
-               return self.inner.remove(index);
+                return self.inner.remove(index);
             }
-            index+=1;
+            index += 1;
         }
-        return (key,None);
+        return (key, None);
     }
 }
 
