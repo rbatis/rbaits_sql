@@ -12,8 +12,16 @@ impl<K, V> VecMap<K, V> {
             inner: vec![],
         }
     }
-    pub fn insert(&mut self, key: K, v: V) {
-        self.inner.push((key, Some(v)))
+    pub fn insert(&mut self, key: K, value: V)
+        where
+            K: Ord, {
+        for (k, v) in &mut self.inner {
+            if *k == key {
+                *v = Some(value);
+                return;
+            }
+        }
+        self.inner.push((key, Some(value)));
     }
 }
 
