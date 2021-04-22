@@ -11,6 +11,7 @@ extern crate xmlsql;
 
 use serde_json::json;
 use xmlsql::vec_map::VecMap;
+use xmlsql::value::JsonValue;
 
 
 #[expr("a+b*(e[0]+b)/2")]
@@ -29,6 +30,9 @@ fn main() {
     });
     let v = gen(&arg);
     println!("{}", v);
+
+    let v=JsonValue::from(arg);
+    println!("{:?}", v);
 }
 
 

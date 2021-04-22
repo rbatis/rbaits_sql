@@ -1,5 +1,10 @@
 use std::ops::{Index, IndexMut};
 use std::collections::hash_map::{Iter, IterMut};
+use std::fmt::{Debug};
+use serde::{Serializer, Serialize};
+use serde::ser::SerializeMap;
+use serde_json::ser::Formatter;
+use std::fmt;
 
 
 #[derive(Clone, Eq, PartialEq)]
@@ -107,5 +112,42 @@ impl<K, V> Iterator for VecMap<K, V> {
         }
         let v = self.inner.remove(0);
         return Some(v);
+    }
+}
+
+
+impl<K, V> Debug for VecMap<K, V> where   K: Serialize,
+                                          V: Serialize, {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&serde_json::json!(self).to_string());
+        return Ok(());
+    }
+}
+
+impl<K, V> fmt::Display for VecMap<K,V> where   K: Serialize,
+                                          V: Serialize, {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&serde_json::json!(self).to_string());
+        return Ok(());
+    }
+}
+
+
+
+
+impl<K, V> Serialize for VecMap<K, V>
+    where
+        K: Serialize,
+        V: Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer, {
+        let mut map = serializer.serialize_map(Some(self.len()))?;
+        for (k, v) in &self.inner {
+            map.serialize_key(k);
+            map.serialize_value(v);
+        }
+        map.end()
     }
 }
