@@ -23,7 +23,7 @@ impl<'a, K, V> VecMap<K, V> {
     }
 
     #[inline]
-    pub fn with_capacity(capacity: usize)->Self<K,V>{
+    pub fn with_capacity(capacity: usize)->Self{
         Self {
             inner: Vec::with_capacity(capacity),
         }
@@ -92,6 +92,48 @@ impl<'a, K, V> VecMap<K, V> {
 
     #[inline]
     pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut V>
+        where
+            K: Borrow<Q>,
+            Q: Hash + Eq,
+    {
+        let mut index = 0;
+        for (k, v) in &self.inner {
+            if k.borrow().eq(key) {
+                return match self.inner.get_mut(index) {
+                    None => { None }
+                    Some((_, result_v)) => {
+                        match result_v {
+                            None => {
+                                None
+                            }
+                            Some(v) => {
+                                Some(v)
+                            }
+                        }
+                    }
+                }
+            }
+            index += 1;
+        }
+        return None;
+    }
+
+    #[inline]
+    pub async fn get_async<Q: ?Sized>(&self, key: &Q) -> Option<&V>
+        where
+            K: Borrow<Q>,
+            Q: Hash + Eq,
+    {
+        for (k, v) in &self.inner {
+            if k.borrow().eq(key) {
+                return v.into();
+            }
+        }
+        return None;
+    }
+
+    #[inline]
+    pub async fn get_mut_async<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut V>
         where
             K: Borrow<Q>,
             Q: Hash + Eq,
