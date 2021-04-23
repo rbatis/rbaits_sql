@@ -12,7 +12,6 @@ extern crate xmlsql;
 use serde_json::json;
 
 use xmlsql::value::JsonValue;
-use xmlsql::vec_map::VecMap;
 use std::sync::Arc;
 
 #[expr("a+b*(e[0]+b)/2")]
@@ -54,34 +53,6 @@ fn bench() {
     gen(&arg);
     bench!(100000,{
        gen(&arg);
-    });
-}
-
-
-#[test]
-fn bench_vec_map() {
-    let mut m = VecMap::new();
-    m.insert("a", 1);
-    m.insert("b", 1);
-    m.insert("c", 1);
-    m.insert("d", 1);
-    m.insert("e", 1);
-
-
-    let arc=Arc::new(m.clone());
-    let m1=arc.clone();
-    let m2=arc.clone();
-    async_std::task::spawn(async move {
-        let s = m1.get_async("a").await;
-        println!("async get v:{}", s.unwrap());
-    });
-    async_std::task::spawn(async move {
-        let s = m2.get_async("a").await;
-        println!("async get v:{}", s.unwrap());
-    });
-
-    bench!(100000,{
-        let e=&m["e"];
     });
 }
 

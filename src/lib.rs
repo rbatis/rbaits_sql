@@ -5,8 +5,6 @@ pub mod error;
 pub mod bencher;
 pub mod ops;
 pub use ops::Value;
-pub mod vec_map;
-
 pub mod ops_eq;
 pub mod ops_cmp;
 
@@ -21,7 +19,6 @@ pub mod ops_not;
 pub mod ops_bit_and;
 pub mod ops_bit_or;
 pub mod from_bool;
-
 
 pub mod value;
 
