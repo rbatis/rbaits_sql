@@ -170,7 +170,7 @@ impl From<serde_json::Value> for JsonValue {
                 JsonValue::Array(array)
             }
             Value::Object(obj) => {
-                let mut map = VecMap::new();
+                let mut map = VecMap::with_capacity(obj.len());
                 for (k, v) in obj {
                     map.insert(k, JsonValue::from(v));
                 }

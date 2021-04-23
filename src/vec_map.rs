@@ -21,6 +21,14 @@ impl<'a, K, V> VecMap<K, V> {
             inner: vec![],
         }
     }
+
+    #[inline]
+    pub fn with_capacity(capacity: usize)->Self<K,V>{
+        Self {
+            inner: Vec::with_capacity(capacity),
+        }
+    }
+
     pub fn insert(&mut self, key: K, value: V)
         where
             K: Ord, {
