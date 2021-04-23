@@ -163,7 +163,7 @@ impl From<serde_json::Value> for JsonValue {
             Value::Number(n) => { Self::Number(n) }
             Value::String(s) => { Self::String(s) }
             Value::Array(arr) => {
-                let mut array = vec![];
+                let mut array = Vec::with_capacity(arr.capacity());
                 for x in arr {
                     array.push(JsonValue::from(x));
                 }
