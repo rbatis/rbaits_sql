@@ -19,7 +19,7 @@ pub enum VecMapMode {
 
 #[derive(Clone, Eq)]
 pub struct VecMap<K, V> where K: Ord + Hash {
-    pub inner: Vec<(K, Option<V>)>,
+    pub inner: Vec<(K, V)>,
     pub index: HashMap<K, usize>,
     pub change_factor: usize,
     pub mode: VecMapMode,
@@ -59,11 +59,11 @@ impl<'a, K, V> VecMap<K, V> where K: Ord + Hash {
         let old = self.get_mut(&key);
         match old {
             None => {
-                self.inner.push((key.clone(), Some(value)));
+                self.inner.push((key.clone(), value));
                 self.index.insert(key, self.inner.len() - 1);
             }
             Some((idx, v)) => {
-                *v = (key, Some(value));
+                *v = (key, value);
             }
         }
         if self.len() > self.change_factor {
@@ -83,7 +83,7 @@ impl<'a, K, V> VecMap<K, V> where K: Ord + Hash {
                 if self.len() <= self.change_factor {
                     self.mode = VecMapMode::Vec;
                 }
-                return removed;
+                return Some(removed);
             }
         }
         return None;
@@ -102,12 +102,12 @@ impl<'a, K, V> VecMap<K, V> where K: Ord + Hash {
     }
 
     #[inline]
-    pub fn iter(&'a self) -> std::slice::Iter<'_, (K, Option<V>)> {
+    pub fn iter(&'a self) -> std::slice::Iter<'_, (K, V)> {
         self.inner.iter()
     }
 
     #[inline]
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, (K, Option<V>)> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, (K, V)> {
         self.inner.iter_mut()
     }
 
@@ -139,7 +139,7 @@ impl<'a, K, V> VecMap<K, V> where K: Ord + Hash {
     }
 
     #[inline]
-    pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<(usize, &mut (K, Option<V>))>
+    pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<(usize, &mut (K, V))>
         where
             K: Borrow<Q>,
             Q: Hash + Eq,
@@ -200,23 +200,20 @@ impl<K, Q: ?Sized, V> ops::IndexMut<&Q> for VecMap<K, V>
 {
     fn index_mut(&mut self, index: &Q) -> &mut Self::Output {
         let (_, (k, v)) = self.get_mut(index).expect("no entry found for key");
-        match v {
-            None => { panic!("no entry found for key") }
-            Some(v) => { return v; }
-        }
+        return v;
     }
 }
 
 
 impl<K, V> Iterator for VecMap<K, V> where K: Hash + Ord {
-    type Item = (K, Option<V>);
+    type Item = (K, V);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.inner.is_empty() {
             return None;
         }
         let v = self.inner.remove(0);
-        return Some(v);
+        return Option::from(v);
     }
 }
 
