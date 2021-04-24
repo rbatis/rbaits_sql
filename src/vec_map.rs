@@ -17,8 +17,8 @@ pub enum VecMapMode {
     Index = 1,
 }
 
-#[derive(Clone,Eq)]
-pub struct VecMap<K, V> where K: Ord+Hash {
+#[derive(Clone, Eq)]
+pub struct VecMap<K, V> where K: Ord + Hash {
     pub inner: Vec<(K, Option<V>)>,
     pub index: HashMap<K, usize>,
     pub change_factor: usize,
@@ -26,14 +26,14 @@ pub struct VecMap<K, V> where K: Ord+Hash {
 }
 
 impl<K, V> PartialEq for VecMap<K, V>
-    where K: Ord+Eq+Hash,
-          V:PartialEq{
+    where K: Ord + Eq + Hash,
+          V: PartialEq {
     fn eq(&self, other: &Self) -> bool {
         return self.inner.eq(&other.inner);
     }
 }
 
-impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
+impl<'a, K, V> VecMap<K, V> where K: Ord + Hash {
     pub fn new() -> VecMap<K, V> {
         Self {
             inner: vec![],
@@ -55,15 +55,17 @@ impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
 
     pub fn insert(&mut self, key: K, value: V)
         where
-            K: Ord+Clone, {
-        for (k, v) in &mut self.inner {
-            if *k == key {
-                *v = Some(value);
-                return;
+            K: Ord + Clone, {
+        let old = self.get_mut(&key);
+        match old {
+            None => {
+                self.inner.push((key.clone(), Some(value)));
+                self.index.insert(key, self.inner.len() - 1);
+            }
+            Some((idx, v)) => {
+                *v = (key, Some(value));
             }
         }
-        self.inner.push((key.clone(), Some(value)));
-        self.index.insert(key, self.inner.len() - 1);
         if self.len() > self.change_factor {
             self.mode = VecMapMode::Index;
         }
@@ -72,9 +74,10 @@ impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
     pub fn remove(&mut self, key: K) -> Option<V>
         where
             K: Ord, {
-        let mut index = 0;
-        for (k, v) in &mut self.inner {
-            if *k == key {
+        let old = self.get_mut(&key);
+        match old {
+            None => {}
+            Some((index, v)) => {
                 let removed = self.inner.remove(index).1;
                 self.index.remove(key.borrow());
                 if self.len() <= self.change_factor {
@@ -82,7 +85,6 @@ impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
                 }
                 return removed;
             }
-            index += 1;
         }
         return None;
     }
@@ -137,7 +139,7 @@ impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
     }
 
     #[inline]
-    pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut V>
+    pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<(usize, &mut (K, Option<V>))>
         where
             K: Borrow<Q>,
             Q: Hash + Eq,
@@ -147,19 +149,13 @@ impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
                 let mut index = 0;
                 for (k, v) in &self.inner {
                     if k.borrow().eq(key) {
-                        return match self.inner.get_mut(index) {
-                            None => { None }
-                            Some((_, result_v)) => {
-                                match result_v {
-                                    None => {
-                                        None
-                                    }
-                                    Some(v) => {
-                                        Some(v)
-                                    }
-                                }
+                        let result = self.inner.get_mut(index);
+                        match result {
+                            None => { return None; }
+                            Some(r) => {
+                                return Some((index, r));
                             }
-                        };
+                        }
                     }
                     index += 1;
                 }
@@ -168,7 +164,8 @@ impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
                 let idx = self.index.get(key);
                 match idx {
                     Some(idx) => {
-                        return Option::<&mut V>::from(&mut self.inner[*idx].1);
+                        let m = &mut self.inner[*idx];
+                        return Some((*idx, m));
                     }
                     _ => {}
                 }
@@ -202,7 +199,11 @@ impl<K, Q: ?Sized, V> ops::IndexMut<&Q> for VecMap<K, V>
         Q: Eq + Hash,
 {
     fn index_mut(&mut self, index: &Q) -> &mut Self::Output {
-        self.get_mut(index).expect("no entry found for key")
+        let (_, (k, v)) = self.get_mut(index).expect("no entry found for key");
+        match v {
+            None => { panic!("no entry found for key") }
+            Some(v) => { return v; }
+        }
     }
 }
 
