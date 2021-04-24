@@ -20,7 +20,6 @@ pub mod ops_bit_and;
 pub mod ops_bit_or;
 pub mod from_bool;
 
-pub mod value;
 
 #[macro_use]
 extern crate xmlsql_macro;
