@@ -138,12 +138,14 @@ mod test {
     #[test]
     fn bench_vec_map() {
         let mut m = VecMap::new();
-        m.insert("a", 1);
-        m.insert("b", 1);
-        m.insert("c", 1);
-        m.insert("d", 1);
-        m.insert("e", 1);
-
+        for idx in 0..5 {
+            m.insert(format!("{}", idx), 1);
+        }
+        m.insert("a".to_string(), 1);
+        m.insert("b".to_string(), 1);
+        m.insert("c".to_string(), 1);
+        m.insert("d".to_string(), 1);
+        m.insert("e".to_string(), 1);
         bench!(100000,{
         let e=&m["e"];
         });
