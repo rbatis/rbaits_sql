@@ -63,6 +63,7 @@ mod test {
     #[macro_use]
     use xmlsql;
     use xmlsql::ops::AsProxy;
+    use xmlsql::vec_map::VecMap;
 
     #[test]
     fn test_node_run() {
@@ -131,5 +132,20 @@ mod test {
         call!(fn49,"nil >= 0", json!(true));
         call!(fn50,"nil <= a", json!(true));
         call!(fn51,"a == 1 && g", json!(true));
+    }
+
+
+    #[test]
+    fn bench_vec_map() {
+        let mut m = VecMap::new();
+        m.insert("a", 1);
+        m.insert("b", 1);
+        m.insert("c", 1);
+        m.insert("d", 1);
+        m.insert("e", 1);
+
+        bench!(100000,{
+        let e=&m["e"];
+        });
     }
 }

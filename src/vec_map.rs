@@ -8,29 +8,38 @@ use std::{fmt, ops};
 use crate::value::JsonValue;
 use std::hash::{Hash, BuildHasher};
 use std::borrow::{Borrow, BorrowMut};
-use std::collections::{BTreeMap};
+use std::collections::HashMap;
+
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub enum VecMapType {
-    vec = 0,
-    hash_map = 1,
+pub enum VecMapMode {
+    Vec = 0,
+    Index = 1,
 }
 
-#[derive(Clone, Eq, PartialEq)]
-pub struct VecMap<K, V> where K: Ord {
+#[derive(Clone,Eq)]
+pub struct VecMap<K, V> where K: Ord+Hash {
     pub inner: Vec<(K, Option<V>)>,
-    pub hash_map: BTreeMap<K, V>,
+    pub index: HashMap<K, usize>,
     pub change_factor: usize,
-    pub r#type: VecMapType,
+    pub mode: VecMapMode,
 }
 
-impl<'a, K, V> VecMap<K, V> where K: Ord {
+impl<K, V> PartialEq for VecMap<K, V>
+    where K: Ord+Eq+Hash,
+          V:PartialEq{
+    fn eq(&self, other: &Self) -> bool {
+        return self.inner.eq(&other.inner);
+    }
+}
+
+impl<'a, K, V> VecMap<K, V> where K: Ord+Hash {
     pub fn new() -> VecMap<K, V> {
         Self {
             inner: vec![],
-            hash_map: BTreeMap::new(),
+            index: HashMap::new(),
             change_factor: 20,
-            r#type: VecMapType::vec,
+            mode: VecMapMode::Vec,
         }
     }
 
@@ -38,58 +47,44 @@ impl<'a, K, V> VecMap<K, V> where K: Ord {
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             inner: Vec::with_capacity(capacity),
-            hash_map: Default::default(),
+            index: Default::default(),
             change_factor: 20,
-            r#type: VecMapType::vec,
+            mode: VecMapMode::Vec,
         }
     }
 
     pub fn insert(&mut self, key: K, value: V)
         where
-            K: Ord, {
-        match self.r#type {
-            VecMapType::vec => {
-                for (k, v) in &mut self.inner {
-                    if *k == key {
-                        *v = Some(value);
-                        return;
-                    }
-                }
-                self.inner.push((key, Some(value)));
-                if self.inner.len() > self.change_factor {
-                    self.r#type = VecMapType::hash_map;
-                    for i in 0..self.inner.len() {
-                        let (k, v) = self.inner.remove(i);
-                        if v.is_some() {
-                            self.hash_map.insert(k, v.unwrap());
-                        }
-                    }
-                }
+            K: Ord+Clone, {
+        for (k, v) in &mut self.inner {
+            if *k == key {
+                *v = Some(value);
+                return;
             }
-            VecMapType::hash_map => {
-                self.hash_map.insert(key, value);
-            }
+        }
+        self.inner.push((key.clone(), Some(value)));
+        self.index.insert(key, self.inner.len() - 1);
+        if self.len() > self.change_factor {
+            self.mode = VecMapMode::Index;
         }
     }
 
     pub fn remove(&mut self, key: K) -> Option<V>
         where
             K: Ord, {
-        match self.r#type {
-            VecMapType::vec => {
-                let mut index = 0;
-                for (k, v) in &mut self.inner {
-                    if *k == key {
-                        return self.inner.remove(index).1;
-                    }
-                    index += 1;
+        let mut index = 0;
+        for (k, v) in &mut self.inner {
+            if *k == key {
+                let removed = self.inner.remove(index).1;
+                self.index.remove(key.borrow());
+                if self.len() <= self.change_factor {
+                    self.mode = VecMapMode::Vec;
                 }
-                return None;
+                return removed;
             }
-            VecMapType::hash_map => {
-                return self.hash_map.remove(&key);
-            }
+            index += 1;
         }
+        return None;
     }
 
     /// Returns the number of elements in the map.
@@ -120,9 +115,22 @@ impl<'a, K, V> VecMap<K, V> where K: Ord {
             K: Borrow<Q>,
             Q: Hash + Eq,
     {
-        for (k, v) in &self.inner {
-            if k.borrow().eq(key) {
-                return v.into();
+        match self.mode {
+            VecMapMode::Vec => {
+                for (k, v) in &self.inner {
+                    if k.borrow().eq(key) {
+                        return v.into();
+                    }
+                }
+            }
+            VecMapMode::Index => {
+                let idx = self.index.get(key);
+                match idx {
+                    Some(idx) => {
+                        return Option::<&V>::from(&self.inner[*idx].1);
+                    }
+                    _ => {}
+                }
             }
         }
         return None;
@@ -134,66 +142,37 @@ impl<'a, K, V> VecMap<K, V> where K: Ord {
             K: Borrow<Q>,
             Q: Hash + Eq,
     {
-        let mut index = 0;
-        for (k, v) in &self.inner {
-            if k.borrow().eq(key) {
-                return match self.inner.get_mut(index) {
-                    None => { None }
-                    Some((_, result_v)) => {
-                        match result_v {
-                            None => {
-                                None
+        match self.mode {
+            VecMapMode::Vec => {
+                let mut index = 0;
+                for (k, v) in &self.inner {
+                    if k.borrow().eq(key) {
+                        return match self.inner.get_mut(index) {
+                            None => { None }
+                            Some((_, result_v)) => {
+                                match result_v {
+                                    None => {
+                                        None
+                                    }
+                                    Some(v) => {
+                                        Some(v)
+                                    }
+                                }
                             }
-                            Some(v) => {
-                                Some(v)
-                            }
-                        }
+                        };
                     }
-                };
+                    index += 1;
+                }
             }
-            index += 1;
-        }
-        return None;
-    }
-
-    #[inline]
-    pub async fn get_async<Q: ?Sized>(&self, key: &Q) -> Option<&V>
-        where
-            K: Borrow<Q>,
-            Q: Hash + Eq,
-    {
-        for (k, v) in &self.inner {
-            if k.borrow().eq(key) {
-                return v.into();
-            }
-        }
-        return None;
-    }
-
-    #[inline]
-    pub async fn get_mut_async<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut V>
-        where
-            K: Borrow<Q>,
-            Q: Hash + Eq,
-    {
-        let mut index = 0;
-        for (k, v) in &self.inner {
-            if k.borrow().eq(key) {
-                return match self.inner.get_mut(index) {
-                    None => { None }
-                    Some((_, result_v)) => {
-                        match result_v {
-                            None => {
-                                None
-                            }
-                            Some(v) => {
-                                Some(v)
-                            }
-                        }
+            VecMapMode::Index => {
+                let idx = self.index.get(key);
+                match idx {
+                    Some(idx) => {
+                        return Option::<&mut V>::from(&mut self.inner[*idx].1);
                     }
-                };
+                    _ => {}
+                }
             }
-            index += 1;
         }
         return None;
     }
