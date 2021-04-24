@@ -1,6 +1,9 @@
 use serde::{Serializer, Deserializer};
 use std::fmt::{Debug, Formatter};
 use std::cmp::Ordering;
+use crate::value::JsonValue;
+use crate::vec_map::VecMap;
+use serde_json::Number;
 
 
 /// convert serde_json::Value to Value
@@ -177,5 +180,224 @@ impl<'de> serde::Deserialize<'de> for Value {
                 return Err(e);
             }
         }
+    }
+}
+
+
+
+impl JsonValue{
+    pub fn as_i64(&self) -> Option<i64> {
+        return match &self {
+            JsonValue::Number(n) => {
+                n.as_i64()
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_f64(&self) -> Option<f64> {
+        return match &self {
+            JsonValue::Number(n) => {
+                n.as_f64()
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_u64(&self) -> Option<u64> {
+        return match &self {
+            JsonValue::Number(n) => {
+                n.as_u64()
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_str(&self) -> Option<&str> {
+        return match &self {
+            JsonValue::String(n) => {
+                Some(n.as_str())
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_bool(&self) -> Option<bool> {
+        return match &self {
+            JsonValue::Bool(n) => {
+                Some(*n)
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_null(&self) -> Option<()> {
+        return match &self {
+            JsonValue::Null => {
+               return Some(());
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_object(&self) -> Option<&VecMap<String, JsonValue>> {
+        return match &self {
+            JsonValue::Object(n) => {
+               Some(n)
+            }
+            _ => {
+                None
+            }
+        }
+    }
+    pub fn as_array(&self) -> Option<&Vec<JsonValue>> {
+        return match &self {
+            JsonValue::Array(n) => {
+                Some(n)
+            }
+            _ => {
+                None
+            }
+        }
+    }
+
+
+    pub fn is_null(&self) -> bool {
+        return match &self {
+            JsonValue::Null=> {
+                true
+            }
+            _ => {
+               false
+            }
+        }
+    }
+    pub fn is_string(&self) -> bool {
+        return match &self {
+            JsonValue::String(_)=> {
+                true
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_f64(&self) -> bool {
+        return match &self {
+            JsonValue::Number(n)=> {
+                n.is_f64()
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_i64(&self) -> bool {
+        return match &self {
+            JsonValue::Number(n)=> {
+                n.is_i64()
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_u64(&self) -> bool {
+        return match &self {
+            JsonValue::Number(n)=> {
+                n.is_u64()
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_bool(&self) -> bool {
+        return match &self {
+            JsonValue::Bool(_)=> {
+               true
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_object(&self) -> bool {
+        return match &self {
+            JsonValue::Object(_)=> {
+                true
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_array(&self) -> bool {
+        return match &self {
+            JsonValue::Array(_)=> {
+                true
+            }
+            _ => {
+                false
+            }
+        }
+    }
+    pub fn is_empty(&self) -> bool {
+        return match &self {
+            JsonValue::Null => {
+                true
+            }
+            JsonValue::Bool(_) => {
+                false
+            }
+            JsonValue::Number(_) => {
+                false
+            }
+            JsonValue::String(s) => {
+                s.is_empty()
+            }
+            JsonValue::Array(arr) => {
+                arr.is_empty()
+            }
+            JsonValue::Object(m) => {
+                m.is_empty()
+            }
+        };
+    }
+}
+
+impl From<serde_json::Number> for JsonValue{
+    fn from(arg: serde_json::Number) -> Self {
+        JsonValue::Number(arg)
+    }
+}
+
+impl From<&serde_json::Number> for JsonValue{
+    fn from(arg: &serde_json::Number) -> Self {
+        JsonValue::Number(arg.clone())
+    }
+}
+
+impl From<String> for JsonValue{
+    fn from(arg: String) -> Self {
+        JsonValue::String(arg)
+    }
+}
+
+impl From<&String> for JsonValue{
+    fn from(arg: &String) -> Self {
+        JsonValue::String(arg.to_owned())
+    }
+}
+
+impl From<&str> for JsonValue{
+    fn from(arg: &str) -> Self {
+        JsonValue::String(arg.to_string())
     }
 }

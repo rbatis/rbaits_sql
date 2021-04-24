@@ -356,3 +356,57 @@ impl<'de> Deserialize<'de> for JsonValue {
         deserializer.deserialize_any(ValueVisitor)
     }
 }
+
+impl Index<&str> for JsonValue{
+    type Output = JsonValue;
+
+    fn index(&self, index: &str) -> &Self::Output {
+        match &self{
+            JsonValue::Null => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Bool(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Number(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::String(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Array(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Object(obj) => {
+                return &obj[index];
+            }
+        }
+    }
+}
+
+impl Index<usize> for JsonValue{
+    type Output = JsonValue;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match &self{
+            JsonValue::Null => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Bool(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Number(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::String(_) => {
+                return &JsonValue::Null;
+            }
+            JsonValue::Array(arr) => {
+                return &arr[index];
+            }
+            JsonValue::Object(obj) => {
+                return &JsonValue::Null;
+            }
+        }
+    }
+}

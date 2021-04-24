@@ -14,8 +14,8 @@ use serde_json::json;
 use xmlsql::value::JsonValue;
 use std::sync::Arc;
 
-#[expr("a+b*(e[0]+b)/2")]
-pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
+#[expr("c+'f'")]
+pub fn gen(arg: &JsonValue) -> JsonValue {}
 
 
 fn main() {
@@ -28,13 +28,9 @@ fn main() {
         "f":[{"field":1}],
         "g":true
     });
-    let v = gen(&arg);
-    println!("{}", v);
 
-    let v = JsonValue::from(arg);
-    println!("{:?}", v);
-
-    let s = v.to_string();
+    let jv=JsonValue::from(arg);
+    let s = gen(&jv);
     println!("json:{}", s);
 }
 
@@ -79,7 +75,7 @@ mod test {
         macro_rules! call {
             ($func_name:ident,$s:expr,$value:expr) => {
                 #[expr($s)]
-                pub fn $func_name(arg: &serde_json::Value) -> serde_json::Value {}
+                pub fn $func_name(arg: &JsonValue) -> JsonValue {}
                      assert_eq!($func_name(&arg), $value);
                 };
         }
