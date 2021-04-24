@@ -1,5 +1,5 @@
 use serde_json::{Number, Value};
-use std::collections::HashMap;
+use crate::vec_map::VecMap;
 use serde::{Serialize, Serializer, Deserialize, Deserializer, de};
 use std::fmt::Debug;
 use serde::de::{Visitor, SeqAccess, MapAccess, DeserializeSeed};
@@ -69,7 +69,7 @@ pub enum JsonValue {
     /// #
     /// let v = json!({ "an": "object" });
     /// ```
-    Object(HashMap<String, JsonValue>),
+    Object(VecMap<String, JsonValue>),
 }
 
 impl Debug for JsonValue {
@@ -170,7 +170,7 @@ impl From<serde_json::Value> for JsonValue {
                 JsonValue::Array(array)
             }
             Value::Object(obj) => {
-                let mut map = HashMap::with_capacity(obj.len());
+                let mut map = VecMap::with_capacity(obj.len());
                 for (k, v) in obj {
                     map.insert(k, JsonValue::from(v));
                 }
@@ -341,14 +341,14 @@ impl<'de> Deserialize<'de> for JsonValue {
                     //     crate::from_str(value.get()).map_err(de::Error::custom)
                     // }
                     Some(KeyClass::Map(first_key)) => {
-                        let mut values = HashMap::<String, JsonValue>::new();
+                        let mut values = VecMap::<String, JsonValue>::new();
                         values.insert(first_key, visitor.next_value()?);
                         while let Some((key, value)) = visitor.next_entry()? {
                             values.insert(key, value);
                         }
                         Ok(JsonValue::Object(values))
                     }
-                    None => Ok(JsonValue::Object(HashMap::new())),
+                    None => Ok(JsonValue::Object(VecMap::new())),
                 }
             }
         }

@@ -21,6 +21,7 @@ pub mod ops_bit_or;
 pub mod from_bool;
 
 pub mod value;
+pub mod vec_map;
 
 #[macro_use]
 extern crate xmlsql_macro;
