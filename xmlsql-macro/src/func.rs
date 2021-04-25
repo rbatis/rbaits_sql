@@ -98,7 +98,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                 return syn::parse_str::<Expr>("&serde_json::Value::Null.into_proxy()").unwrap();
             }
             //println!("Path:{}", b.to_token_stream());
-            return syn::parse_str::<Expr>(&format!("&arg[\"{}\"]", b.to_token_stream().to_string().trim())).unwrap();
+            return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy()", b.to_token_stream().to_string().trim())).unwrap();
         }
         Expr::MethodCall(mut b) => {
             let ex = *(b.receiver.clone());
@@ -137,9 +137,9 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
         }
         Expr::Unary(mut b) => {
             b.expr = Box::new(convert_to_arg_access(*b.expr.clone()));
-            // if b.op.to_token_stream().to_string().trim() == "-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy()") {
-            //     return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
-            // }
+            if b.op.to_token_stream().to_string().trim() == "-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy()") {
+                return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
+            }
             return Expr::Unary(b);
         }
         Expr::Paren(mut b) => {
@@ -181,7 +181,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
                             }
                         }
                     }
-                    syn::parse_str::<Expr>(&format!("&arg{}", token)).unwrap()
+                    syn::parse_str::<Expr>(&format!("&arg{}.as_proxy()", token)).unwrap()
                 }
                 Member::Unnamed(unamed) => {
                     Expr::Field(b)
@@ -198,7 +198,7 @@ fn convert_to_arg_access(arg: Expr) -> Expr {
             let result = Expr::Index(b);
             //return result;
             //remove inner . as_proxy(),keep  out . as_proxy()
-            return syn::parse_str::<Expr>(&format!("{}", result.to_token_stream().to_string())).unwrap();
+            return syn::parse_str::<Expr>(&format!("{}.as_proxy()", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
         }
         Expr::Lit(mut b) => {
             match b.lit.clone() {
