@@ -16,7 +16,7 @@
         <result column="status" langType="status"/>
         <result column="version" langType="int"
                 version_enable="true"/>
-        <result column="create_time" langType="time.Time"/>
+        <result column="create_time" langType="string"/>
         <result column="delete_flag" langType="int"
                 logic_enable="true"
                 logic_undelete="1"
