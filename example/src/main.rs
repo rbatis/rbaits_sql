@@ -13,8 +13,8 @@ use serde_json::json;
 use std::sync::Arc;
 
 
-// #[xml("s")]
-// pub fn xml(arg: &serde_json::Value) -> serde_json::Value {}
+#[xml("s")]
+pub fn xml(arg: &serde_json::Value) -> serde_json::Value {}
 
 
 

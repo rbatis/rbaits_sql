@@ -2,43 +2,43 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
-    <!--logic_enable 逻辑删除字段-->
-    <!--logic_deleted 逻辑删除已删除字段-->
-    <!--logic_undelete 逻辑删除 未删除字段-->
-    <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
-    <resultMap id="BaseResultMap" tables="biz_activity">
-        <id column="id" langType="string"/>
-        <result column="name" langType="string"/>
-        <result column="pc_link" langType="string"/>
-        <result column="h5_link" langType="string"/>
-        <result column="remark" langType="string"/>
-        <result column="sort" langType="int"/>
-        <result column="status" langType="status"/>
-        <result column="version" langType="int"
-                version_enable="true"/>
-        <result column="create_time" langType="string"/>
-        <result column="delete_flag" langType="int"
-                logic_enable="true"
-                logic_undelete="1"
-                logic_deleted="0"/>
-    </resultMap>
+<!--    &lt;!&ndash;logic_enable 逻辑删除字段&ndash;&gt;-->
+<!--    &lt;!&ndash;logic_deleted 逻辑删除已删除字段&ndash;&gt;-->
+<!--    &lt;!&ndash;logic_undelete 逻辑删除 未删除字段&ndash;&gt;-->
+<!--    &lt;!&ndash;version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64&ndash;&gt;-->
+<!--    <resultMap id="BaseResultMap" tables="biz_activity">-->
+<!--        <id column="id" langType="string"/>-->
+<!--        <result column="name" langType="string"/>-->
+<!--        <result column="pc_link" langType="string"/>-->
+<!--        <result column="h5_link" langType="string"/>-->
+<!--        <result column="remark" langType="string"/>-->
+<!--        <result column="sort" langType="int"/>-->
+<!--        <result column="status" langType="status"/>-->
+<!--        <result column="version" langType="int"-->
+<!--                version_enable="true"/>-->
+<!--        <result column="create_time" langType="string"/>-->
+<!--        <result column="delete_flag" langType="int"-->
+<!--                logic_enable="true"-->
+<!--                logic_undelete="1"-->
+<!--                logic_deleted="0"/>-->
+<!--    </resultMap>-->
 
-    <!--模板标签: columns wheres sets 支持逗号,分隔表达式，*?* 为判空表达式-->
+<!--    &lt;!&ndash;模板标签: columns wheres sets 支持逗号,分隔表达式，*?* 为判空表达式&ndash;&gt;-->
 
-    <!--插入模板:默认id="insertTemplate,test="field != null",where自动设置逻辑删除字段,支持批量插入" -->
-    <insertTemplate/>
-    <!--查询模板:默认id="selectTemplate,where自动设置逻辑删除字段-->
-    <selectTemplate wheres="name?name = #{name}"/>
-    <!--更新模板:默认id="updateTemplate,set自动设置乐观锁版本号-->
-    <updateTemplate sets="name?name = #{name},remark?remark=#{remark}" wheres="id?id = #{id}"/>
-    <!--删除模板:默认id="deleteTemplate,where自动设置逻辑删除字段-->
-    <deleteTemplate wheres="name?name = #{name}"/>
+<!--    &lt;!&ndash;插入模板:默认id="insertTemplate,test="field != null",where自动设置逻辑删除字段,支持批量插入" &ndash;&gt;-->
+<!--    <insertTemplate/>-->
+<!--    &lt;!&ndash;查询模板:默认id="selectTemplate,where自动设置逻辑删除字段&ndash;&gt;-->
+<!--    <selectTemplate wheres="name?name = #{name}"/>-->
+<!--    &lt;!&ndash;更新模板:默认id="updateTemplate,set自动设置乐观锁版本号&ndash;&gt;-->
+<!--    <updateTemplate sets="name?name = #{name},remark?remark=#{remark}" wheres="id?id = #{id}"/>-->
+<!--    &lt;!&ndash;删除模板:默认id="deleteTemplate,where自动设置逻辑删除字段&ndash;&gt;-->
+<!--    <deleteTemplate wheres="name?name = #{name}"/>-->
 
 
-    <!--批量插入例子: 因为上面已经有id="insertTemplate" 需要指定id -->
-    <insertTemplate id="InsertTemplateBatch"/>
-    <!--统计模板例子:-->
-    <selectTemplate id="selectCountTemplate" columns="count(*)" wheres="name?name = #{name}"/>
+<!--    &lt;!&ndash;批量插入例子: 因为上面已经有id="insertTemplate" 需要指定id &ndash;&gt;-->
+<!--    <insertTemplate id="InsertTemplateBatch"/>-->
+<!--    &lt;!&ndash;统计模板例子:&ndash;&gt;-->
+<!--    <selectTemplate id="selectCountTemplate" columns="count(*)" wheres="name?name = #{name}"/>-->
 
 
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
@@ -56,110 +56,110 @@
         order by create_time desc
         <if test="page != null and size != null">limit #{page}, #{size}</if>
     </select>
-    <!--int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);-->
-    <select id="countByCondition">
-        select count(id) from biz_activity where delete_flag=1
-        <if test="name != nil">
-            and name like concat('%',#{name},'%')
-        </if>
-        <if test="startTime != nil">
-            and create_time >= #{startTime}
-        </if>
-        <if test="endTime != nil">
-            and create_time &lt;= #{endTime}
-        </if>
-    </select>
-    <!--List<Activity> selectAll();-->
-    <select id="selectAll">
-        select * from biz_activity where delete_flag=1 order by create_time desc
-    </select>
-    <!--Activity selectByUUID(@Param("uuid")String uuid);-->
-    <select id="selectByUUID">
-        select * from biz_activity
-        where uuid = #{uuid}
-          and delete_flag = 1
-    </select>
-    <select id="selectById">
-        select * from biz_activity
-        where id = #{id}
-          and delete_flag = 1
-    </select>
-    <select id="selectByIds">
-        select * from biz_activity
-        where delete_flag = 1
-        <foreach separator="," collection="ids" item="item" index="index" open=" and id in (" close=")">
-            #{item}
-        </foreach>
-    </select>
-    <select id="selectByIdMaps">
-        select * from biz_activity
-        where delete_flag = 1
-        <foreach separator="," collection="ids" item="item" index="index" open=" and id in (" close=")">
-            #{item}
-        </foreach>
-        <foreach separator="," collection="ids" item="item" index="index" open=" and delete_flag in (" close=")">
-            #{index}
-        </foreach>
-    </select>
-    <update id="deleteById">
-        update biz_activity
-        set delete_flag = 0
-        where id = #{id}
-    </update>
-    <update id="updateById">
-        update biz_activity
-        <set>
-            <if test="name != nil">name = #{name},</if>
-            <if test="pc_link != nil">pc_link = #{pc_link},</if>
-            <if test="h5_link != nil">h5_link = #{h5_link},</if>
-            <if test="remark != nil">remark = #{remark},</if>
-            <if test="create_time != nil">create_time = #{create_time},</if>
-            <if test="delete_flag != nil ">delete_flag = #{delete_flag},</if>
-        </set>
-        where id = #{id} and delete_flag = 1
-    </update>
-    <insert id="insert">
-        insert into biz_activity
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != nil">id,</if>
-            <if test="name != nil">name,</if>
-            <if test="pc_link != nil">pc_link,</if>
-            <if test="h5_link != nil">h5_link,</if>
-            <if test="remark != nil">remark,</if>
-            <if test="create_time != nil">create_time,</if>
-            <if test="delete_flag != nil">delete_flag,</if>
-        </trim>
+<!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->
+<!--    <select id="countByCondition">-->
+<!--        select count(id) from biz_activity where delete_flag=1-->
+<!--        <if test="name != nil">-->
+<!--            and name like concat('%',#{name},'%')-->
+<!--        </if>-->
+<!--        <if test="startTime != nil">-->
+<!--            and create_time >= #{startTime}-->
+<!--        </if>-->
+<!--        <if test="endTime != nil">-->
+<!--            and create_time &lt;= #{endTime}-->
+<!--        </if>-->
+<!--    </select>-->
+<!--    &lt;!&ndash;List<Activity> selectAll();&ndash;&gt;-->
+<!--    <select id="selectAll">-->
+<!--        select * from biz_activity where delete_flag=1 order by create_time desc-->
+<!--    </select>-->
+<!--    &lt;!&ndash;Activity selectByUUID(@Param("uuid")String uuid);&ndash;&gt;-->
+<!--    <select id="selectByUUID">-->
+<!--        select * from biz_activity-->
+<!--        where uuid = #{uuid}-->
+<!--          and delete_flag = 1-->
+<!--    </select>-->
+<!--    <select id="selectById">-->
+<!--        select * from biz_activity-->
+<!--        where id = #{id}-->
+<!--          and delete_flag = 1-->
+<!--    </select>-->
+<!--    <select id="selectByIds">-->
+<!--        select * from biz_activity-->
+<!--        where delete_flag = 1-->
+<!--        <foreach separator="," collection="ids" item="item" index="index" open=" and id in (" close=")">-->
+<!--            #{item}-->
+<!--        </foreach>-->
+<!--    </select>-->
+<!--    <select id="selectByIdMaps">-->
+<!--        select * from biz_activity-->
+<!--        where delete_flag = 1-->
+<!--        <foreach separator="," collection="ids" item="item" index="index" open=" and id in (" close=")">-->
+<!--            #{item}-->
+<!--        </foreach>-->
+<!--        <foreach separator="," collection="ids" item="item" index="index" open=" and delete_flag in (" close=")">-->
+<!--            #{index}-->
+<!--        </foreach>-->
+<!--    </select>-->
+<!--    <update id="deleteById">-->
+<!--        update biz_activity-->
+<!--        set delete_flag = 0-->
+<!--        where id = #{id}-->
+<!--    </update>-->
+<!--    <update id="updateById">-->
+<!--        update biz_activity-->
+<!--        <set>-->
+<!--            <if test="name != nil">name = #{name},</if>-->
+<!--            <if test="pc_link != nil">pc_link = #{pc_link},</if>-->
+<!--            <if test="h5_link != nil">h5_link = #{h5_link},</if>-->
+<!--            <if test="remark != nil">remark = #{remark},</if>-->
+<!--            <if test="create_time != nil">create_time = #{create_time},</if>-->
+<!--            <if test="delete_flag != nil ">delete_flag = #{delete_flag},</if>-->
+<!--        </set>-->
+<!--        where id = #{id} and delete_flag = 1-->
+<!--    </update>-->
+<!--    <insert id="insert">-->
+<!--        insert into biz_activity-->
+<!--        <trim prefix="(" suffix=")" suffixOverrides=",">-->
+<!--            <if test="id != nil">id,</if>-->
+<!--            <if test="name != nil">name,</if>-->
+<!--            <if test="pc_link != nil">pc_link,</if>-->
+<!--            <if test="h5_link != nil">h5_link,</if>-->
+<!--            <if test="remark != nil">remark,</if>-->
+<!--            <if test="create_time != nil">create_time,</if>-->
+<!--            <if test="delete_flag != nil">delete_flag,</if>-->
+<!--        </trim>-->
 
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != nil">#{id},</if>
-            <if test="name != nil">#{name},</if>
-            <if test="pc_link != nil">#{pc_link},</if>
-            <if test="h5_link != nil">#{h5_link},</if>
-            <if test="remark != nil">#{remark},</if>
-            <if test="create_time != nil">#{create_time},</if>
-            <if test="delete_flag != nil">#{delete_flag},</if>
-        </trim>
-    </insert>
+<!--        <trim prefix="values (" suffix=")" suffixOverrides=",">-->
+<!--            <if test="id != nil">#{id},</if>-->
+<!--            <if test="name != nil">#{name},</if>-->
+<!--            <if test="pc_link != nil">#{pc_link},</if>-->
+<!--            <if test="h5_link != nil">#{h5_link},</if>-->
+<!--            <if test="remark != nil">#{remark},</if>-->
+<!--            <if test="create_time != nil">#{create_time},</if>-->
+<!--            <if test="delete_flag != nil">#{delete_flag},</if>-->
+<!--        </trim>-->
+<!--    </insert>-->
 
-    <select id="choose" resultMap="BaseResultMap">
-        SELECT * FROM biz_activity
-        <choose>
-            <when test="deleteFlag > 1">WHERE delete_flag > 1</when>
-            <when test="deleteFlag == 1">WHERE delete_flag = 1</when>
-            <otherwise>WHERE delete_flag = #{deleteFlag}</otherwise>
-        </choose>
-    </select>
+<!--    <select id="choose" resultMap="BaseResultMap">-->
+<!--        SELECT * FROM biz_activity-->
+<!--        <choose>-->
+<!--            <when test="deleteFlag > 1">WHERE delete_flag > 1</when>-->
+<!--            <when test="deleteFlag == 1">WHERE delete_flag = 1</when>-->
+<!--            <otherwise>WHERE delete_flag = #{deleteFlag}</otherwise>-->
+<!--        </choose>-->
+<!--    </select>-->
 
-    <sql id="links">
-        pc_link,h5_link
-        <!--不启用TypeConvert的话，使用${} 而不是 #{}-->
-        <if test="column != nil">,${column}</if>
-    </sql>
+<!--    <sql id="links">-->
+<!--        pc_link,h5_link-->
+<!--        &lt;!&ndash;不启用TypeConvert的话，使用${} 而不是 #{}&ndash;&gt;-->
+<!--        <if test="column != nil">,${column}</if>-->
+<!--    </sql>-->
 
-    <select id="selectLinks">
-        select
-        <include refid="links"/>
-        from biz_activity where delete_flag = 1
-    </select>
+<!--    <select id="selectLinks">-->
+<!--        select-->
+<!--        <include refid="links"/>-->
+<!--        from biz_activity where delete_flag = 1-->
+<!--    </select>-->
 </mapper>
 
