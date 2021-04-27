@@ -94,7 +94,7 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
 #[test]
 fn test_load_file() {
     // --snip--
-    let file_path = "./src/example/Example_ActivityMapper.xml";
+    let file_path = "example/example.xml";
     println!(">>>>>>>>>>>>>>>>>>>>>>start load {} >>>>>>>>>>>>>>>>>>>>>>>", file_path);
     let content = fs::read_to_string(file_path).unwrap();
     println!("With text:/n{}", content);
