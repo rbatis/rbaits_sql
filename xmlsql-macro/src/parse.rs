@@ -67,8 +67,7 @@ fn parse(arg: &str) -> TokenStream {
                             let method_name = Ident::new(&method_name, Span::call_site());
                             let test_value=test_value.replace(" and "," && ");
                             let test_value=test_value.replace(" or "," && ");
-                            let ex= crate::func::impl_fn(&method_name.to_string(),&format!("\"{}\"",test_value));
-                            let method_impl = quote!(fn #method_name(arg:&serde_json::Value)->bool { #ex });
+                            let method_impl= crate::func::impl_fn(&method_name.to_string(),&format!("\"{}\"",test_value));
                             methods = quote!{
                                 #methods
                                 #method_impl

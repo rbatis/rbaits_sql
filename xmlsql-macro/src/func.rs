@@ -269,10 +269,13 @@ pub(crate) fn impl_fn(func_name_ident: &str, args: &str) -> proc_macro2::TokenSt
 
     //println!("[rexpr]gen expr: {}", t.to_token_stream());
     let func_name_ident = Ident::new(&func_name_ident.to_string(),Span::call_site());
-    return quote!(pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
-                     use xmlsql::ops::AsProxy;
-                     let result={#t};
-                     return serde_json::json!(result);
-                  })
+
+    return quote! {
+        pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
+           use xmlsql::ops::AsProxy;
+           let result={#t};
+           return serde_json::json!(result);
+        }
+    }
         .to_token_stream();
 }
