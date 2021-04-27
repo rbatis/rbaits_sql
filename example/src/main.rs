@@ -18,8 +18,8 @@ pub fn xml(arg: &serde_json::Value) -> serde_json::Value {}
 
 
 
-#[expr("a+b*(e[0]+b)/2")]
-pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
+// #[expr("a+b*(e[0]+b)/2")]
+// pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
 
 fn main() {
@@ -45,7 +45,6 @@ mod test {
     #[macro_use]
     use xmlsql;
     use xmlsql::ops::AsProxy;
-    use crate::gen;
 
     #[test]
     fn test_node_run() {
@@ -115,6 +114,9 @@ mod test {
         call!(fn50,"nil <= a", json!(true));
         call!(fn51,"a == 1 && g", json!(true));
     }
+
+    #[expr("a+b*(e[0]+b)/2")]
+    pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
     #[test]
     fn bench() {

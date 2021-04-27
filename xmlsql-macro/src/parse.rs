@@ -66,12 +66,14 @@ fn parse(arg: &str) -> TokenStream {
                             }
                         }
 
-                        let mut body = quote!(fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                        let mut body = quote!{
+                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut  sql=String::new();
                                let mut args=vec![];
                                #body
                                return (sql,args)
-                        } );
+                            }
+                        };
                         fn_impl=quote! {
                             #fn_impl
                             #body
