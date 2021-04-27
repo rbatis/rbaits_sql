@@ -4,6 +4,7 @@ use syn;
 use syn::{BinOp, Expr, ItemFn, Lit, Member};
 
 use crate::proc_macro::TokenStream;
+use proc_macro2::{Ident, Span};
 
 // fn is_name_char(arg: char) -> bool {
 //     match arg {
@@ -32,60 +33,6 @@ fn is_param_char(arg: char) -> bool {
     return false;
 }
 
-pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> TokenStream {
-    let mut string_data = args.to_string();
-    string_data = string_data[1..string_data.len() - 1].to_string();
-    #[cfg(feature = "debug_mode")]
-        {
-            println!("[rexpr]expr: {}", string_data);
-        }
-    string_data = string_data.replace(".string()", ".to_string()");
-    //convert string define
-    let mut last_char = '_';
-    let mut string_data_new = String::new();
-    for x in string_data.chars() {
-        if x == '\'' && last_char != '\\' {
-            string_data_new.push('\"');
-        } else {
-            string_data_new.push(x);
-        }
-        last_char = x;
-    }
-    string_data = string_data_new;
-
-
-    let t = syn::parse_str::<Expr>(&string_data);
-    if t.is_err() {
-        panic!("[rexpr]syn::parse_str fail for: {}", t.err().unwrap().to_string())
-    } else {
-        //println!("[rexpr]parse expr:{} success!", string_data);
-    }
-    let mut t = t.unwrap();
-    t = convert_to_arg_access(t);
-    string_data = t.to_token_stream().to_string();
-    string_data = string_data.replace(" . ", ".");
-
-    //let s = syn::parse_str::<syn::LitStr>(&string_data).unwrap();
-    let t = syn::parse_str::<Expr>(&string_data);
-    if t.is_err() {
-        panic!("[rexpr]syn::parse_str fail for: {}", t.err().unwrap().to_string())
-    } else {
-        //println!("[rexpr]parse expr:{} success!", string_data);
-    }
-    let t = t.unwrap();
-    //t = convert_to_arg_access(t);
-
-    //println!("[rexpr]gen expr: {}", t.to_token_stream());
-    let func_args = f.sig.inputs.to_token_stream();
-    let func_name_ident = f.sig.ident.to_token_stream();
-    let return_ty = f.sig.output.to_token_stream();
-    return quote!(pub fn #func_name_ident(#func_args) -> serde_json::Value {
-                     use xmlsql::ops::AsProxy;
-                     let result={#t};
-                     return serde_json::json!(result);
-                  })
-        .to_token_stream().into();
-}
 
 fn convert_to_arg_access(arg: Expr) -> Expr {
     // println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
@@ -274,4 +221,58 @@ fn expr_type(expr: Expr) -> String {
         Expr::Yield(_) => { format!("Yield") }
         Expr::__TestExhaustive(_) => { format!("__TestExhaustive") }
     }
+}
+
+
+pub(crate) fn impl_fn(func_name_ident: &str, args: &str) -> proc_macro2::TokenStream {
+    let mut string_data = args.to_string();
+    string_data = string_data[1..string_data.len() - 1].to_string();
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("[rexpr]expr: {}", string_data);
+        }
+    string_data = string_data.replace(".string()", ".to_string()");
+    //convert string define
+    let mut last_char = '_';
+    let mut string_data_new = String::new();
+    for x in string_data.chars() {
+        if x == '\'' && last_char != '\\' {
+            string_data_new.push('\"');
+        } else {
+            string_data_new.push(x);
+        }
+        last_char = x;
+    }
+    string_data = string_data_new;
+
+
+    let t = syn::parse_str::<Expr>(&string_data);
+    if t.is_err() {
+        panic!("[rexpr]syn::parse_str: {} fail for: {}",string_data, t.err().unwrap().to_string())
+    } else {
+        //println!("[rexpr]parse expr:{} success!", string_data);
+    }
+    let mut t = t.unwrap();
+    t = convert_to_arg_access(t);
+    string_data = t.to_token_stream().to_string();
+    string_data = string_data.replace(" . ", ".");
+
+    //let s = syn::parse_str::<syn::LitStr>(&string_data).unwrap();
+    let t = syn::parse_str::<Expr>(&string_data);
+    if t.is_err() {
+        panic!("[rexpr]syn::parse_str: {} fail for: {}",string_data, t.err().unwrap().to_string())
+    } else {
+        //println!("[rexpr]parse expr:{} success!", string_data);
+    }
+    let t = t.unwrap();
+    //t = convert_to_arg_access(t);
+
+    //println!("[rexpr]gen expr: {}", t.to_token_stream());
+    let func_name_ident = Ident::new(&func_name_ident.to_string(),Span::call_site());
+    return quote!(pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
+                     use xmlsql::ops::AsProxy;
+                     let result={#t};
+                     return serde_json::json!(result);
+                  })
+        .to_token_stream();
 }

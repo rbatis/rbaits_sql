@@ -24,4 +24,4 @@ pub mod from_bool;
 #[macro_use]
 extern crate xmlsql_macro;
 
-pub use xmlsql_macro::{expr};
+pub use xmlsql_macro::{expr,xml};

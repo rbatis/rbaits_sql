@@ -29,4 +29,4 @@ serde_json = { version = "1"}
 dashmap = { version = "4" }
 
 xmlsql-macro={version="0.1.0",path="xmlsql-macro"}
-base64 = "0.13.0"
+base64 = "0.13"

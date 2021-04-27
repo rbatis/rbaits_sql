@@ -2,8 +2,6 @@ use xml::EventReader;
 use xml::reader::XmlEvent;
 use base64::{encode, decode};
 
-fn ZW5kVGltZSAhPSBuaWw_() -> bool { true }
-
 /// gen rust code
 fn parse(arg: &str) {
     let mut methods = "".to_string();
