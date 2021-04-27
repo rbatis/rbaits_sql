@@ -17,6 +17,15 @@ use std::collections::HashMap;
 //     return Ok((sql, args));
 // }
 
+#[derive(Debug)]
+struct Tag {
+    pub t: String,
+    pub attrs: HashMap<String, String>,
+    pub data: String,
+    pub childs: Vec<Tag>,
+}
+
+
 /// gen rust code
 fn parse(arg: &str) -> TokenStream {
     let mut file = File::open("example/example.xml").unwrap();
