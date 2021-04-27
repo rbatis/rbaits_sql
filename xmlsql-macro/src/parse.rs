@@ -26,6 +26,68 @@ struct Tag {
 }
 
 
+
+// fn load_xml(arg:EventReader<&[u8]>) -> Tag{
+//     let mut tag =Tag{
+//         t: "".to_string(),
+//         attrs: Default::default(),
+//         data: "".to_string(),
+//         childs: vec![]
+//     };
+//     for e in arg {
+//         match e{
+//             Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
+//                 let mut attr_map = HashMap::new();
+//                 for attr in &attributes {
+//                     attr_map.insert(attr.name.to_string(), attr.value.clone());
+//                 }
+//                 if depth==0{
+//                     tag.t=name.local_name.to_string();
+//                     tag.attrs=attr_map;
+//                 }
+//                 depth += 1;
+//             }
+//             Ok(XmlEvent::EndElement { name }) => {
+//                 depth -= 1;
+//             }
+//             Err(e) => {
+//                 break;
+//             }
+//             Ok(XmlEvent::Characters(s)) => {
+//                 let s = s.trim();
+//                 tag.childs.push(Tag{
+//                     t: "str".to_string(),
+//                     attrs: Default::default(),
+//                     data:  s.to_string(),
+//                     childs: vec![]
+//                 })
+//             }
+//             Ok(XmlEvent::Comment(s)) => {
+//                 let s = s.trim();
+//                 tag.childs.push(Tag{
+//                     t: "str".to_string(),
+//                     attrs: Default::default(),
+//                     data:  s.to_string(),
+//                     childs: vec![]
+//                 })
+//             }
+//             Ok(XmlEvent::CData(s)) => {
+//                 let s = s.trim();
+//                 tag.childs.push(Tag{
+//                     t: "str".to_string(),
+//                     attrs: Default::default(),
+//                     data:  s.to_string(),
+//                     childs: vec![]
+//                 })
+//             }
+//             _ => {
+//
+//             }
+//         }
+//     }
+//     return tag;
+// }
+
 /// gen rust code
 fn parse(arg: &str) -> TokenStream {
     let mut file = File::open("example/example.xml").unwrap();
