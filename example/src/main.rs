@@ -30,7 +30,8 @@ fn main() {
         "f":[{"field":1}],
         "g":true,
         "name":"ss",
-        "startTime":"2019"
+        "startTime":"2019",
+        "endTime":"2020"
     });
     // let v = gen(&arg);
     // println!("{}", v);
