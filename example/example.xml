@@ -45,7 +45,7 @@
     <select id="selectByCondition" resultMap="BaseResultMap">
         select * from biz_activity
         <if test="name != null">and name like #{pattern}</if>
-        <trim prefix=" AND" prefixOverrides="and" suffix="AND" suffixOverrides="and">
+        <trim prefix="(" prefixOverrides="and"  suffixOverrides="and" suffix=")" >
             and id!=null and
         </trim>
     </select>

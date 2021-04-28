@@ -65,37 +65,63 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             }
             "trim" => {
                 let mut empty_string = String::new();
-                let prefix = x.attributes.get("prefix").unwrap_or(&empty_string);
-                let suffix = x.attributes.get("suffix").unwrap_or(&empty_string);
-                let prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string);
-                let suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string);
-
+                let prefix = x.attributes.get("prefix").unwrap_or(&empty_string).to_string();
+                let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
+                let mut prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
+                let mut suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
                 let mut trim_body = parse(&x.childs, methods);
+                body = quote! {
+                   #body
+                   sql = format!("{}{}",sql,#prefix);
+                };
                 if !prefixOverrides.is_empty() {
+                    let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
+                    let mut trims = quote! {sql};
+                    for x in prefixs {
+                        trims = quote! {
+                            #trims
+                            .trim_start_matches(#x)
+                        }
+                    }
                     body = quote! {
                         #body
                          let trim_string_prefix={
                             let mut sql = String::new();
                             #trim_body
-                            sql=sql.trim_start().to_string();
+                            sql = sql.trim_start().to_string();
                             if sql.starts_with(#prefixOverrides){
-                               sql= #prefix.to_string() + sql.trim_start_matches(#prefixOverrides);
+                               sql = #trims.to_string();
                             }
                             sql};
-                        sql = sql+ trim_string_prefix.as_str();
+                        sql = sql + trim_string_prefix.as_str();
                     };
                     trim_body = quote! {};
                 }
-                if !suffixOverrides.is_empty() {
-                    body = quote! {
+                body = quote! {
                         #body
                         #trim_body
+                    };
+                if !suffixOverrides.is_empty() {
+                    let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
+                    let mut trims = quote! {sql_trim};
+                    for x in suffixs {
+                        trims = quote! {
+                            #trims
+                            .trim_end_matches(#x)
+                        }
+                    }
+                    body = quote! {
+                        #body
                         let sql_trim=sql.trim();
                         if sql_trim.ends_with(#suffixOverrides){
-                            sql = format!("{}{}",sql_trim.trim_end_matches(#suffixOverrides),#suffix);
+                            sql = #trims.to_string();
                         }
                     }
                 }
+                body = quote! {
+                  #body
+                  sql = sql+#suffix;
+                };
             }
             "select" => {
                 let id = x.attributes.get("id").expect("select element must be have id!");
