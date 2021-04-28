@@ -1,5 +1,5 @@
 use quote::{quote, ToTokens};
-use syn::{ItemFn, Expr};
+use syn::{ItemFn, Expr, ItemMod};
 use crate::proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 
@@ -123,7 +123,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
     return body.into();
 }
 
-pub(crate) fn impl_fn(f: &ItemFn, args: crate::proc_macro::TokenStream) -> TokenStream {
+pub(crate) fn impl_fn(f: &ItemMod, args: crate::proc_macro::TokenStream) -> TokenStream {
     let t = parse_str(example_data);
     return t.into();
 }

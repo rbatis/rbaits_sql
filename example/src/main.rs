@@ -14,7 +14,9 @@ use std::sync::Arc;
 use serde_json::json;
 
 #[xml]
-pub fn xml(arg: &serde_json::Value) -> serde_json::Value {}
+pub mod example {
+
+}
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
