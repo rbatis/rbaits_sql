@@ -33,6 +33,7 @@ fn main() {
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
+    println!("{:?}", selectByCondition(&arg));
 }
 
 

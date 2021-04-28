@@ -43,9 +43,6 @@
 
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
     <select id="selectByCondition" resultMap="BaseResultMap">
-
-        <![CDATA[ sdafasdf ]]>
-
         <bind name="pattern" value="'%' + name + '%'"/>
         select * from biz_activity
         <where>
