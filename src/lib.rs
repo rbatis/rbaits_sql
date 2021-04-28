@@ -1,5 +1,4 @@
 pub mod string_util;
-pub mod xmls;
 pub mod error;
 #[macro_use]
 pub mod bencher;

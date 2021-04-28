@@ -11,13 +11,6 @@ use std::io::Read;
 use std::collections::HashMap;
 use crate::xml_loader::{load_xml, Element};
 
-// fn fff(arg: &serde_json::Value) -> xml_sql::error::Result<(String, Vec<serde_json::Value>)> {
-//     let mut sql = String::new();
-//     let mut args: Vec<serde_json::Value> = vec![];
-//
-//     return Ok((sql, args));
-// }
-
 const  example_data:&'static str=include_str!("../../example/example.xml");
 
 fn parse_str(arg: &str) -> TokenStream {
