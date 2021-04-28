@@ -92,7 +92,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                         #trim_body
                         let sql_trim=sql.trim();
                         if sql_trim.ends_with(#suffixOverrides){
-                            sql = format!("{}{}{}",sql_trim,sql_trim.trim_end_matches(#suffixOverrides),#suffix);
+                            sql = format!("{}{}",sql_trim.trim_end_matches(#suffixOverrides),#suffix);
                         }
                     }
                 }
