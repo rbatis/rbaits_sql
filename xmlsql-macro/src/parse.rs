@@ -47,15 +47,19 @@ fn parse(arg: &str) -> TokenStream {
                                 let test = x.attributes.get("test");
                                 match test {
                                     Some(test_value) => {
-                                        let method_name = encode(&test_value).replace("_", "__").replace("=", "_");
-                                        let method_name = Ident::new(&method_name, Span::call_site());
+                                        let method_name_string = encode(&test_value).replace("_", "__").replace("=", "_");
+                                        let method_name = Ident::new(&method_name_string, Span::call_site());
                                         let test_value = test_value.replace(" and ", " && ");
                                         let test_value = test_value.replace(" or ", " && ");
                                         let method_impl = crate::func::impl_fn(&method_name.to_string(), &format!("\"{}\"", test_value));
-                                        methods = quote! {
+
+                                        if !methods.to_token_stream().to_string().contains(&method_name_string){
+                                          methods = quote! {
                                              #methods
                                              #method_impl
-                                        };
+                                          };
+                                        }
+
                                         body = quote!(
                                             #body
                                             if #method_name(arg).as_bool().unwrap_or(false) {
@@ -77,8 +81,8 @@ fn parse(arg: &str) -> TokenStream {
 
                         let mut body = quote!{
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
-                               let mut  sql=String::new();
-                               let mut args=vec![];
+                               let mut sql = String::with_capacity(1000);
+                               let mut args = vec![];
                                #body
                                return (sql,args);
                             }

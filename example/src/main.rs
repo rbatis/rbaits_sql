@@ -28,12 +28,18 @@ fn main() {
         "d":null,
         "e":[1],
         "f":[{"field":1}],
-        "g":true
+        "g":true,
+        "name":"ss",
+        "startTime":"2019"
     });
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
     println!("{:?}", selectByCondition(&arg));
+
+    bench!(100000,{
+        selectByCondition(&arg);
+    });
 }
 
 
