@@ -9,14 +9,12 @@
 #[macro_use]
 extern crate xmlsql;
 
-use serde_json::json;
 use std::sync::Arc;
 
+use serde_json::json;
 
-#[xml("s")]
+#[xml]
 pub fn xml(arg: &serde_json::Value) -> serde_json::Value {}
-
-
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
@@ -34,7 +32,7 @@ fn main() {
     });
     // let v = gen(&arg);
     // println!("{}", v);
-  // xml(&arg);
+    // xml(&arg);
 }
 
 

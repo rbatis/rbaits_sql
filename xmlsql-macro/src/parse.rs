@@ -56,13 +56,22 @@ fn parse(arg: &str) -> TokenStream {
                                              #methods
                                              #method_impl
                                         };
-                                        body = quote!(if #method_name() {
+                                        body = quote!(
+                                            #body
+                                            if #method_name(arg).as_bool().unwrap_or(false) {
                                             sql=sql+"1";
                                         } );
 
                                     }
                                     _ => {}
                                 }
+                            }
+                            if x.tag.eq(""){
+                                let s=x.data;
+                                body = quote!(
+                                    #body
+                                    sql=sql+#s;
+                                );
                             }
                         }
 
@@ -71,7 +80,7 @@ fn parse(arg: &str) -> TokenStream {
                                let mut  sql=String::new();
                                let mut args=vec![];
                                #body
-                               return (sql,args)
+                               return (sql,args);
                             }
                         };
                         fn_impl=quote! {
