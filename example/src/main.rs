@@ -38,9 +38,9 @@ fn main() {
     // xml(&arg);
     println!("{:?}", selectByCondition(&arg));
 
-    bench!(100000,{
-        selectByCondition(&arg);
-    });
+    // bench!(100000,{
+    //     selectByCondition(&arg);
+    // });
 }
 
 
