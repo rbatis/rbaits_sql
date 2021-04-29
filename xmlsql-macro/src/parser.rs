@@ -49,18 +49,26 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let method_impl = crate::func::impl_fn(&body.to_string(),&method_name.to_string(), &format!("\"{}\"", test_value));
 
                 let method_string=method_impl.to_string();
-                let method_impl=&method_string[method_string.find("{").unwrap()..method_string.len()];
+                let method_impl= &method_string[method_string.find("{").unwrap()..method_string.len()];
 
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
 
+
+                //check append value
+                if !body.to_string().contains(&method_name.to_string()){
+                    body = quote! {
+                              #body
+                              let #method_name = #method_impl;
+                          };
+                }
                 if x.childs.len() != 0 {
                     let if_tag_body = parse(&x.childs, methods);
                     body = quote! {
                               #body
-                                if #method_impl.as_bool().unwrap_or(false) {
+                              if #method_name.as_bool().unwrap_or(false) {
                                    #if_tag_body
-                                }
+                              }
                           };
                 }
             }
