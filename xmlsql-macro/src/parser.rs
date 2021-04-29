@@ -46,18 +46,19 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let method_name = Ident::new(&method_name_string, Span::call_site());
                 let test_value = test_value.replace(" and ", " && ");
                 let test_value = test_value.replace(" or ", " && ");
-                let method_impl = crate::func::impl_fn(&method_name.to_string(), &format!("\"{}\"", test_value));
-                if !methods.to_token_stream().to_string().contains(&method_name_string) {
-                    *methods = quote! {
-                                   #methods
-                                   #method_impl
-                             };
-                }
+                let method_impl = crate::func::impl_fn(&body.to_string(),&method_name.to_string(), &format!("\"{}\"", test_value));
+
+                let method_string=method_impl.to_string();
+                let method_impl=&method_string[method_string.find("{").unwrap()..method_string.len()];
+
+                let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
+                let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+
                 if x.childs.len() != 0 {
                     let if_tag_body = parse(&x.childs, methods);
                     body = quote! {
                               #body
-                              if #method_name(arg).as_bool().unwrap_or(false) {
+                                if #method_impl.as_bool().unwrap_or(false) {
                                    #if_tag_body
                                 }
                           };
@@ -122,6 +123,26 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                   #body
                   sql = sql+#suffix;
                 };
+            }
+            "bind" => {
+                let name = x.attributes.get("name").expect("bind element must be have name!").to_string();
+                let value = x.attributes.get("value").expect("bind element must be have value!").to_string();
+
+                let s = syn::parse::<syn::LitStr>(name.to_token_stream().into()).unwrap();
+                let name_expr = syn::parse_str::<Expr>(&s.value()).unwrap();
+
+                let method_impl = crate::func::impl_fn(&body.to_string(),"this_is_gen", &format!("\"{}\"", value));
+
+                let method_string=method_impl.to_string();
+                let method_impl=&method_string[method_string.find("{").unwrap()..method_string.len()];
+
+                let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
+                let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+
+                body = quote! {
+                            #body
+                            let #name_expr=#method_impl;
+                        };
             }
             "select" => {
                 let id = x.attributes.get("id").expect("select element must be have id!");
