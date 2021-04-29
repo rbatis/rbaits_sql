@@ -79,58 +79,33 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let mut prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let mut suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
                 let mut trim_body = parse(&x.childs, methods);
-                body = quote! {
-                   #body
-                   sql = format!("{}{}",sql,#prefix);
+
+
+                let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
+                let mut trims = quote! {
+                     let mut sql=String::with_capacity(1000);
+                     #trim_body
+                     sql
                 };
-                if !prefixOverrides.is_empty() {
-                    let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
-                    let mut trims = quote! {sql};
-                    for x in prefixs {
-                        trims = quote! {
+                for x in prefixs {
+                    trims = quote! {
                             #trims
                             .trim_start_matches(#x)
                         }
-                    }
-                    body = quote! {
-                        #body
-                         let trim_string_prefix={
-                            let mut sql = String::new();
-                            #trim_body
-                            sql = sql.trim_start().to_string();
-                            if sql.starts_with(#prefixOverrides){
-                               sql = #trims.to_string();
-                            }
-                            sql};
-                        sql = sql + trim_string_prefix.as_str();
-                    };
-                    trim_body = quote! {};
                 }
-                body = quote! {
-                        #body
-                        #trim_body
-                    };
-                if !suffixOverrides.is_empty() {
-                    let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
-                    let mut trims = quote! {sql_trim};
-                    for x in suffixs {
-                        trims = quote! {
+                let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
+                for x in suffixs {
+                    trims = quote! {
                             #trims
                             .trim_end_matches(#x)
                         }
-                    }
-                    body = quote! {
-                        #body
-                        let sql_trim=sql.trim();
-                        if sql_trim.ends_with(#suffixOverrides){
-                            sql = #trims.to_string();
-                        }
-                    }
                 }
+
                 body = quote! {
-                  #body
-                  sql = sql+#suffix;
+                   #body
+                   sql = format!("{}{}{}{}",sql,#prefix,{#trims; sql },#suffix);
                 };
+
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("bind element must be have name!").to_string();
