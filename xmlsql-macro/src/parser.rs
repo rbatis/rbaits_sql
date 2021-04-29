@@ -103,7 +103,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
                 body = quote! {
                    #body
-                   sql = format!("{}{}{}{}",sql,#prefix,{#trims; sql },#suffix);
+                    sql.push_str(#prefix);
+                    sql.push_str(&{#trims; sql });
+                    sql.push_str(#suffix);
                 };
 
             }
