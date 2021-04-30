@@ -1,7 +1,7 @@
-use serde::{Serializer, Deserializer};
-use std::fmt::{Debug, Formatter};
 use std::cmp::Ordering;
+use std::fmt::{Debug, Formatter};
 
+use serde::{Deserializer, Serializer};
 
 /// convert serde_json::Value to Value
 pub trait AsProxy {
@@ -14,12 +14,10 @@ pub trait AsProxy {
 /// This structure has a certain amount of computing power
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub struct Value {
-    pub inner: serde_json::Value
+    pub inner: serde_json::Value,
 }
 
 impl Value {
-
-
     pub fn i64(&self) -> i64 {
         self.inner.as_i64().unwrap_or_default()
     }
@@ -41,7 +39,6 @@ impl Value {
     pub fn null(&self) -> () {
         self.inner.as_null().unwrap_or_default()
     }
-
 
 
     pub fn as_i64(&self) -> Option<i64> {
@@ -128,13 +125,27 @@ impl std::fmt::Display for Value {
 impl AsProxy for serde_json::Value {
     fn into_proxy(self) -> Value {
         Value {
-            inner: self
+            inner: self.clone()
         }
     }
 
     fn as_proxy(&self) -> Value {
         Value {
+            inner: (*self).clone()
+        }
+    }
+}
+
+impl AsProxy for &serde_json::Value {
+    fn into_proxy(self) -> Value {
+        Value {
             inner: self.clone()
+        }
+    }
+
+    fn as_proxy(&self) -> Value {
+        Value {
+            inner: (*self).clone()
         }
     }
 }
@@ -181,3 +192,50 @@ impl<'de> serde::Deserialize<'de> for Value {
 }
 
 
+impl AsProxy for Value {
+    fn into_proxy(self) -> Value {
+        self
+    }
+
+    fn as_proxy(&self) -> Value {
+        self.clone()
+    }
+}
+
+
+impl AsProxy for &str {
+    fn into_proxy(self) -> Value {
+        Value {
+            inner: serde_json::Value::String(self.to_string())
+        }
+    }
+
+    fn as_proxy(&self) -> Value {
+        Value {
+            inner: serde_json::Value::String(self.to_string())
+        }
+    }
+}
+
+macro_rules! impl_into_proxy {
+    ($($ty:ty)*) => {
+        $(
+ impl AsProxy for $ty {
+    fn into_proxy(self) -> Value {
+        Value {
+            inner: serde_json::json!(self)
+        }
+    }
+    fn as_proxy(&self) -> Value {
+        Value {
+            inner: serde_json::json!(self)
+        }
+    }}
+      )*
+    };
+}
+
+impl_into_proxy!(i8 i16 i32 i64 isize);
+impl_into_proxy!(u8 u16 u32 u64 usize);
+impl_into_proxy!(f32 f64);
+impl_into_proxy!(String);

@@ -120,6 +120,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
                 let method_string=method_impl.to_string();
                 let method_impl=&method_string[method_string.find("{").unwrap()..method_string.len()];
+                let method_impl=method_impl.replace("serde_json ::","");
+                let method_impl=method_impl.replace("json ! (result)","result");
 
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
