@@ -33,11 +33,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 return parse(&x.childs, methods);
             }
             "" => {
-                let mut s = x.data.to_owned();
-                s = format!(" {} ", s.trim());
+                let mut s = &x.data;
                 body = quote!(
                         #body
-                         sql=sql+#s;
+                         sql.push_str(" ");
+                         sql.push_str(#s);
+                         sql.push_str(" ");
                        );
             }
             "if" => {
