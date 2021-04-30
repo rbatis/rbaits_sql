@@ -36,7 +36,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let mut s = &x.data;
                 body = quote!(
                         #body
-                         sql.push_str(" ");
                          sql.push_str(#s);
                          sql.push_str(" ");
                        );
