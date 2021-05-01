@@ -46,18 +46,18 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let method_name = Ident::new(&method_name_string, Span::call_site());
                 let test_value = test_value.replace(" and ", " && ");
                 let test_value = test_value.replace(" or ", " && ");
-                let method_impl = crate::func::impl_fn(&body.to_string(),&method_name.to_string(), &format!("\"{}\"", test_value));
+                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value));
 
-                let mut method_string=method_impl.to_string();
-                method_string = method_string.replace("serde_json :: json ! (result)","result");
-                let method_impl= &method_string[method_string.find("{").unwrap()..method_string.len()];
+                let mut method_string = method_impl.to_string();
+                method_string = method_string.replace("serde_json :: json ! (result)", "result");
+                let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
 
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
 
 
                 //check append value
-                if !body.to_string().contains(&method_name.to_string()){
+                if !body.to_string().contains(&method_name.to_string()) {
                     body = quote! {
                               #body
                               let #method_name = #method_impl;
@@ -108,7 +108,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                     sql.push_str(&{#trims; sql });
                     sql.push_str(#suffix);
                 };
-
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("bind element must be have name!").to_string();
@@ -117,12 +116,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let s = syn::parse::<syn::LitStr>(name.to_token_stream().into()).unwrap();
                 let name_expr = syn::parse_str::<Expr>(&s.value()).unwrap();
 
-                let method_impl = crate::func::impl_fn(&body.to_string(),"this_is_gen", &format!("\"{}\"", value));
+                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value));
 
-                let method_string=method_impl.to_string();
-                let method_impl=&method_string[method_string.find("{").unwrap()..method_string.len()];
-                let method_impl=method_impl.replace("serde_json ::","");
-                let method_impl=method_impl.replace("json ! (result)","result");
+                let method_string = method_impl.to_string();
+                let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
+                let method_impl = method_impl.replace("serde_json ::", "");
+                let method_impl = method_impl.replace("json ! (result)", "result");
 
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
@@ -132,6 +131,19 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                             let #name_expr=#method_impl;
                         };
             }
+
+            "where" => {}
+
+            "choose" => {}
+
+            "when" => {}
+
+            "otherwise" => {}
+
+            "foreach" => {}
+
+            "set" => {}
+
             "select" => {
                 let id = x.attributes.get("id").expect("select element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
