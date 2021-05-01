@@ -134,24 +134,30 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                           };
                 }
 
+                let mut open_impl = quote! {};
                 if !open.is_empty() {
-                    body = quote! {
-                    #body
+                    open_impl = quote! {
                     sql.push_str(#open);
+                    };
+                }
+                let mut close_impl = quote! {};
+                if !close.is_empty() {
+                    close_impl = quote! {
+                    sql.push_str(#close);
                     };
                 }
 
 
-                let item_ident=Ident::new(&item, Span::call_site());
-                let index_ident=Ident::new(&index, Span::call_site());
+                let item_ident = Ident::new(&item, Span::call_site());
+                let index_ident = Ident::new(&index, Span::call_site());
 
-                let mut index_create=quote! {};
-                let mut index_add=quote! {};
-                if !index.is_empty(){
-                    index_create=quote! {
+                let mut index_create = quote! {};
+                let mut index_add = quote! {};
+                if !index.is_empty() {
+                    index_create = quote! {
                         let mut #index_ident=0;
                     };
-                    index_add=quote! {
+                    index_add = quote! {
                         #index_ident=#index_ident+1;
                     };
                 }
@@ -159,28 +165,25 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 body = quote! {
                     #body
                     if #method_name.is_array(){
-                     #index_create
-                     for #item_ident in #method_name.as_array().unwrap() {
-                        use xmlsql::ops::AsProxy;
-                        let item=#item_ident.as_proxy();
-                        #impl_body
-                        #index_add
-                     }
+                        #open_impl
+                        #index_create
+                        for #item_ident in #method_name.as_array().unwrap() {
+                          use xmlsql::ops::AsProxy;
+                          let item=#item_ident.as_proxy();
+                          #impl_body
+                          #index_add
+                        }
+                        #close_impl
                     }else if #method_name.is_object(){
-                       for (#index_ident,#item_ident) in #method_name.as_object().unwrap() {
-                        use xmlsql::ops::AsProxy;
-                        let item=#item_ident.as_proxy();
-                        #impl_body
-                       }
+                        #open_impl
+                        for (#index_ident,#item_ident) in #method_name.as_object().unwrap() {
+                          use xmlsql::ops::AsProxy;
+                          let item=#item_ident.as_proxy();
+                          #impl_body
+                        }
+                        #close_impl
                     }
                 };
-
-                if !close.is_empty() {
-                    body = quote! {
-                    #body
-                    sql.push_str(#close);
-                    };
-                }
             }
 
             "set" => {
