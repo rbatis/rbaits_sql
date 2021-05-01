@@ -104,7 +104,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                         };
             }
 
-            "where" => {}
+            "where" => {
+                impl_trim("", "", " and | AND | or | OR ", "", x, &mut body, arg, methods);
+            }
 
             "choose" => {}
 
