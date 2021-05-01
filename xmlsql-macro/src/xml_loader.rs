@@ -34,6 +34,8 @@ pub fn load_xml(file_content: &str) -> Vec<Element> {
 fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
     let mut depth = 0;
 
+    let mut fathers = vec![];
+
     let mut temp_element = &mut Element {
         tag: "".to_string(),
         data: "".to_string(),
@@ -41,18 +43,20 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
         childs: vec![],
     };
 
-    let mut fathers = vec![];
-
     for item in parser {
         match item {
-            Ok(XmlEvent::StartElement { name, attributes, .. }) => {
+            Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
+                *temp_element =  Element {
+                    tag: "".to_string(),
+                    data: "".to_string(),
+                    attributes: HashMap::new(),
+                    childs: vec![],
+                };
                 //load attr
-                temp_element.tag = name.local_name;
-
+                temp_element.tag = name.to_string();
                 for x in attributes {
-                    temp_element.attributes.insert(x.name.local_name.to_string(), x.value.to_string());
+                    temp_element.attributes.insert(x.name.to_string(), x.value.to_string());
                 }
-
                 &fathers.push(temp_element.clone());
                 depth += 1;
             }
@@ -60,7 +64,7 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
                 let last = fathers.last_mut().unwrap();
                 (*last).childs.push(Element {
                     tag: "".to_string(),
-                    data: " ".to_string() + data.clone().replace("\r", "").replace("\n", "").trim(),
+                    data: data.to_string(),
                     attributes: HashMap::new(),
                     childs: vec![],
                 })

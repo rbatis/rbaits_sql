@@ -34,7 +34,7 @@ fn is_param_char(arg: char) -> bool {
 }
 
 
-fn token_steam_string(arg:proc_macro2::TokenStream)->String{
+fn token_steam_string(arg: proc_macro2::TokenStream) -> String {
     arg.to_token_stream().to_string().trim().to_string()
 }
 
@@ -49,10 +49,10 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
             if b.to_token_stream().to_string().trim() == "nil" {
                 return syn::parse_str::<Expr>("&serde_json::Value::Null.into_proxy()").unwrap();
             }
-            let param= token_steam_string(b.to_token_stream());
-            if context.contains(&format!("let {} =",param)){
-                println!("is contains:{}",format!("let {} =",param));
-                println!("is contains source:{}",context);
+            let param = token_steam_string(b.to_token_stream());
+            if context.contains(&format!("let {} =", param)) {
+                println!("is contains:{}", format!("let {} =", param));
+                println!("is contains source:{}", context);
                 return syn::parse_str::<Expr>(&format!("{}.as_proxy()", param)).unwrap();
             }
             return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy()", param)).unwrap();
@@ -139,7 +139,7 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
                             }
                         }
                     }
-                    syn::parse_str::<Expr>(&format!("{}{}.as_proxy()",b.base.to_token_stream(), token)).unwrap()
+                    syn::parse_str::<Expr>(&format!("{}{}.as_proxy()", b.base.to_token_stream(), token)).unwrap()
                 }
                 Member::Unnamed(unamed) => {
                     Expr::Field(b)
@@ -235,7 +235,7 @@ fn expr_type(expr: Expr) -> String {
 }
 
 
-pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str) -> proc_macro2::TokenStream {
+pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool) -> proc_macro2::TokenStream {
     let mut string_data = args.to_string();
     string_data = string_data[1..string_data.len() - 1].to_string();
     #[cfg(feature = "debug_mode")]
@@ -272,12 +272,15 @@ pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str) -> proc_
     let t = t.unwrap();
     let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
 
+    let mut result_impl = quote! { result };
+    if serialize_result {
+        result_impl = quote! {serde_json::json!(result)};
+    }
     return quote! {
         pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
            use xmlsql::ops::AsProxy;
            let result={#t};
-           serde_json::json!(result)
+           #result_impl
         }
-    }
-        .to_token_stream();
+    }.to_token_stream();
 }
