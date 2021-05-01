@@ -79,35 +79,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
                 let mut prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let mut suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
-                let mut trim_body = parse(&x.childs, methods);
-
-
-                let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
-                let mut trims = quote! {
-                     let mut sql=String::with_capacity(1000);
-                     #trim_body
-                     sql
-                };
-                for x in prefixs {
-                    trims = quote! {
-                            #trims
-                            .trim_start_matches(#x)
-                        }
-                }
-                let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
-                for x in suffixs {
-                    trims = quote! {
-                            #trims
-                            .trim_end_matches(#x)
-                        }
-                }
-
-                body = quote! {
-                   #body
-                    sql.push_str(#prefix);
-                    sql.push_str(&{#trims; sql });
-                    sql.push_str(#suffix);
-                };
+                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods);
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("bind element must be have name!").to_string();
@@ -168,6 +140,37 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
     println!("gen methods:\n{}", methods);
     println!("gen fn:----start----\n{}\n----end----\n", body);
     return body.into();
+}
+
+
+fn impl_trim(prefix:&str,suffix:&str,prefixOverrides:&str,suffixOverrides:&str,x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) {
+    let mut trim_body = parse(&x.childs, methods);
+    let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
+    let mut trims = quote! {
+                     let mut sql=String::with_capacity(1000);
+                     #trim_body
+                     sql
+                };
+    for x in prefixs {
+        trims = quote! {
+                            #trims
+                            .trim_start_matches(#x)
+                        }
+    }
+    let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
+    for x in suffixs {
+        trims = quote! {
+                            #trims
+                            .trim_end_matches(#x)
+                        }
+    }
+
+    *body = quote! {
+                   #body
+                    sql.push_str(#prefix);
+                    sql.push_str(&{#trims; sql });
+                    sql.push_str(#suffix);
+                };
 }
 
 pub(crate) fn impl_fn(f: &ItemMod, args: crate::proc_macro::TokenStream) -> TokenStream {
