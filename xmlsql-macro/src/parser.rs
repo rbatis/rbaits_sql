@@ -63,7 +63,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let s = syn::parse::<syn::LitStr>(name.to_token_stream().into()).unwrap();
                 let name_expr = syn::parse_str::<Expr>(&s.value()).unwrap();
 
-                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false,true);
+                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false, true);
 
                 let method_string = method_impl.to_string();
                 let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
@@ -118,10 +118,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let impl_body = parse(&x.childs, methods);
 
 
-
                 let method_name_string = encode(&collection).replace("_", "__").replace("=", "_");
                 let method_name = Ident::new(&method_name_string, Span::call_site());
-                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false,false);
+                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false);
                 let mut method_string = method_impl.to_string();
                 let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
                 //method_impl = method_impl.replace("as_proxy()",".as_array().unwrap_or(&vec![])");
@@ -135,15 +134,45 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                           };
                 }
 
-                body = quote! {
+                if !open.is_empty() {
+                    body = quote! {
                     #body
-                    for item in #method_name.as_array().unwrap() {
-                        use xmlsql::ops::AsProxy;
-                        let item=item.as_proxy();
-                        #impl_body
-                    }
+                    sql.push_str(#open);
+                    };
                 }
 
+
+                let item_ident=Ident::new(&item, Span::call_site());
+                let index_ident=Ident::new(&index, Span::call_site());
+
+                let mut index_create=quote! {};
+                let mut index_add=quote! {};
+                if !index.is_empty(){
+                    index_create=quote! {
+                        let mut #index_ident=0;
+                    };
+                    index_add=quote! {
+                        #index_ident=#index_ident+1;
+                    };
+                }
+
+                body = quote! {
+                    #body
+                    #index_create
+                    for #item_ident in #method_name.as_array().unwrap() {
+                        use xmlsql::ops::AsProxy;
+                        let item=#item_ident.as_proxy();
+                        #impl_body
+                        #index_add
+                    }
+                };
+
+                if !close.is_empty() {
+                    body = quote! {
+                    #body
+                    sql.push_str(#close);
+                    };
+                }
             }
 
             "set" => {
@@ -184,7 +213,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
     let method_name = Ident::new(&method_name_string, Span::call_site());
     let test_value = test_value.replace(" and ", " && ");
     let test_value = test_value.replace(" or ", " && ");
-    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false,true);
+    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true);
     let mut method_string = method_impl.to_string();
 
     let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
