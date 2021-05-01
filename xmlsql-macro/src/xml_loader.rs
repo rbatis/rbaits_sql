@@ -46,7 +46,7 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
     for item in parser {
         match item {
             Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
-                *temp_element =  Element {
+                *temp_element = Element {
                     tag: "".to_string(),
                     data: "".to_string(),
                     attributes: HashMap::new(),
@@ -61,10 +61,17 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
                 depth += 1;
             }
             Ok(XmlEvent::Characters(data)) | Ok(XmlEvent::Comment(data)) | Ok(XmlEvent::CData(data)) => {
+                let mut data = data.replace("\r\n", "").to_string();
+                if data.starts_with(" ") {
+                    data = " ".to_string() + data.trim_start();
+                }
+                if data.ends_with(" ") {
+                    data = data.trim_end().to_string() + " ";
+                }
                 let last = fathers.last_mut().unwrap();
                 (*last).childs.push(Element {
                     tag: "".to_string(),
-                    data: data.to_string(),
+                    data: data,
                     attributes: HashMap::new(),
                     childs: vec![],
                 })

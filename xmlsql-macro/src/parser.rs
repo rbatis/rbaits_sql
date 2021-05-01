@@ -108,7 +108,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
               }
             }
 
-            "foreach" => {}
+            "foreach" => {
+
+            }
 
             "set" => {
                 impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods);
