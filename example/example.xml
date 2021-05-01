@@ -62,6 +62,9 @@
         <foreach collection="e" item="item" index="index" open="(" close=")" separator=",">
             #{item}
         </foreach>
+        <foreach collection="h" item="item" index="index" open="(" close=")" separator=",">
+            #{index},#{item}
+        </foreach>
     </select>
     <!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->
     <!--    <select id="countByCondition">-->

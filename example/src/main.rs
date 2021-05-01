@@ -30,10 +30,15 @@ fn main() {
         "e":[1,2,3,4,5],
         "f":[{"field":1}],
         "g":true,
+        "h":{"name":"h"},
         "name":"ss",
         "startTime":"2019",
         "endTime":"2020"
     });
+    let o= arg.as_object().unwrap();
+    for x in o {
+        
+    }
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);

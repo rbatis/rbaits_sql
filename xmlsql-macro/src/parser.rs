@@ -158,12 +158,20 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
                 body = quote! {
                     #body
-                    #index_create
-                    for #item_ident in #method_name.as_array().unwrap() {
+                    if #method_name.is_array(){
+                     #index_create
+                     for #item_ident in #method_name.as_array().unwrap() {
                         use xmlsql::ops::AsProxy;
                         let item=#item_ident.as_proxy();
                         #impl_body
                         #index_add
+                     }
+                    }else if #method_name.is_object(){
+                       for (#index_ident,#item_ident) in #method_name.as_object().unwrap() {
+                        use xmlsql::ops::AsProxy;
+                        let item=#item_ident.as_proxy();
+                        #impl_body
+                       }
                     }
                 };
 
