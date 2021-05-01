@@ -39,7 +39,7 @@ fn token_steam_string(arg: proc_macro2::TokenStream) -> String {
 }
 
 
-fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
+fn convert_to_arg_access(context: &str, arg: Expr,as_proxy:bool) -> Expr {
     // println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
     match arg {
         Expr::Path(b) => {
@@ -50,12 +50,18 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
                 return syn::parse_str::<Expr>("&serde_json::Value::Null.into_proxy()").unwrap();
             }
             let param = token_steam_string(b.to_token_stream());
-            if context.contains(&format!("let {} =", param)) {
-                println!("is contains:{}", format!("let {} =", param));
-                println!("is contains source:{}", context);
-                return syn::parse_str::<Expr>(&format!("{}.as_proxy()", param)).unwrap();
+
+            if as_proxy{
+                if context.contains(&format!("let {} =", param)) {
+                    return syn::parse_str::<Expr>(&format!("{}.as_proxy()", param)).unwrap();
+                }
+                return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy()", param)).unwrap();
+            }else{
+                if context.contains(&format!("let {} =", param)) {
+                    return syn::parse_str::<Expr>(&format!("{}", param)).unwrap();
+                }
+                return syn::parse_str::<Expr>(&format!("&arg[\"{}\"]", param)).unwrap();
             }
-            return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy()", param)).unwrap();
         }
         Expr::MethodCall(mut b) => {
             let ex = *(b.receiver.clone());
@@ -63,7 +69,7 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
             for x in s.chars() {
                 if is_param_char(x) {
                     //println!("re:{},Type:{}", s, expr_type_box(&b.receiver));
-                    b.receiver = Box::new(convert_to_arg_access(context, *b.receiver.clone()));
+                    b.receiver = Box::new(convert_to_arg_access(context, *b.receiver.clone(),as_proxy));
                     return Expr::MethodCall(b);
                 }
                 break;
@@ -71,8 +77,8 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
             return Expr::MethodCall(b);
         }
         Expr::Binary(mut b) => {
-            b.left = Box::new(convert_to_arg_access(context, *b.left.clone()));
-            b.right = Box::new(convert_to_arg_access(context, *b.right.clone()));
+            b.left = Box::new(convert_to_arg_access(context, *b.left.clone(),as_proxy));
+            b.right = Box::new(convert_to_arg_access(context, *b.right.clone(),as_proxy));
             match b.op {
                 BinOp::And(_) => {
                     b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
@@ -93,18 +99,18 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
             return Expr::Binary(b);
         }
         Expr::Unary(mut b) => {
-            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone()));
+            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone(),as_proxy));
             if b.op.to_token_stream().to_string().trim() == "-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy()") {
                 return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
             }
             return Expr::Unary(b);
         }
         Expr::Paren(mut b) => {
-            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone()));
+            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone(),as_proxy));
             return Expr::Paren(b);
         }
         Expr::Field(mut b) => {
-            b.base = Box::new(convert_to_arg_access(context, *b.base.clone()));
+            b.base = Box::new(convert_to_arg_access(context, *b.base.clone(),as_proxy));
             b.base = Box::new(syn::parse_str::<Expr>(&b.base.to_token_stream().to_string().trim().trim_end_matches(" . as_proxy()")).unwrap());
             return match b.member.clone() {
                 Member::Named(n) => {
@@ -139,7 +145,11 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
                             }
                         }
                     }
-                    syn::parse_str::<Expr>(&format!("{}{}.as_proxy()", b.base.to_token_stream(), token)).unwrap()
+                    if as_proxy{
+                        syn::parse_str::<Expr>(&format!("{}{}.as_proxy()", b.base.to_token_stream(), token)).unwrap()
+                    }else{
+                        syn::parse_str::<Expr>(&format!("{}{}", b.base.to_token_stream(), token)).unwrap()
+                    }
                 }
                 Member::Unnamed(unamed) => {
                     Expr::Field(b)
@@ -147,16 +157,21 @@ fn convert_to_arg_access(context: &str, arg: Expr) -> Expr {
             };
         }
         Expr::Reference(mut b) => {
-            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone()));
+            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone(),as_proxy));
             let result = Expr::Reference(b);
             return result;
         }
         Expr::Index(mut b) => {
-            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone()));
+            b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone(),as_proxy));
             let result = Expr::Index(b);
             //return result;
             //remove inner . as_proxy(),keep  out . as_proxy()
-            return syn::parse_str::<Expr>(&format!("{}.as_proxy()", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
+
+            if as_proxy{
+                return syn::parse_str::<Expr>(&format!("{}.as_proxy()", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
+            }else{
+                return syn::parse_str::<Expr>(&format!("{}", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
+            }
         }
         Expr::Lit(mut b) => {
             match b.lit.clone() {
@@ -235,7 +250,7 @@ fn expr_type(expr: Expr) -> String {
 }
 
 
-pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool) -> proc_macro2::TokenStream {
+pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool,as_proxy:bool) -> proc_macro2::TokenStream {
     let mut string_data = args.to_string();
     string_data = string_data[1..string_data.len() - 1].to_string();
     #[cfg(feature = "debug_mode")]
@@ -260,7 +275,7 @@ pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serializ
         panic!("[rexpr]syn::parse_str: {} fail for: {}", string_data, t.err().unwrap().to_string())
     }
     let mut t = t.unwrap();
-    t = convert_to_arg_access(context, t);
+    t = convert_to_arg_access(context, t, as_proxy);
     string_data = t.to_token_stream().to_string();
     string_data = string_data.replace(" . ", ".");
     let t = syn::parse_str::<Expr>(&string_data);

@@ -12,7 +12,7 @@ mod xml_loader;
 pub fn expr(args: TokenStream, func: TokenStream) -> TokenStream {
     //let args = parse_macro_input!(args as AttributeArgs);
     let target_fn: ItemFn = syn::parse(func).unwrap();
-    let stream = func::impl_fn("",&target_fn.sig.ident.to_string(), &args.to_string(),true).into();
+    let stream = func::impl_fn("",&target_fn.sig.ident.to_string(), &args.to_string(),true,true).into();
     #[cfg(feature = "debug_mode")]
         {
             println!("............gen macro rexpr:\n {}", stream);

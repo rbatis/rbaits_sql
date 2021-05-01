@@ -43,23 +43,23 @@
 
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
     <select id="selectByCondition" resultMap="BaseResultMap">
-        <bind name="a" value='"pp"'/>
-        <bind name="ff" value='a'/>
-        <if test="ff!=''">
-            ff is not eq empty
-        </if>
-        select * from biz_activity
-        <if test="name != null">and name like #{pattern}</if>
-        <if test="f[0].field != null">and name like #{pattern}</if>
-        <trim prefix="(" prefixOverrides="and"  suffixOverrides="and" suffix=")" >
-            and id!=null and
-        </trim>
-        <choose>
-            <when test="a==1">when 1==1</when>
-            <when test="1!=1">when 1!=1</when>
-            <otherwise>otherwise</otherwise>
-        </choose>
-        <foreach collection="e">
+<!--        <bind name="a" value='"pp"'/>-->
+<!--        <bind name="ff" value='a'/>-->
+<!--        <if test="ff!=''">-->
+<!--            ff is not eq empty-->
+<!--        </if>-->
+<!--        select * from biz_activity-->
+<!--        <if test="name != null">and name like #{pattern}</if>-->
+<!--        <if test="f[0].field != null">and name like #{pattern}</if>-->
+<!--        <trim prefix="(" prefixOverrides="and"  suffixOverrides="and" suffix=")" >-->
+<!--            and id!=null and-->
+<!--        </trim>-->
+<!--        <choose>-->
+<!--            <when test="a==1">when 1==1</when>-->
+<!--            <when test="1!=1">when 1!=1</when>-->
+<!--            <otherwise>otherwise</otherwise>-->
+<!--        </choose>-->
+        <foreach collection="e" item="item" index="index" open="(" close=")" separator=",">
             #{item}
         </foreach>
     </select>

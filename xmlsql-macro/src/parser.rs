@@ -13,6 +13,7 @@ use crate::xml_loader::{load_xml, Element};
 
 const example_data: &'static str = include_str!("../../example/example.xml");
 
+
 fn parse_str(arg: &str) -> TokenStream {
     let datas = load_xml(arg);
 
@@ -62,12 +63,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let s = syn::parse::<syn::LitStr>(name.to_token_stream().into()).unwrap();
                 let name_expr = syn::parse_str::<Expr>(&s.value()).unwrap();
 
-                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false);
+                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false,true);
 
                 let method_string = method_impl.to_string();
                 let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
-                let method_impl = method_impl.replace("serde_json ::", "");
-                let method_impl = method_impl.replace("json ! (result)", "result");
 
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
@@ -107,7 +106,45 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
               }
             }
 
-            "foreach" => {}
+            "foreach" => {
+                let empty_string = String::new();
+                let collection = x.attributes.get("collection").unwrap_or(&empty_string).to_string();
+                let item = x.attributes.get("item").unwrap_or(&empty_string).to_string();
+                let index = x.attributes.get("index").unwrap_or(&empty_string).to_string();
+                let open = x.attributes.get("open").unwrap_or(&empty_string).to_string();
+                let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
+                let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
+
+                let impl_body = parse(&x.childs, methods);
+
+
+
+                let method_name_string = encode(&collection).replace("_", "__").replace("=", "_");
+                let method_name = Ident::new(&method_name_string, Span::call_site());
+                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false,false);
+                let mut method_string = method_impl.to_string();
+                let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
+                //method_impl = method_impl.replace("as_proxy()",".as_array().unwrap_or(&vec![])");
+                let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
+                let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+                //check append value
+                if !body.to_string().contains(&method_name.to_string()) {
+                    body = quote! {
+                              #body
+                              let #method_name = #method_impl;
+                          };
+                }
+
+                body = quote! {
+                    #body
+                    for item in #method_name.as_array().unwrap() {
+                        use xmlsql::ops::AsProxy;
+                        let item=item.as_proxy();
+                        #impl_body
+                    }
+                }
+
+            }
 
             "set" => {
                 impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods);
@@ -147,7 +184,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
     let method_name = Ident::new(&method_name_string, Span::call_site());
     let test_value = test_value.replace(" and ", " && ");
     let test_value = test_value.replace(" or ", " && ");
-    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false);
+    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false,true);
     let mut method_string = method_impl.to_string();
 
     let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
