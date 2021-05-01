@@ -54,6 +54,11 @@
         <trim prefix="(" prefixOverrides="and"  suffixOverrides="and" suffix=")" >
             and id!=null and
         </trim>
+        <choose>
+            <when test="a==1">when 1==1</when>
+            <when test="1!=1">when 1!=1</when>
+            <otherwise>otherwise</otherwise>
+        </choose>
     </select>
     <!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->
     <!--    <select id="countByCondition">-->
