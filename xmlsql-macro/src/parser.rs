@@ -105,7 +105,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             }
 
             "where" => {
-                impl_trim("", "", " and | AND | or | OR ", "", x, &mut body, arg, methods);
+                impl_trim("", "", "and |or ", " and| or", x, &mut body, arg, methods);
             }
 
             "choose" => {}
@@ -116,7 +116,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
             "foreach" => {}
 
-            "set" => {}
+            "set" => {
+                impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods);
+            }
 
             "select" => {
                 let id = x.attributes.get("id").expect("select element must be have id!");
