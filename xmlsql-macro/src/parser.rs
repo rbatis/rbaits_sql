@@ -137,6 +137,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                             #select
                         };
             }
+            "update" => {}
+            "insert" => {}
+            "delete" => {}
             _ => {}
         }
     }
