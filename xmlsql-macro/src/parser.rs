@@ -48,7 +48,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let test_value = test_value.replace(" or ", " && ");
                 let method_impl = crate::func::impl_fn(&body.to_string(),&method_name.to_string(), &format!("\"{}\"", test_value));
 
-                let method_string=method_impl.to_string();
+                let mut method_string=method_impl.to_string();
+                method_string = method_string.replace("serde_json :: json ! (result)","result");
                 let method_impl= &method_string[method_string.find("{").unwrap()..method_string.len()];
 
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
@@ -66,7 +67,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                     let if_tag_body = parse(&x.childs, methods);
                     body = quote! {
                               #body
-                              if #method_name.as_bool().unwrap_or(false) {
+                              if #method_name {
                                    #if_tag_body
                               }
                           };
