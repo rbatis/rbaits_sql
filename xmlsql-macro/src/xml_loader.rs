@@ -62,12 +62,7 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
             }
             Ok(XmlEvent::Characters(data)) | Ok(XmlEvent::Comment(data)) | Ok(XmlEvent::CData(data)) => {
                 let mut data = data.replace("\r\n", "").to_string();
-                if data.starts_with(" ") {
-                    data = " ".to_string() + data.trim_start();
-                }
-                if data.ends_with(" ") {
-                    data = data.trim_end().to_string() + " ";
-                }
+                data=data.trim().to_string();
                 let last = fathers.last_mut().unwrap();
                 (*last).childs.push(Element {
                     tag: "".to_string(),

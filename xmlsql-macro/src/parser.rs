@@ -41,7 +41,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                     body = quote!(
                         #body
                          sql.push_str(#s);
-                         sql.push_str(" ");
                        );
                 }
             }
@@ -108,9 +107,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
               }
             }
 
-            "foreach" => {
-
-            }
+            "foreach" => {}
 
             "set" => {
                 impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods);
@@ -189,10 +186,12 @@ fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mu
 fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) {
     let mut trim_body = parse(&x.childs, methods);
     let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
+    let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
+    let have_trim = prefixs.len() != 0 && suffixs.len() != 0;
     let mut trims = quote! {
-                     let mut sql=String::with_capacity(1000);
+                     let mut sql=String::new();
                      #trim_body
-                     sql
+                     sql=sql
                 };
     for x in prefixs {
         trims = quote! {
@@ -200,7 +199,6 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
                             .trim_start_matches(#x)
                         }
     }
-    let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
     for x in suffixs {
         trims = quote! {
                             #trims
@@ -211,8 +209,16 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
     *body = quote! {
                    #body
                     sql.push_str(#prefix);
-                    sql.push_str(&{#trims; sql });
-                    sql.push_str(#suffix);
+                };
+    if have_trim {
+        *body = quote! {
+                   #body
+                   sql.push_str(&{#trims.to_string(); sql });
+                };
+    }
+    *body = quote! {
+                   #body
+                   sql.push_str(#suffix);
                 };
 }
 
