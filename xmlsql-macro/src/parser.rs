@@ -64,7 +64,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                         string_data = string_data.replace(&v, " ? ");
                         body = quote! {
                               #body
-                              args.push(#method_name.inner.clone());
+                              args.push(serde_json::json!(#method_name));
                           };
                     } else {
                         replaces = quote! {
@@ -161,8 +161,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let impl_body = parse(&x.childs, methods);
                 //do replace arg get index and item
                 let mut body_strings = impl_body.to_string().replace("  ", " ").replace("\n", "");
-                body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", index), &index);
-                body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", item), &item);
+                // body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", index), &index);
+                // body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", item), &item);
                 body_strings = body_strings.replace(&format!("arg [\"{}\"]", index), &index);
                 body_strings = body_strings.replace(&format!("arg [\"{}\"]", item), &item);
                 let s = syn::parse::<syn::LitStr>(body_strings.to_token_stream().into()).unwrap();
