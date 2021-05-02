@@ -10,6 +10,7 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 use crate::xml_loader::{load_xml, Element};
+use crate::string_util::find_convert_string;
 
 const example_data: &'static str = include_str!("../../example/example.xml");
 
@@ -37,8 +38,33 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 return parse(&x.childs, methods);
             }
             "" => {
-                let mut s = &x.data;
-                if !s.trim().is_empty() {
+                let mut s = x.data.trim();
+                let convert_map= find_convert_string(s);
+                for (k,v) in convert_map {
+                    let method_name_string = encode(&k).replace("_", "__").replace("=", "_");
+                    let method_name = Ident::new(&method_name_string, Span::call_site());
+                    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true);
+                    let mut method_string = method_impl.to_string();
+                    method_string=method_string.replace("& arg","arg");
+                    let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
+                    let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
+                    let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+                    //check append value
+                    if !body.to_string().contains(&format!("{} ",method_name)) {
+                        body = quote! {
+                              #body
+                              let #method_name = #method_impl;
+                          };
+                    }
+                    body = quote! {
+                              #body
+                              args.push(#method_name.inner.clone());
+                          };
+
+
+                }
+
+                if !s.is_empty() {
                     body = quote!(
                         #body
                          sql.push_str(#s);
@@ -127,7 +153,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false);
                 let mut method_string = method_impl.to_string();
                 let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
-                //method_impl = method_impl.replace("as_proxy()",".as_array().unwrap_or(&vec![])");
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
                 //check append value
@@ -199,7 +224,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let mut select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut sql = String::with_capacity(1000);
-                               let mut args = vec![];
+                               let mut args = Vec::with_capacity(20);
                                #child_body
                                return (sql,args);
                             }

@@ -7,6 +7,7 @@ use crate::proc_macro::TokenStream;
 mod func;
 mod parser;
 mod xml_loader;
+mod string_util;
 
 #[proc_macro_attribute]
 pub fn expr(args: TokenStream, func: TokenStream) -> TokenStream {
