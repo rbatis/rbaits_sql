@@ -61,8 +61,9 @@ fn parser_func(parser: EventReader<&[u8]>) -> Vec<Element> {
                 depth += 1;
             }
             Ok(XmlEvent::Characters(data)) | Ok(XmlEvent::Comment(data)) | Ok(XmlEvent::CData(data)) => {
-                let mut data = data.replace("\r\n", "").to_string();
-                data=data.trim().to_string();
+                let mut data = data
+                    .to_string();
+                data = data.trim().to_string();
                 let last = fathers.last_mut().unwrap();
                 (*last).childs.push(Element {
                     tag: "".to_string(),
