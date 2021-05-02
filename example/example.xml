@@ -63,7 +63,7 @@
         </foreach>
         order by
         <foreach collection="order_by" index="index" item="item">
-            #{item+"f"}
+            #{item}
         </foreach>
     </select>
     <!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->
