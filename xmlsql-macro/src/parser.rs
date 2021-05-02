@@ -40,8 +40,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             "" => {
                 let mut string_data = x.data.trim().to_string();
                 let convert_map = find_convert_string(&string_data);
-                println!("string_data:{}",string_data);
-                println!("convert_map:{:?}",convert_map);
+                println!("string_data:{}", string_data);
+                println!("convert_map:{:?}", convert_map);
 
                 let mut replaces = quote! {};
                 for (k, v) in convert_map {
@@ -61,7 +61,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                           };
                     }
                     if v.starts_with("#") {
-                        string_data = string_data.replace(&v, "?");
+                        string_data = string_data.replace(&v, " ? ");
                         body = quote! {
                               #body
                               args.push(#method_name.inner.clone());
@@ -159,6 +159,14 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
                 let impl_body = parse(&x.childs, methods);
+                //do replace arg get index and item
+                let mut body_strings = impl_body.to_string().replace("  ", " ").replace("\n", "");
+                body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", index), &index);
+                body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", item), &item);
+                body_strings = body_strings.replace(&format!("arg [\"{}\"]", index), &index);
+                body_strings = body_strings.replace(&format!("arg [\"{}\"]", item), &item);
+                let s = syn::parse::<syn::LitStr>(body_strings.to_token_stream().into()).unwrap();
+                let impl_body = syn::parse_str::<proc_macro2::TokenStream>(&s.value()).unwrap();
 
 
                 let method_name_string = encode(&collection).replace("_", "__").replace("=", "_");
@@ -166,6 +174,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false);
                 let mut method_string = method_impl.to_string();
                 let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
+
+
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
                 //check append value
