@@ -59,11 +59,11 @@
         create_time between #{create_time} and #{create_time}
         group by
         <foreach collection="ids" index="index" item="item">
-            ${index}=#{item}
+            #{item}
         </foreach>
         order by
         <foreach collection="order_by" index="index" item="item">
-            ${index}=#{item}
+            #{item}
         </foreach>
     </select>
     <!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->
