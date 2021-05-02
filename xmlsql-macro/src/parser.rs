@@ -131,7 +131,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
                 //check append value
-                if !body.to_string().contains(&method_name.to_string()) {
+                if !body.to_string().contains(&format!("{} ",method_name)) {
                     body = quote! {
                               #body
                               let #method_name = #method_impl;
@@ -236,7 +236,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
 
 
     //check append value
-    if !body.to_string().contains(&method_name.to_string()) {
+    if !body.to_string().contains(&format!("{} ",method_name)) {
         *body = quote! {
                               #body
                               let #method_name = #method_impl;
