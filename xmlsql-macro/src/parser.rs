@@ -108,9 +108,13 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
             "foreach" => {
                 let empty_string = String::new();
+
+                let def_item = "item".to_string();
+                let def_index = "index".to_string();
+
                 let collection = x.attributes.get("collection").unwrap_or(&empty_string).to_string();
-                let item = x.attributes.get("item").unwrap_or(&empty_string).to_string();
-                let index = x.attributes.get("index").unwrap_or(&empty_string).to_string();
+                let item = x.attributes.get("item").unwrap_or(&def_item).to_string();
+                let index = x.attributes.get("index").unwrap_or(&def_index).to_string();
                 let open = x.attributes.get("open").unwrap_or(&empty_string).to_string();
                 let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
@@ -153,14 +157,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
                 let mut index_create = quote! {};
                 let mut index_add = quote! {};
-                if !index.is_empty() {
-                    index_create = quote! {
+                index_create = quote! {
                         let mut #index_ident=0;
                     };
-                    index_add = quote! {
+                index_add = quote! {
                         #index_ident=#index_ident+1;
                     };
-                }
 
                 body = quote! {
                     #body

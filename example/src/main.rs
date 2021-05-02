@@ -23,28 +23,21 @@ pub mod example {}
 
 fn main() {
     let arg = serde_json::json!({
-        "a":1,
-        "b":2,
-        "c":"c",
-        "d":null,
-        "e":[1,2,3,4,5],
-        "f":[{"field":1}],
-        "g":true,
-        "h":{"name":"h"},
-        "name":"ss",
-        "startTime":"2019",
-        "endTime":"2020"
+        "id":1,
+        "order_by":["id","name"],
+        "ids":[1,2,3],
+        "name":"asdf",
+        "map":{"a":1},
+        "create_time":"2020-23-23"
     });
-    let o= arg.as_object().unwrap();
-    for x in o {
-        
-    }
+    let o = arg.as_object().unwrap();
+    for x in o {}
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
     println!("{:?}", selectByCondition(&arg));
 
-    bench!(100000,{
+    bench!(1000000,{
         selectByCondition(&arg);
     });
 }

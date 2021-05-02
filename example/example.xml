@@ -43,27 +43,27 @@
 
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
     <select id="selectByCondition" resultMap="BaseResultMap">
-<!--        <bind name="a" value='"pp"'/>-->
-<!--        <bind name="ff" value='a'/>-->
-<!--        <if test="ff!=''">-->
-<!--            ff is not eq empty-->
-<!--        </if>-->
-<!--        select * from biz_activity-->
-<!--        <if test="name != null">and name like #{pattern}</if>-->
-<!--        <if test="f[0].field != null">and name like #{pattern}</if>-->
-<!--        <trim prefix="(" prefixOverrides="and"  suffixOverrides="and" suffix=")" >-->
-<!--            and id!=null and-->
-<!--        </trim>-->
-<!--        <choose>-->
-<!--            <when test="a==1">when 1==1</when>-->
-<!--            <when test="1!=1">when 1!=1</when>-->
-<!--            <otherwise>otherwise</otherwise>-->
-<!--        </choose>-->
-        <foreach collection="e" item="item" index="index" open="(" close=")" separator=",">
-            #{item}
+        select * from table where
+        id = #{id}
+        id != #{id}
+        id in #{ids}
+        id in #{ids}
+        id in #{ids}
+        id not in #{ids}
+        <foreach collection="map">
+            #{k}=#{v}
         </foreach>
-        <foreach collection="h" item="item" index="index" open="(" close=")" separator=",">
-            #{index},#{item}
+        name like #{name}
+        or
+        name not like #{name}
+        create_time between #{create_time} and #{create_time}
+        group by
+        <foreach collection="ids">
+            #{k}=#{v}
+        </foreach>
+        order by
+        <foreach collection="order_by">
+            #{k}=#{v}
         </foreach>
     </select>
     <!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->
