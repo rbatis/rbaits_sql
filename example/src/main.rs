@@ -30,12 +30,13 @@ fn main() {
         "map":{"a":1},
         "create_time":"2020-23-23"
     });
-    let o = arg.as_object().unwrap();
-    for x in o {}
+
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
-    println!("{:?}", selectByCondition(&arg));
+    let (sql,args)=selectByCondition(&arg);
+    println!("sql: {}", sql);
+    println!("args: {:?}", args);
 
     bench!(1000000,{
         selectByCondition(&arg);

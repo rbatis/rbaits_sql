@@ -38,36 +38,49 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 return parse(&x.childs, methods);
             }
             "" => {
-                let mut s = x.data.trim();
-                let convert_map= find_convert_string(s);
-                for (k,v) in convert_map {
+                let mut string_data = x.data.trim().to_string();
+                let convert_map = find_convert_string(&string_data);
+                println!("string_data:{}",string_data);
+                println!("convert_map:{:?}",convert_map);
+
+                let mut replaces = quote! {};
+                for (k, v) in convert_map {
                     let method_name_string = encode(&k).replace("_", "__").replace("=", "_");
                     let method_name = Ident::new(&method_name_string, Span::call_site());
                     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true);
                     let mut method_string = method_impl.to_string();
-                    method_string=method_string.replace("& arg","arg");
+                    method_string = method_string.replace("& arg", "arg");
                     let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
                     let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                     let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
                     //check append value
-                    if !body.to_string().contains(&format!("{} ",method_name)) {
+                    if !body.to_string().contains(&format!("{} ", method_name)) {
                         body = quote! {
                               #body
                               let #method_name = #method_impl;
                           };
                     }
-                    body = quote! {
+                    if v.starts_with("#") {
+                        string_data = string_data.replace(&v, "?");
+                        body = quote! {
                               #body
                               args.push(#method_name.inner.clone());
                           };
-
-
+                    } else {
+                        replaces = quote! {
+                            #replaces.replace(#v, &#method_name.to_string())
+                        }
+                    }
                 }
-
-                if !s.is_empty() {
+                if !replaces.is_empty() {
+                    replaces = quote! {
+                        #replaces.as_str()
+                    }
+                }
+                if !string_data.is_empty() {
                     body = quote!(
                         #body
-                         sql.push_str(#s);
+                         sql.push_str(#string_data#replaces);
                        );
                 }
             }
@@ -156,7 +169,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
                 let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
                 //check append value
-                if !body.to_string().contains(&format!("{} ",method_name)) {
+                if !body.to_string().contains(&format!("{} ", method_name)) {
                     body = quote! {
                               #body
                               let #method_name = #method_impl;
@@ -261,7 +274,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
 
 
     //check append value
-    if !body.to_string().contains(&format!("{} ",method_name)) {
+    if !body.to_string().contains(&format!("{} ", method_name)) {
         *body = quote! {
                               #body
                               let #method_name = #method_impl;

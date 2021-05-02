@@ -44,7 +44,7 @@
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
     <select id="selectByCondition" resultMap="BaseResultMap">
         select * from table where
-        id = #{id}
+        id = ${id}
         id != #{id}
         id in #{ids}
         id in #{ids}
@@ -58,12 +58,12 @@
         name not like #{name}
         create_time between #{create_time} and #{create_time}
         group by
-        <foreach collection="ids">
-            #{k}=#{v}
+        <foreach collection="ids" index="index" item="item">
+            ${index}=#{item}
         </foreach>
         order by
-        <foreach collection="order_by">
-            #{k}=#{v}
+        <foreach collection="order_by" index="index" item="item">
+            ${index}=#{item}
         </foreach>
     </select>
     <!--    &lt;!&ndash;int countByCondition(@Param("name")String name,@Param("startTime") Date startTime, @Param("endTime")Date endTime);&ndash;&gt;-->

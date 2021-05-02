@@ -21,15 +21,15 @@ pub fn find_convert_string(arg: &str) -> LinkedList<(String, String)> {
         if *v == '}' as u8 && last_index != -1 {
             item = String::from_utf8(chars[(last_index + 2) as usize..index as usize].to_vec())
                 .unwrap();
-            if cache.get(&item).is_some() {
+            let value =
+                String::from_utf8(chars[last_index as usize..(index + 1) as usize].to_vec())
+                    .unwrap();
+            if cache.get(&value).is_some() {
                 item.clear();
                 last_index = -1;
                 continue;
             }
-            let value =
-                String::from_utf8(chars[last_index as usize..(index + 1) as usize].to_vec())
-                    .unwrap();
-            cache.insert(item.clone());
+            cache.insert(value.clone());
             list.push_back((item.clone(), value));
             item.clear();
             last_index = -1;
