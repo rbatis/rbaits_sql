@@ -17,9 +17,6 @@ const example_data: &'static str = include_str!("../../example/example.xml");
 
 fn parse_str(arg: &str) -> TokenStream {
     let datas = load_xml(arg);
-
-    println!("datas:{:#?}", datas);
-
     let mut methods = quote!();
     let fn_impl = parse(&datas, &mut methods);
     let token = quote! {
@@ -40,9 +37,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             "" => {
                 let mut string_data = x.data.trim().to_string();
                 let convert_map = find_convert_string(&string_data);
-                println!("string_data:{}", string_data);
-                println!("convert_map:{:?}", convert_map);
-
                 let mut replaces = quote! {};
                 for (k, v) in convert_map {
                     let method_name_string = encode(&k).replace("_", "__").replace("=", "_");
