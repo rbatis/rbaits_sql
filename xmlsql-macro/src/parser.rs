@@ -36,9 +36,11 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             }
             "" => {
                 let mut string_data = x.data.trim().to_string();
-                let convert_map = find_convert_string(&string_data);
+                let convert_list = find_convert_string(&string_data);
                 let mut replaces = quote! {};
-                for (k, v) in convert_map {
+
+                let mut replaced=HashMap::<String,bool>::new();
+                for (k, v) in convert_list {
                     let method_name_string = encode(&k).replace("_", "__").replace("=", "_");
                     let method_name = Ident::new(&method_name_string, Span::call_site());
                     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true);
@@ -61,8 +63,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                               args.push(serde_json::json!(#method_name));
                           };
                     } else {
-                        replaces = quote! {
-                            #replaces.replace(#v, &#method_name.to_string())
+                        if replaced.get(&v).is_none(){
+                            replaces = quote! {#replaces.replace(#v, &#method_name.to_string())};
+                            replaced.insert(v.to_string(),true);
                         }
                     }
                 }

@@ -3,7 +3,6 @@ use std::collections::{HashSet, LinkedList};
 //find like #{*,*},${*,*} value *
 pub fn find_convert_string(arg: &str) -> LinkedList<(String, String)> {
     let mut list = LinkedList::new();
-    let mut cache = HashSet::new();
     let chars: Vec<u8> = arg.bytes().collect();
     let mut item = String::new();
     let mut last_index: i32 = -1;
@@ -24,12 +23,6 @@ pub fn find_convert_string(arg: &str) -> LinkedList<(String, String)> {
             let value =
                 String::from_utf8(chars[last_index as usize..(index + 1) as usize].to_vec())
                     .unwrap();
-            if cache.get(&value).is_some() {
-                item.clear();
-                last_index = -1;
-                continue;
-            }
-            cache.insert(value.clone());
             list.push_back((item.clone(), value));
             item.clear();
             last_index = -1;
