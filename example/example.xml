@@ -40,7 +40,6 @@
     <!--    &lt;!&ndash;统计模板例子:&ndash;&gt;-->
     <!--    <selectTemplate id="selectCountTemplate" columns="count(*)" wheres="name?name = #{name}"/>-->
 
-
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
     <select id="selectByCondition" table="biz_activity">
         select * from table where

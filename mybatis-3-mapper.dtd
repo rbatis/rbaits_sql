@@ -60,7 +60,6 @@
         <!ATTLIST select
                 id CDATA #REQUIRED
                 table CDATA #IMPLIED
-                lang CDATA #IMPLIED
                 >
 
         <!ELEMENT selectTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
