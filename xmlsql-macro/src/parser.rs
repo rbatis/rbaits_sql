@@ -1,5 +1,5 @@
 use quote::{quote, ToTokens};
-use syn::{ItemFn, Expr, ItemMod};
+use syn::{ItemFn, Expr, ItemMod, Path};
 use crate::proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 
@@ -34,12 +34,67 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             "mapper" => {
                 return parse(&x.childs, methods);
             }
+            "table" => {
+                let table_name = x.attributes.get("name").expect("<table> mut have name attr!");
+                if table_name.is_empty() {
+                    panic!("<table> mut have name attr!");
+                }
+                let table_ident = Ident::new(&table_name, Span::call_site());
+
+                let mut table_fields = quote! {};
+                for x in &x.childs {
+                    match x.tag.as_ref() {
+                        "id" => {
+                            let column = x.attributes.get("column").expect("<id> mut have column attr!");
+                            let lang_type = x.attributes.get("lang_type").expect("<id> mut have lang_type attr!");
+                            if column.is_empty() {
+                                panic!("<id> column can not be empty!")
+                            }
+                            if lang_type.is_empty() {
+                                panic!("<id> lang_type can not be empty!")
+                            }
+                            let column_ident = Ident::new(&column, Span::call_site());
+                            let lang_type_ident = parse_path(lang_type);
+                            table_fields=quote! {
+                                #table_fields
+                                pub #column_ident:#lang_type_ident,
+                            };
+                        }
+                        "result" => {
+                            let column = x.attributes.get("column").expect("<result> mut have column attr!");
+                            let lang_type = x.attributes.get("lang_type").expect("<result> mut have lang_type attr!");
+                            if column.is_empty() {
+                                panic!("<id> column can not be empty!")
+                            }
+                            if lang_type.is_empty() {
+                                panic!("<id> lang_type can not be empty!")
+                            }
+                            let column_ident = Ident::new(&column, Span::call_site());
+                            let lang_type_ident =  parse_path(lang_type);
+                            table_fields=quote! {
+                                #table_fields
+                                pub #column_ident:#lang_type_ident,
+                            };
+                        }
+                        _ => {}
+                    }
+                }
+
+                body = quote! {
+                    #body
+                    #[derive(Clone, Debug)]
+                    #[derive(serde::Serialize, serde::Deserialize)]
+                    pub struct #table_ident{
+                         #table_fields
+                    }
+                }
+            }
             "" => {
                 let mut string_data = x.data.trim().to_string();
                 let convert_list = find_convert_string(&string_data);
                 let mut replaces = quote! {};
 
-                let mut replaced=HashMap::<String,bool>::new();
+                let mut replaced = HashMap::<String, bool>::new();
                 for (k, v) in convert_list {
                     let method_name_string = encode(&k).replace("_", "__").replace("=", "_");
                     let method_name = Ident::new(&method_name_string, Span::call_site());
@@ -47,8 +102,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                     let mut method_string = method_impl.to_string();
                     method_string = method_string.replace("& arg", "arg");
                     let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
-                    let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
-                    let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+                    let method_impl = parse_expr(&method_impl);
                     //check append value
                     if !body.to_string().contains(&format!("{} ", method_name)) {
                         body = quote! {
@@ -63,9 +117,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                               args.push(serde_json::json!(#method_name));
                           };
                     } else {
-                        if replaced.get(&v).is_none(){
+                        if replaced.get(&v).is_none() {
                             replaces = quote! {#replaces.replace(#v, &#method_name.to_string())};
-                            replaced.insert(v.to_string(),true);
+                            replaced.insert(v.to_string(), true);
                         }
                     }
                 }
@@ -93,19 +147,17 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods);
             }
             "bind" => {
-                let name = x.attributes.get("name").expect("bind element must be have name!").to_string();
-                let value = x.attributes.get("value").expect("bind element must be have value!").to_string();
+                let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
+                let value = x.attributes.get("value").expect("<bind> element must be have value!").to_string();
 
-                let s = syn::parse::<syn::LitStr>(name.to_token_stream().into()).unwrap();
-                let name_expr = syn::parse_str::<Expr>(&s.value()).unwrap();
+                let name_expr = parse_expr(&name);
 
                 let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false, true);
 
                 let method_string = method_impl.to_string();
                 let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
 
-                let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
-                let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+                let method_impl = parse_expr(&method_impl);
 
                 body = quote! {
                             #body
@@ -172,9 +224,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let mut method_string = method_impl.to_string();
                 let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
 
-
-                let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
-                let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+                let method_impl = parse_expr(&method_impl);
                 //check append value
                 if !body.to_string().contains(&format!("{} ", method_name)) {
                     body = quote! {
@@ -238,7 +288,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             }
 
             "select" => {
-                let id = x.attributes.get("id").expect("select element must be have id!");
+                let id = x.attributes.get("id").expect("<select> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods);
                 let mut select = quote! {
@@ -349,4 +399,16 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
 pub(crate) fn impl_fn(f: &ItemMod, args: crate::proc_macro::TokenStream) -> TokenStream {
     let t = parse_str(example_data);
     return t.into();
+}
+
+/// parse to expr
+fn parse_expr(lit_str:&str)->Expr{
+    let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}",lit_str));
+    return syn::parse_str::<Expr>(&s.value()).expect(&format!("parse_str::<Expr> fail: {}",lit_str));
+}
+
+/// parse to expr
+fn parse_path(lit_str:&str)->Path{
+    let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}",lit_str));
+    return syn::parse_str::<Path>(&s.value()).expect(&format!("parse_str::<Path> fail: {}",lit_str));
 }
