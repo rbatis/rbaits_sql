@@ -28,6 +28,7 @@ fn parse_str(arg: &str) -> TokenStream {
 
 /// gen rust code
 fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+    let empty_string = String::new();
     let mut body = quote! {};
     for x in arg {
         match x.tag.as_str() {
@@ -45,35 +46,43 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 for x in &x.childs {
                     match x.tag.as_ref() {
                         "id" => {
-                            let column = x.attributes.get("column").expect("<id> mut have column attr!");
-                            let lang_type = x.attributes.get("lang_type").expect("<id> mut have lang_type attr!");
+                            let column = x.attributes.get("column").unwrap_or(&empty_string);
+                            let mut type_lang = x.attributes.get("type_lang").unwrap_or(&empty_string).to_string();
+                            let type_option = x.attributes.get("type_option").unwrap_or(&empty_string);
+                            if !type_option.is_empty() {
+                                type_lang = format!("Option<{}>", type_option);
+                            }
                             if column.is_empty() {
                                 panic!("<id> column can not be empty!")
                             }
-                            if lang_type.is_empty() {
-                                panic!("<id> lang_type can not be empty!")
+                            if type_lang.is_empty() {
+                                panic!("<id> type_lang can not be empty!")
                             }
                             let column_ident = Ident::new(&column, Span::call_site());
-                            let lang_type_ident = parse_path(lang_type);
-                            table_fields=quote! {
+                            let type_lang_ident = parse_path(&type_lang);
+                            table_fields = quote! {
                                 #table_fields
-                                pub #column_ident:#lang_type_ident,
+                                pub #column_ident:#type_lang_ident,
                             };
                         }
                         "result" => {
-                            let column = x.attributes.get("column").expect("<result> mut have column attr!");
-                            let lang_type = x.attributes.get("lang_type").expect("<result> mut have lang_type attr!");
+                            let column = x.attributes.get("column").unwrap_or(&empty_string);
+                            let mut type_lang = x.attributes.get("type_lang").unwrap_or(&empty_string).to_string();
+                            let type_option = x.attributes.get("type_option").unwrap_or(&empty_string);
+                            if !type_option.is_empty() {
+                                type_lang = format!("Option<{}>", type_option);
+                            }
                             if column.is_empty() {
                                 panic!("<id> column can not be empty!")
                             }
-                            if lang_type.is_empty() {
-                                panic!("<id> lang_type can not be empty!")
+                            if type_lang.is_empty() {
+                                panic!("<id> type_lang can not be empty!")
                             }
                             let column_ident = Ident::new(&column, Span::call_site());
-                            let lang_type_ident =  parse_path(lang_type);
-                            table_fields=quote! {
+                            let type_lang_ident = parse_path(&type_lang);
+                            table_fields = quote! {
                                 #table_fields
-                                pub #column_ident:#lang_type_ident,
+                                pub #column_ident:#type_lang_ident,
                             };
                         }
                         _ => {}
@@ -402,13 +411,13 @@ pub(crate) fn impl_fn(f: &ItemMod, args: crate::proc_macro::TokenStream) -> Toke
 }
 
 /// parse to expr
-fn parse_expr(lit_str:&str)->Expr{
-    let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}",lit_str));
-    return syn::parse_str::<Expr>(&s.value()).expect(&format!("parse_str::<Expr> fail: {}",lit_str));
+fn parse_expr(lit_str: &str) -> Expr {
+    let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}", lit_str));
+    return syn::parse_str::<Expr>(&s.value()).expect(&format!("parse_str::<Expr> fail: {}", lit_str));
 }
 
 /// parse to expr
-fn parse_path(lit_str:&str)->Path{
-    let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}",lit_str));
-    return syn::parse_str::<Path>(&s.value()).expect(&format!("parse_str::<Path> fail: {}",lit_str));
+fn parse_path(lit_str: &str) -> Path {
+    let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}", lit_str));
+    return syn::parse_str::<Path>(&s.value()).expect(&format!("parse_str::<Path> fail: {}", lit_str));
 }

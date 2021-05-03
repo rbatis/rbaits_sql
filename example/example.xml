@@ -7,17 +7,17 @@
     <!--logic_undelete 逻辑删除 未删除字段-->
     <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
     <table name="biz_activity">
-        <id column="id" lang_type='Option&lt;String&gt;'/>
-        <result column="name" lang_type="String"/>
-        <result column="pc_link" lang_type="String"/>
-        <result column="h5_link" lang_type="String"/>
-        <result column="remark" lang_type="String"/>
-        <result column="sort" lang_type="i32"/>
-        <result column="status" lang_type="i32"/>
-        <result column="version" lang_type="i32"
+        <id column="id" type_option='String'/>
+        <result column="name" type_lang="String"/>
+        <result column="pc_link" type_lang="String"/>
+        <result column="h5_link" type_lang="String"/>
+        <result column="remark" type_lang="String"/>
+        <result column="sort" type_lang="i32"/>
+        <result column="status" type_lang="i32"/>
+        <result column="version" type_lang="i32"
                 version_enable="true"/>
-        <result column="create_time" lang_type="String"/>
-        <result column="delete_flag" lang_type="i32"
+        <result column="create_time" type_lang="String"/>
+        <result column="delete_flag" type_lang="i32"
                 logic_enable="true"
                 logic_undelete="1"
                 logic_deleted="0"/>

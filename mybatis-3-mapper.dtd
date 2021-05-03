@@ -27,13 +27,15 @@
 
         <!ELEMENT id EMPTY>
         <!ATTLIST id
-                lang_type CDATA #IMPLIED
+                type_lang CDATA #IMPLIED
+                type_option CDATA #IMPLIED
+                option CDATA #IMPLIED
                 column CDATA #IMPLIED
                 >
 
         <!ELEMENT result EMPTY>
         <!ATTLIST result
-                lang_type CDATA #IMPLIED
+                type_lang CDATA #IMPLIED
                 column CDATA #IMPLIED
                 version_enable CDATA #IMPLIED
                 logic_enable CDATA #IMPLIED
@@ -43,7 +45,7 @@
 
         <!ELEMENT arg EMPTY>
         <!ATTLIST arg
-                lang_type CDATA #IMPLIED
+                type_lang CDATA #IMPLIED
                 column CDATA #IMPLIED
                 select CDATA #IMPLIED
                 table CDATA #IMPLIED
