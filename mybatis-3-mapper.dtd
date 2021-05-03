@@ -36,6 +36,7 @@
         <!ELEMENT result EMPTY>
         <!ATTLIST result
                 type_lang CDATA #IMPLIED
+                type_option CDATA #IMPLIED
                 column CDATA #IMPLIED
                 version_enable CDATA #IMPLIED
                 logic_enable CDATA #IMPLIED

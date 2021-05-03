@@ -8,16 +8,16 @@
     <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
     <table name="biz_activity">
         <id column="id" type_option='String'/>
-        <result column="name" type_lang="String"/>
-        <result column="pc_link" type_lang="String"/>
-        <result column="h5_link" type_lang="String"/>
-        <result column="remark" type_lang="String"/>
-        <result column="sort" type_lang="i32"/>
-        <result column="status" type_lang="i32"/>
-        <result column="version" type_lang="i32"
+        <result column="name" type_option="String"/>
+        <result column="pc_link" type_option="String"/>
+        <result column="h5_link" type_option="String"/>
+        <result column="remark" type_option="String"/>
+        <result column="sort" type_option="i32"/>
+        <result column="status" type_option="i32"/>
+        <result column="version" type_option="i32"
                 version_enable="true"/>
-        <result column="create_time" type_lang="String"/>
-        <result column="delete_flag" type_lang="i32"
+        <result column="create_time" type_option="String"/>
+        <result column="delete_flag" type_option="i32"
                 logic_enable="true"
                 logic_undelete="1"
                 logic_deleted="0"/>
