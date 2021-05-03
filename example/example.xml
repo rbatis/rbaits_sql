@@ -2,26 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "mybatis-3-mapper.dtd">
 <mapper>
-    <!--    &lt;!&ndash;logic_enable 逻辑删除字段&ndash;&gt;-->
-    <!--    &lt;!&ndash;logic_deleted 逻辑删除已删除字段&ndash;&gt;-->
-    <!--    &lt;!&ndash;logic_undelete 逻辑删除 未删除字段&ndash;&gt;-->
-    <!--    &lt;!&ndash;version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64&ndash;&gt;-->
-    <!--    <resultMap id="BaseResultMap" tables="biz_activity">-->
-    <!--        <id column="id" langType="string"/>-->
-    <!--        <result column="name" langType="string"/>-->
-    <!--        <result column="pc_link" langType="string"/>-->
-    <!--        <result column="h5_link" langType="string"/>-->
-    <!--        <result column="remark" langType="string"/>-->
-    <!--        <result column="sort" langType="int"/>-->
-    <!--        <result column="status" langType="status"/>-->
-    <!--        <result column="version" langType="int"-->
-    <!--                version_enable="true"/>-->
-    <!--        <result column="create_time" langType="string"/>-->
-    <!--        <result column="delete_flag" langType="int"-->
-    <!--                logic_enable="true"-->
-    <!--                logic_undelete="1"-->
-    <!--                logic_deleted="0"/>-->
-    <!--    </resultMap>-->
+        <!--logic_enable 逻辑删除字段-->
+        <!--logic_deleted 逻辑删除已删除字段-->
+        <!--logic_undelete 逻辑删除 未删除字段-->
+        <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
+        <table name="biz_activity">
+            <id column="id" langType="string"/>
+            <result column="name" langType="string"/>
+            <result column="pc_link" langType="string"/>
+            <result column="h5_link" langType="string"/>
+            <result column="remark" langType="string"/>
+            <result column="sort" langType="int"/>
+            <result column="status" langType="status"/>
+            <result column="version" langType="int"
+                    version_enable="true"/>
+            <result column="create_time" langType="string"/>
+            <result column="delete_flag" langType="int"
+                    logic_enable="true"
+                    logic_undelete="1"
+                    logic_deleted="0"/>
+        </table>
 
     <!--    &lt;!&ndash;模板标签: columns wheres sets 支持逗号,分隔表达式，*?* 为判空表达式&ndash;&gt;-->
 
@@ -42,7 +42,7 @@
 
 
     <!--SelectByCondition func(name *string, startTime *time.Time, endTime *time.Time, page *int, size *int) ([]Activity, error) `args:"name,startTime,endTime,page,size"`-->
-    <select id="selectByCondition" resultMap="BaseResultMap">
+    <select id="selectByCondition" table="biz_activity">
         select * from table where
         id = ${id}
         id != #{id}
