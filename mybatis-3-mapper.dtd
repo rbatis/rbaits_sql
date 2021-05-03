@@ -37,7 +37,7 @@
         <!ATTLIST result
                 type_lang CDATA #IMPLIED
                 type_option CDATA #IMPLIED
-                column CDATA #IMPLIED
+                column CDATA #REQUIRED
                 version_enable CDATA #IMPLIED
                 logic_enable CDATA #IMPLIED
                 logic_deleted CDATA #IMPLIED
