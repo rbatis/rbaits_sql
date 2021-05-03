@@ -2,26 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "mybatis-3-mapper.dtd">
 <mapper>
-        <!--logic_enable 逻辑删除字段-->
-        <!--logic_deleted 逻辑删除已删除字段-->
-        <!--logic_undelete 逻辑删除 未删除字段-->
-        <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
-        <table name="biz_activity">
-            <id column="id" langType="string"/>
-            <result column="name" langType="string"/>
-            <result column="pc_link" langType="string"/>
-            <result column="h5_link" langType="string"/>
-            <result column="remark" langType="string"/>
-            <result column="sort" langType="int"/>
-            <result column="status" langType="status"/>
-            <result column="version" langType="int"
-                    version_enable="true"/>
-            <result column="create_time" langType="string"/>
-            <result column="delete_flag" langType="int"
-                    logic_enable="true"
-                    logic_undelete="1"
-                    logic_deleted="0"/>
-        </table>
+    <!--logic_enable 逻辑删除字段-->
+    <!--logic_deleted 逻辑删除已删除字段-->
+    <!--logic_undelete 逻辑删除 未删除字段-->
+    <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
+    <table name="biz_activity">
+        <id column="id" lang_type='Option&lt;String&gt;'/>
+        <result column="name" lang_type="String"/>
+        <result column="pc_link" lang_type="String"/>
+        <result column="h5_link" lang_type="String"/>
+        <result column="remark" lang_type="String"/>
+        <result column="sort" lang_type="i32"/>
+        <result column="status" lang_type="i32"/>
+        <result column="version" lang_type="i32"
+                version_enable="true"/>
+        <result column="create_time" lang_type="String"/>
+        <result column="delete_flag" lang_type="i32"
+                logic_enable="true"
+                logic_undelete="1"
+                logic_deleted="0"/>
+    </table>
 
     <!--    &lt;!&ndash;模板标签: columns wheres sets 支持逗号,分隔表达式，*?* 为判空表达式&ndash;&gt;-->
 
