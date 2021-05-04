@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "mybatis-3-mapper.dtd">
+<table name="biz_activity">
+    <id column="id" type_lang='Option<String>'></id>
+    <result column="name" type_option="String"></result>
+    <result column="pc_link" type_option="String"></result>
+    <result column="h5_link" type_option="String"></result>
+    <result column="remark" type_option="String"></result>
+    <result column="sort" type_option="i32"></result>
+    <result column="status" type_option="i32"></result>
+    <result column="version" type_option="i32"
+            version_enable="true"></result>
+    <result column="create_time" type_option="String"></result>
+    <result column="delete_flag" type_option="i32"
+            logic_enable="true"
+            logic_undelete="1"
+            logic_deleted="0"></result>
+</table>
+<select id="selectByCondition" table="biz_activity">
+    select * from table where
+    id = ${id}
+    id != #{id}
+    id in #{ids}
+    id in #{ids}
+    id in #{ids}
+    id not in #{ids}
+    <foreach collection="map">
+        #{k}=#{v}
+    </foreach>
+    name like #{name}
+    or
+    name not like #{name}
+    create_time between #{create_time} and #{create_time}
+    group by
+    <foreach collection="ids" index="index" item="item">
+        #{item}
+    </foreach>
+    order by
+    <foreach collection="order_by" index="index" item="item">
+        #{item}
+    </foreach>
+</select>
