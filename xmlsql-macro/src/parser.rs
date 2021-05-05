@@ -19,7 +19,7 @@ fn parse_str(arg: &str) -> TokenStream {
     let datas = load_html(arg).expect("load_html() fail!");
     println!("load html:{:#?}", datas);
     let mut methods = quote!();
-    let fn_impl = parse(&datas, &mut methods, "mapper");
+    let fn_impl = parse(&datas, &mut methods, "");
     let token = quote! {
         #methods
         #fn_impl
@@ -106,7 +106,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let mut replaced = HashMap::<String, bool>::new();
                 for (k, v) in convert_list {
-                    let method_name_string = encode(&format!("{}{}",block_name,k)).replace("_", "__").replace("=", "_");
+                    let method_name_string = encode(&format!("{}:{}",block_name,k)).replace("_", "__").replace("=", "_");
                     let mut method_name = Ident::new(&method_name_string, Span::call_site());
                     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true);
                     let mut method_string = method_impl.to_string();
@@ -146,7 +146,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
             }
             "if" => {
-                impl_if(x, &mut body, methods);
+                impl_if(x, &mut body, methods,&format!("{}:{}",block_name,"if"));
             }
             "trim" => {
                 let mut empty_string = String::new();
@@ -154,7 +154,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
                 let mut prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let mut suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
-                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods);
+                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods,&format!("{}:{}",block_name,"trim"));
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
@@ -176,7 +176,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "where" => {
-                impl_trim("", "", "and |or ", " and| or", x, &mut body, arg, methods);
+                impl_trim("", "", "and |or ", " and| or", x, &mut body, arg, methods,&format!("{}:{}",block_name,"where:trim"));
             }
 
             "choose" => {
@@ -186,10 +186,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         panic!("choose node's childs must be when node and otherwise node!");
                     }
                     if x.tag.eq("when") {
-                        impl_if(x, &mut inner_body, methods);
+                        impl_if(x, &mut inner_body, methods,&format!("{}:{}",block_name,"choose:when:if"));
                     }
                     if x.tag.eq("otherwise") {
-                        impl_otherwise(x, &mut inner_body, methods);
+                        impl_otherwise(x, &mut inner_body, methods,&format!("{}:{}",block_name,"choose:otherwise"));
                     }
                 }
                 body = quote! {
@@ -228,7 +228,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let impl_body = syn::parse_str::<proc_macro2::TokenStream>(&s.value()).unwrap();
 
 
-                let method_name_string = encode(&format!("{}{}",block_name,collection)).replace("_", "__").replace("=", "_");
+                let method_name_string = encode(&format!("{}:{}",block_name,collection)).replace("_", "__").replace("=", "_");
                 let method_name = Ident::new(&method_name_string, Span::call_site());
                 let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false);
                 let mut method_string = method_impl.to_string();
@@ -294,7 +294,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "set" => {
-                impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods);
+                impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods,&format!("{}:{}",block_name,"set:trim"));
             }
 
             "select" => {
@@ -325,7 +325,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
     return body.into();
 }
 
-fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream) {
+fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream,block_name:&str) {
     let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
     let method_name_string = encode(&test_value).replace("_", "__").replace("=", "_");
     let method_name = Ident::new(&method_name_string, Span::call_site());
@@ -346,7 +346,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
                           };
     }
     if x.childs.len() != 0 {
-        let if_tag_body = parse(&x.childs, methods, "if");
+        let if_tag_body = parse(&x.childs, methods, block_name);
         *body = quote! {
                               #body
                               if #method_name {
@@ -356,8 +356,8 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
     }
 }
 
-fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream) {
-    let child_body = parse(&x.childs, methods, "otherwise");
+fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream,block_name:&str) {
+    let child_body = parse(&x.childs, methods, block_name);
     *body = quote!(
                         #body
                         #child_body
@@ -365,8 +365,8 @@ fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mu
 }
 
 
-fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) {
-    let mut trim_body = parse(&x.childs, methods, "trim");
+fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream,block_name:&str) {
+    let mut trim_body = parse(&x.childs, methods, block_name);
     let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
     let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
     let have_trim = prefixs.len() != 0 && suffixs.len() != 0;

@@ -22,24 +22,24 @@
             id = ${id}
         </if>
         id != #{id}
-<!--        id in #{ids}-->
-<!--        id in #{ids}-->
-<!--        id in #{ids}-->
-<!--        id not in #{ids}-->
-<!--        <foreach collection="map">-->
-<!--            #{k}=#{v}-->
-<!--        </foreach>-->
-<!--        name like #{name}-->
-<!--        or-->
-<!--        name not like #{name}-->
-<!--        create_time between #{create_time} and #{create_time}-->
-<!--        group by-->
-<!--        <foreach collection="ids" index="index" item="item">-->
-<!--            #{item}-->
-<!--        </foreach>-->
-<!--        order by-->
-<!--        <foreach collection="order_by" index="index" item="item">-->
-<!--            #{item}-->
-<!--        </foreach>-->
+        id in #{ids}
+        id in #{ids}
+        id in #{ids}
+        id not in #{ids}
+        <foreach collection="map">
+            #{k}=#{v}
+        </foreach>
+        name like #{name}
+        or
+        name not like #{name}
+        create_time between #{create_time} and #{create_time}
+        group by
+        <foreach collection="ids" index="index" item="item">
+            #{item}
+        </foreach>
+        order by
+        <foreach collection="order_by" index="index" item="item">
+            #{item}
+        </foreach>
     </select>
 </mapper>
