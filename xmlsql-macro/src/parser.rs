@@ -329,8 +329,6 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
     let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
     let method_name_string = encode(&test_value).replace("_", "__").replace("=", "_");
     let method_name = Ident::new(&method_name_string, Span::call_site());
-    let test_value = test_value.replace(" and ", " && ");
-    let test_value = test_value.replace(" or ", " && ");
     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true);
     let mut method_string = method_impl.to_string();
 
