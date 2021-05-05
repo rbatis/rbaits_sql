@@ -9,14 +9,15 @@ use base64::{encode, decode};
 use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
-use crate::xml_loader::{load_xml, Element};
 use crate::string_util::find_convert_string;
+use crate::html_loader::{load_html, Element};
 
-const example_data: &'static str = include_str!("../../example/example.xml");
+const example_data: &'static str = include_str!("../../example/example.html");
 
 
 fn parse_str(arg: &str) -> TokenStream {
-    let datas = load_xml(arg);
+    let datas = load_html(arg).expect("load_html() fail!");
+    println!("load html:{:#?}",datas);
     let mut methods = quote!();
     let fn_impl = parse(&datas, &mut methods);
     let token = quote! {
