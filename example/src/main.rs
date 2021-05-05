@@ -20,7 +20,6 @@ pub mod example {}
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 
-
 fn main() {
     let arg = serde_json::json!({
         "id":1,
@@ -34,7 +33,7 @@ fn main() {
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
-    let (sql,args)=selectByCondition(&arg);
+    let (sql, args) = selectByCondition(&arg);
     println!("sql: {}", sql);
     println!("args: {:?}", args);
 

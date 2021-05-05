@@ -17,9 +17,9 @@ const example_data: &'static str = include_str!("../../example/example.html");
 
 fn parse_str(arg: &str) -> TokenStream {
     let datas = load_html(arg).expect("load_html() fail!");
-    println!("load html:{:#?}",datas);
+    println!("load html:{:#?}", datas);
     let mut methods = quote!();
-    let fn_impl = parse(&datas, &mut methods);
+    let fn_impl = parse(&datas, &mut methods, "mapper");
     let token = quote! {
         #methods
         #fn_impl
@@ -28,13 +28,13 @@ fn parse_str(arg: &str) -> TokenStream {
 }
 
 /// gen rust code
-fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) -> proc_macro2::TokenStream {
     let empty_string = String::new();
     let mut body = quote! {};
     for x in arg {
         match x.tag.as_str() {
             "mapper" => {
-                return parse(&x.childs, methods);
+                return parse(&x.childs, methods, "mapper");
             }
             "table" => {
                 let table_name = x.attributes.get("name").expect("<table> mut have name attr!");
@@ -106,8 +106,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
 
                 let mut replaced = HashMap::<String, bool>::new();
                 for (k, v) in convert_list {
-                    let method_name_string = encode(&k).replace("_", "__").replace("=", "_");
-                    let method_name = Ident::new(&method_name_string, Span::call_site());
+                    let method_name_string = encode(&format!("{}{}",block_name,k)).replace("_", "__").replace("=", "_");
+                    let mut method_name = Ident::new(&method_name_string, Span::call_site());
                     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true);
                     let mut method_string = method_impl.to_string();
                     method_string = method_string.replace("& arg", "arg");
@@ -217,7 +217,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
-                let impl_body = parse(&x.childs, methods);
+                let impl_body = parse(&x.childs, methods, "foreach");
                 //do replace arg get index and item
                 let mut body_strings = impl_body.to_string().replace("  ", " ").replace("\n", "");
                 // body_strings = body_strings.replace(&format!("arg [\"{}\"] . as_proxy()", index), &index);
@@ -228,7 +228,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
                 let impl_body = syn::parse_str::<proc_macro2::TokenStream>(&s.value()).unwrap();
 
 
-                let method_name_string = encode(&collection).replace("_", "__").replace("=", "_");
+                let method_name_string = encode(&format!("{}{}",block_name,collection)).replace("_", "__").replace("=", "_");
                 let method_name = Ident::new(&method_name_string, Span::call_site());
                 let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false);
                 let mut method_string = method_impl.to_string();
@@ -300,7 +300,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) -> proc_mac
             "select" => {
                 let id = x.attributes.get("id").expect("<select> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods);
+                let child_body = parse(&x.childs, methods, "select");
                 let mut select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut sql = String::with_capacity(1000);
@@ -346,7 +346,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
                           };
     }
     if x.childs.len() != 0 {
-        let if_tag_body = parse(&x.childs, methods);
+        let if_tag_body = parse(&x.childs, methods, "if");
         *body = quote! {
                               #body
                               if #method_name {
@@ -357,7 +357,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
 }
 
 fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream) {
-    let child_body = parse(&x.childs, methods);
+    let child_body = parse(&x.childs, methods, "otherwise");
     *body = quote!(
                         #body
                         #child_body
@@ -366,7 +366,7 @@ fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mu
 
 
 fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream) {
-    let mut trim_body = parse(&x.childs, methods);
+    let mut trim_body = parse(&x.childs, methods, "trim");
     let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
     let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
     let have_trim = prefixs.len() != 0 && suffixs.len() != 0;
