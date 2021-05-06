@@ -3,10 +3,10 @@ use std::ops::Sub;
 use crate::ops::AsProxy;
 
 //serde
-impl Sub<&serde_json::Value> for Value {
-    type Output = Value;
+impl Sub<&serde_json::Value> for Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -23,10 +23,10 @@ impl Sub<&serde_json::Value> for Value {
     }
 }
 
-impl Sub<serde_json::Value> for Value {
-    type Output = Value;
+impl Sub<serde_json::Value> for Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -43,10 +43,10 @@ impl Sub<serde_json::Value> for Value {
     }
 }
 
-impl Sub<&serde_json::Value> for &Value {
-    type Output = Value;
+impl Sub<&serde_json::Value> for &Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: &serde_json::Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -63,10 +63,10 @@ impl Sub<&serde_json::Value> for &Value {
     }
 }
 
-impl Sub<serde_json::Value> for &Value {
-    type Output = Value;
+impl Sub<serde_json::Value> for &Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: serde_json::Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -84,10 +84,10 @@ impl Sub<serde_json::Value> for &Value {
 }
 
 //value
-impl Sub<&Value> for Value {
-    type Output = Value;
+impl Sub<&Value<'_>> for Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: &Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -104,10 +104,10 @@ impl Sub<&Value> for Value {
     }
 }
 
-impl Sub<Value> for Value {
-    type Output = Value;
+impl Sub<Value<'_>> for Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -124,10 +124,10 @@ impl Sub<Value> for Value {
     }
 }
 
-impl Sub<&Value> for &Value {
-    type Output = Value;
+impl Sub<&Value<'_>> for &Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: &Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -144,10 +144,10 @@ impl Sub<&Value> for &Value {
     }
 }
 
-impl Sub<Value> for &Value {
-    type Output = Value;
+impl Sub<Value<'_>> for &Value<'_> {
+    type Output = Value<'static>;
     fn sub(self, rhs: Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -196,42 +196,42 @@ fn sub_f64_value(value: &Value, other: f64) -> f64 {
 macro_rules! impl_numeric_sub {
     ($($sub:ident,$sub_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
-            impl Sub<$ty> for Value {
+            impl Sub<$ty> for Value<'_> {
                 type Output = $return_ty;
                 fn sub(self, other: $ty) -> Self::Output {
                     $sub(&self, other as _)
                 }
             }
 
-            impl Sub<Value> for $ty {
+            impl Sub<Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn sub(self, other: Value) -> Self::Output {
                     $sub_value(&other, self as _)
                 }
             }
 
-            impl Sub<&Value> for $ty {
+            impl Sub<&Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn sub(self, other: &Value) -> Self::Output {
                     $sub_value(other, self as _)
                 }
             }
 
-            impl Sub<&mut Value> for $ty {
+            impl Sub<&mut Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn sub(self, other: &mut Value) -> Self::Output {
                     $sub_value(other, self as _)
                 }
             }
 
-            impl<'a> Sub<$ty> for &'a Value {
+            impl<'a> Sub<$ty> for &'a Value<'_> {
                 type Output = $return_ty;
                 fn sub(self, other: $ty) -> Self::Output {
                     $sub(self, other as _)
                 }
             }
 
-            impl<'a> Sub<$ty> for &'a mut Value {
+            impl<'a> Sub<$ty> for &'a mut Value<'_> {
                 type Output = $return_ty;
                 fn sub(self, other: $ty) -> Self::Output {
                     $sub(self, other as _)

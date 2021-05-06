@@ -2,10 +2,10 @@ use crate::Value;
 use std::ops::Mul;
 use crate::ops::AsProxy;
 
-impl Mul<&serde_json::Value> for Value {
-    type Output = Value;
+impl Mul<&serde_json::Value> for Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -22,10 +22,10 @@ impl Mul<&serde_json::Value> for Value {
     }
 }
 
-impl Mul<serde_json::Value> for Value {
-    type Output = Value;
+impl Mul<serde_json::Value> for Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -42,10 +42,10 @@ impl Mul<serde_json::Value> for Value {
     }
 }
 
-impl Mul<&serde_json::Value> for &Value {
-    type Output = Value;
+impl Mul<&serde_json::Value> for &Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: &serde_json::Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -62,10 +62,10 @@ impl Mul<&serde_json::Value> for &Value {
     }
 }
 
-impl Mul<serde_json::Value> for &Value {
-    type Output = Value;
+impl Mul<serde_json::Value> for &Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: serde_json::Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -83,10 +83,10 @@ impl Mul<serde_json::Value> for &Value {
 }
 
 
-impl Mul<&Value> for Value {
-    type Output = Value;
+impl Mul<&Value<'_>> for Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: &Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -103,10 +103,10 @@ impl Mul<&Value> for Value {
     }
 }
 
-impl Mul<Value> for Value {
-    type Output = Value;
+impl Mul<Value<'_>> for Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -123,10 +123,10 @@ impl Mul<Value> for Value {
     }
 }
 
-impl Mul<&Value> for &Value {
-    type Output = Value;
+impl Mul<&Value<'_>> for &Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: &Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -143,10 +143,10 @@ impl Mul<&Value> for &Value {
     }
 }
 
-impl Mul<Value> for &Value {
-    type Output = Value;
+impl Mul<Value<'_>> for &Value<'_> {
+    type Output = Value<'static>;
     fn mul(self, rhs: Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() * rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -180,42 +180,42 @@ fn mul_f64(value: &Value, other: f64) -> f64 {
 macro_rules! impl_numeric_mul {
     ($($mul:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
-            impl Mul<$ty> for Value {
+            impl Mul<$ty> for Value<'_> {
                 type Output = $return_ty;
                 fn mul(self, other: $ty) -> Self::Output {
                     $mul(&self, other as _)
                 }
             }
 
-            impl Mul<Value> for $ty {
+            impl Mul<Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn mul(self, other: Value) -> Self::Output {
                     $mul(&other, self as _)
                 }
             }
 
-            impl Mul<&Value> for $ty {
+            impl Mul<&Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn mul(self, other: &Value) -> Self::Output {
                     $mul(other, self as _)
                 }
             }
 
-            impl Mul<&mut Value> for $ty {
+            impl Mul<&mut Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn mul(self, other: &mut Value) -> Self::Output {
                     $mul(other, self as _)
                 }
             }
 
-            impl<'a> Mul<$ty> for &'a Value {
+            impl<'a> Mul<$ty> for &'a Value<'_> {
                 type Output = $return_ty;
                 fn mul(self, other: $ty) -> Self::Output {
                     $mul(self, other as _)
                 }
             }
 
-            impl<'a> Mul<$ty> for &'a mut Value {
+            impl<'a> Mul<$ty> for &'a mut Value<'_> {
                 type Output = $return_ty;
                 fn mul(self, other: $ty) -> Self::Output {
                     $mul(self, other as _)

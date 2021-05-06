@@ -29,37 +29,37 @@ fn eq_bool(value: &Value, other: bool) -> Option<Ordering> {
 macro_rules! impl_numeric_cmp {
     ($($eq:ident [$($ty:ty)*])*) => {
         $($(
-            impl PartialOrd<$ty> for Value {
+            impl PartialOrd<$ty> for Value<'_> {
                 fn partial_cmp(&self, other: &$ty) -> Option<Ordering> {
                     $eq(self, *other as _)
                 }
             }
 
-            impl PartialOrd<Value> for $ty {
+            impl PartialOrd<Value<'_>> for $ty {
                 fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
                     $eq(other, *self as _)
                 }
             }
 
-            impl PartialOrd<&Value> for $ty {
+            impl PartialOrd<&Value<'_>> for $ty {
                 fn partial_cmp(&self, other: &&Value)  -> Option<Ordering> {
                     $eq(*other, *self as _)
                 }
             }
 
-            impl PartialOrd<&mut Value> for $ty {
+            impl PartialOrd<&mut Value<'_>> for $ty {
                 fn partial_cmp(&self, other: &&mut Value)  -> Option<Ordering> {
                     $eq(*other, *self as _)
                 }
             }
 
-            impl<'a> PartialOrd<$ty> for &'a Value {
+            impl<'a> PartialOrd<$ty> for &'a Value<'_> {
                 fn partial_cmp(&self, other: &$ty) -> Option<Ordering> {
                     $eq(*self, *other as _)
                 }
             }
 
-            impl<'a> PartialOrd<$ty> for &'a mut Value {
+            impl<'a> PartialOrd<$ty> for &'a mut Value<'_> {
                 fn partial_cmp(&self, other: &$ty) -> Option<Ordering> {
                     $eq(*self, *other as _)
                 }
@@ -76,19 +76,19 @@ impl_numeric_cmp! {
 }
 
 
-impl PartialOrd<Value> for Value {
+impl PartialOrd<Value<'static>> for Value<'static> {
     fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
         self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }
 }
 
-impl PartialOrd<Value> for &Value {
-    fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
+impl PartialOrd<Value<'static>> for &Value<'_> {
+    fn partial_cmp(&self, other: &Value<'_>) -> Option<Ordering> {
         self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }
 }
 
-impl PartialOrd<&Value> for Value{
+impl PartialOrd<&Value<'_>> for Value<'_>{
     fn partial_cmp(&self, other: &&Value) -> Option<Ordering> {
         self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }

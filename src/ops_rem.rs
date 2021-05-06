@@ -4,10 +4,10 @@ use crate::ops::AsProxy;
 
 
 //serde
-impl Rem<serde_json::Value> for Value {
-    type Output = Value;
+impl Rem<serde_json::Value> for Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -24,10 +24,10 @@ impl Rem<serde_json::Value> for Value {
     }
 }
 
-impl Rem<&serde_json::Value> for Value {
-    type Output = Value;
+impl Rem<&serde_json::Value> for Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -44,10 +44,10 @@ impl Rem<&serde_json::Value> for Value {
     }
 }
 
-impl Rem<serde_json::Value> for &Value {
-    type Output = Value;
+impl Rem<serde_json::Value> for &Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: serde_json::Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -64,10 +64,10 @@ impl Rem<serde_json::Value> for &Value {
     }
 }
 
-impl Rem<&serde_json::Value> for &Value {
-    type Output = Value;
+impl Rem<&serde_json::Value> for &Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: &serde_json::Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -86,10 +86,10 @@ impl Rem<&serde_json::Value> for &Value {
 
 //value
 
-impl Rem<Value> for Value {
-    type Output = Value;
+impl Rem<Value<'_>> for Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -106,10 +106,10 @@ impl Rem<Value> for Value {
     }
 }
 
-impl Rem<&Value> for Value {
-    type Output = Value;
+impl Rem<&Value<'_>> for Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: &Value) -> Self::Output {
-        return match self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -126,10 +126,10 @@ impl Rem<&Value> for Value {
     }
 }
 
-impl Rem<Value> for &Value {
-    type Output = Value;
+impl Rem<Value<'_>> for &Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -146,10 +146,10 @@ impl Rem<Value> for &Value {
     }
 }
 
-impl Rem<&Value> for &Value {
-    type Output = Value;
+impl Rem<&Value<'_>> for &Value<'_> {
+    type Output = Value<'static>;
     fn rem(self, rhs: &Value) -> Self::Output {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     serde_json::json!(s.as_i64().unwrap_or_default() % rhs.as_i64().unwrap_or_default()).into_proxy()
@@ -197,42 +197,42 @@ fn rem_f64_value(value: &Value, other: f64) -> f64 {
 macro_rules! impl_numeric_rem {
     ($($rem:ident,$rem_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
-            impl Rem<$ty> for Value {
+            impl Rem<$ty> for Value<'_> {
                 type Output = $return_ty;
                 fn rem(self, other: $ty) -> Self::Output {
                     $rem(&self, other as _)
                 }
             }
 
-            impl Rem<Value> for $ty {
+            impl Rem<Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn rem(self, other: Value) -> Self::Output {
                     $rem_value(&other, self as _)
                 }
             }
 
-            impl Rem<&Value> for $ty {
+            impl Rem<&Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn rem(self, other: &Value) -> Self::Output {
                     $rem_value(other, self as _)
                 }
             }
 
-            impl Rem<&mut Value> for $ty {
+            impl Rem<&mut Value<'_>> for $ty {
                 type Output = $return_ty;
                 fn rem(self, other: &mut Value) -> Self::Output {
                     $rem_value(other, self as _)
                 }
             }
 
-            impl<'a> Rem<$ty> for &'a Value {
+            impl<'a> Rem<$ty> for &'a Value<'_> {
                 type Output = $return_ty;
                 fn rem(self, other: $ty) -> Self::Output {
                     $rem(self, other as _)
                 }
             }
 
-            impl<'a> Rem<$ty> for &'a mut Value {
+            impl<'a> Rem<$ty> for &'a mut Value<'_> {
                 type Output = $return_ty;
                 fn rem(self, other: $ty) -> Self::Output {
                     $rem(self, other as _)

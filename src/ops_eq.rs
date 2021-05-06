@@ -1,13 +1,13 @@
 use crate::Value;
 
 
-impl PartialEq<Value> for &Value {
+impl PartialEq<Value<'_>> for &'_ Value<'_> {
     fn eq(&self, other: &Value) -> bool {
         self.inner.eq(&other.inner)
     }
 }
 
-impl PartialEq<&Value> for Value{
+impl PartialEq<&Value<'_>> for Value<'_>{
     fn eq(&self, other: &&Value) -> bool {
         self.inner.eq(&other.inner)
     }
@@ -37,37 +37,37 @@ fn eq_str(value: &Value, other: &str) -> bool {
     value.as_str().map_or(false, |i| i == other)
 }
 
-impl PartialEq<str> for Value {
+impl PartialEq<str> for Value<'_> {
     fn eq(&self, other: &str) -> bool {
         eq_str(self, other)
     }
 }
 
-impl<'a> PartialEq<&'a str> for Value {
+impl<'a> PartialEq<&'a str> for Value<'_> {
     fn eq(&self, other: &&str) -> bool {
         eq_str(self, *other)
     }
 }
 
-impl PartialEq<Value> for str {
+impl PartialEq<Value<'_>> for str {
     fn eq(&self, other: &Value) -> bool {
         eq_str(other, self)
     }
 }
 
-impl<'a> PartialEq<Value> for &'a str {
+impl<'a> PartialEq<Value<'_>> for &'a str {
     fn eq(&self, other: &Value) -> bool {
         eq_str(other, *self)
     }
 }
 
-impl PartialEq<String> for Value {
+impl PartialEq<String> for Value<'_> {
     fn eq(&self, other: &String) -> bool {
         eq_str(self, other.as_str())
     }
 }
 
-impl PartialEq<Value> for String {
+impl PartialEq<Value<'_>> for String {
     fn eq(&self, other: &Value) -> bool {
         eq_str(other, self.as_str())
     }
@@ -76,37 +76,37 @@ impl PartialEq<Value> for String {
 macro_rules! impl_numeric_eq {
     ($($eq:ident [$($ty:ty)*])*) => {
         $($(
-            impl PartialEq<$ty> for Value {
+            impl PartialEq<$ty> for Value<'_> {
                 fn eq(&self, other: &$ty) -> bool {
                     $eq(self, *other as _)
                 }
             }
 
-            impl PartialEq<Value> for $ty {
+            impl PartialEq<Value<'_>> for $ty {
                 fn eq(&self, other: &Value) -> bool {
                     $eq(other, *self as _)
                 }
             }
 
-            impl PartialEq<&Value> for $ty {
+            impl PartialEq<&Value<'_>> for $ty {
                 fn eq(&self, other: &&Value)  -> bool {
                     $eq(*other, *self as _)
                 }
             }
 
-            impl PartialEq<&mut Value> for $ty {
+            impl PartialEq<&mut Value<'_>> for $ty {
                 fn eq(&self, other: &&mut Value)  -> bool {
                     $eq(*other, *self as _)
                 }
             }
 
-            impl<'a> PartialEq<$ty> for &'a Value {
+            impl<'a> PartialEq<$ty> for &'a Value<'_> {
                 fn eq(&self, other: &$ty) -> bool {
                     $eq(*self, *other as _)
                 }
             }
 
-            impl<'a> PartialEq<$ty> for &'a mut Value {
+            impl<'a> PartialEq<$ty> for &'a mut Value<'_> {
                 fn eq(&self, other: &$ty) -> bool {
                     $eq(*self, *other as _)
                 }

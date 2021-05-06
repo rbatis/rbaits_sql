@@ -1,7 +1,7 @@
 use std::ops::BitAnd;
 use crate::Value;
 
-impl BitAnd for Value{
+impl BitAnd for Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -9,7 +9,7 @@ impl BitAnd for Value{
     }
 }
 
-impl BitAnd<Value> for bool{
+impl BitAnd<Value<'_>> for bool{
     type Output = bool;
 
     fn bitand(self, rhs: Value) -> Self::Output {
@@ -18,7 +18,7 @@ impl BitAnd<Value> for bool{
 }
 
 //ref value
-impl BitAnd<Value> for &Value{
+impl BitAnd<Value<'_>> for &Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: Value) -> Self::Output {
@@ -26,7 +26,7 @@ impl BitAnd<Value> for &Value{
     }
 }
 
-impl BitAnd<&Value> for &Value{
+impl BitAnd<&Value<'_>> for &Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: &Value) -> Self::Output {
@@ -34,7 +34,7 @@ impl BitAnd<&Value> for &Value{
     }
 }
 
-impl BitAnd<bool> for &Value{
+impl BitAnd<bool> for &Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: bool) -> Self::Output {
@@ -43,7 +43,7 @@ impl BitAnd<bool> for &Value{
 }
 
 //ref value mut
-impl BitAnd<Value> for &mut Value{
+impl BitAnd<Value<'_>> for &mut Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: Value) -> Self::Output {
@@ -51,7 +51,7 @@ impl BitAnd<Value> for &mut Value{
     }
 }
 
-impl BitAnd<&Value> for &mut Value{
+impl BitAnd<&Value<'_>> for &mut Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: &Value) -> Self::Output {
@@ -59,7 +59,7 @@ impl BitAnd<&Value> for &mut Value{
     }
 }
 
-impl BitAnd<bool> for &mut Value{
+impl BitAnd<bool> for &mut Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: bool) -> Self::Output {
@@ -68,7 +68,7 @@ impl BitAnd<bool> for &mut Value{
 }
 
 //rhs ref
-impl BitAnd<&Value> for Value{
+impl BitAnd<&Value<'_>> for Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: &Value) -> Self::Output {
@@ -76,7 +76,7 @@ impl BitAnd<&Value> for Value{
     }
 }
 
-impl BitAnd<&Value> for bool{
+impl BitAnd<&Value<'_>> for bool{
     type Output = bool;
 
     fn bitand(self, rhs: &Value) -> Self::Output {
@@ -85,7 +85,7 @@ impl BitAnd<&Value> for bool{
 }
 
 //rhs ref mut
-impl BitAnd<&mut Value> for Value{
+impl BitAnd<&mut Value<'_>> for Value<'_>{
     type Output = bool;
 
     fn bitand(self, rhs: &mut Value) -> Self::Output {
@@ -93,7 +93,7 @@ impl BitAnd<&mut Value> for Value{
     }
 }
 
-impl BitAnd<&mut Value> for bool{
+impl BitAnd<&mut Value<'_>> for bool{
     type Output = bool;
 
     fn bitand(self, rhs: &mut Value) -> Self::Output {

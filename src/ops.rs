@@ -2,22 +2,23 @@ use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 
 use serde::{Deserializer, Serializer};
+use std::borrow::Cow;
 
 /// convert serde_json::Value to Value
 pub trait AsProxy {
-    fn into_proxy(self) -> Value;
-    fn as_proxy(&self) -> Value;
+    fn into_proxy(self) -> Value<'static>;
+    fn as_proxy(&self) -> Value<'_>;
 }
 
 
 /// proxy serde_json::Value struct
 /// This structure has a certain amount of computing power
 #[derive(Eq, PartialEq, Clone, Debug)]
-pub struct Value {
-    pub inner: serde_json::Value,
+pub struct Value<'a> {
+    pub inner: Cow<'a, serde_json::Value>,
 }
 
-impl Value {
+impl<'a> Value<'a> {
     pub fn i64(&self) -> i64 {
         self.inner.as_i64().unwrap_or_default()
     }
@@ -92,7 +93,7 @@ impl Value {
         self.inner.is_array()
     }
     pub fn is_empty(&self) -> bool {
-        return match &self.inner {
+        return match self.inner.as_ref() {
             serde_json::Value::Null => {
                 true
             }
@@ -115,7 +116,16 @@ impl Value {
     }
 }
 
-impl std::fmt::Display for Value {
+impl<'a> Value<'a> {
+    fn into_proxy(self) -> Value<'a> {
+        self
+    }
+    pub fn as_proxy(self) -> Value<'a> {
+        self
+    }
+}
+
+impl<'a> std::fmt::Display for Value<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.inner, f)
     }
@@ -123,65 +133,65 @@ impl std::fmt::Display for Value {
 
 
 impl AsProxy for serde_json::Value {
-    fn into_proxy(self) -> Value {
+    fn into_proxy(self) -> Value<'static> {
         Value {
-            inner: self.clone()
+            inner: Cow::Owned(self)
         }
     }
 
-    fn as_proxy(&self) -> Value {
+    fn as_proxy(&self) -> Value<'_> {
         Value {
-            inner: (*self).clone()
+            inner: Cow::Borrowed(self)
         }
     }
 }
 
 impl AsProxy for &serde_json::Value {
-    fn into_proxy(self) -> Value {
+    fn into_proxy(self) -> Value<'static> {
         Value {
-            inner: self.clone()
+            inner: Cow::Owned(self.clone())
         }
     }
 
-    fn as_proxy(&self) -> Value {
+    fn as_proxy(&self) -> Value<'_> {
         Value {
-            inner: (*self).clone()
+            inner: Cow::Borrowed(self)
         }
     }
 }
 
 
-impl From<serde_json::Value> for Value {
+impl<'a> From<serde_json::Value> for Value<'a> {
     fn from(arg: serde_json::Value) -> Self {
         Value {
-            inner: arg
+            inner: Cow::Owned(arg)
         }
     }
 }
 
-impl From<&serde_json::Value> for Value {
-    fn from(arg: &serde_json::Value) -> Self {
+impl<'a> From<&'a serde_json::Value> for Value<'a> {
+    fn from(arg: &'a serde_json::Value) -> Self {
         Value {
-            inner: arg.clone()
+            inner: Cow::Borrowed(arg)
         }
     }
 }
 
-impl serde::Serialize for Value {
+impl<'a> serde::Serialize for Value<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> where
         S: Serializer {
         self.inner.serialize(serializer)
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Value {
+impl<'a, 'de> serde::Deserialize<'de> for Value<'a> {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error> where
         D: Deserializer<'de> {
         let r = serde_json::Value::deserialize(deserializer);
         match r {
             Ok(o) => {
                 return Ok(Value {
-                    inner: o
+                    inner: Cow::Owned(o)
                 });
             }
             Err(e) => {
@@ -192,27 +202,16 @@ impl<'de> serde::Deserialize<'de> for Value {
 }
 
 
-impl AsProxy for Value {
-    fn into_proxy(self) -> Value {
-        self
-    }
-
-    fn as_proxy(&self) -> Value {
-        self.clone()
-    }
-}
-
-
 impl AsProxy for &str {
-    fn into_proxy(self) -> Value {
+    fn into_proxy(self) -> Value<'static> {
         Value {
-            inner: serde_json::Value::String(self.to_string())
+            inner: Cow::Owned(serde_json::Value::String(self.to_string()))
         }
     }
 
-    fn as_proxy(&self) -> Value {
+    fn as_proxy(&self) -> Value<'static> {
         Value {
-            inner: serde_json::Value::String(self.to_string())
+            inner: Cow::Owned(serde_json::Value::String(self.to_string()))
         }
     }
 }
@@ -221,14 +220,14 @@ macro_rules! impl_into_proxy {
     ($($ty:ty)*) => {
         $(
  impl AsProxy for $ty {
-    fn into_proxy(self) -> Value {
+    fn into_proxy(self) -> Value<'static> {
         Value {
-            inner: serde_json::json!(self)
+            inner: Cow::Owned(serde_json::json!(self))
         }
     }
-    fn as_proxy(&self) -> Value {
+    fn as_proxy(&self) -> Value<'static> {
         Value {
-            inner: serde_json::json!(self)
+            inner: Cow::Owned(serde_json::json!(self))
         }
     }}
       )*
