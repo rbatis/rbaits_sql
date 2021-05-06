@@ -11,7 +11,8 @@ pub trait AsProxy {
 }
 
 
-/// proxy serde_json::Value struct
+/// proxy serde_json::Value struct,support Deserializer, Serializer
+/// use Cow Optimize unnecessary clones
 /// This structure has a certain amount of computing power
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub struct Value<'a> {
