@@ -146,12 +146,15 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
             }
             "if" => {
-                impl_if(x, &mut body, methods,&format!("{}:{}",block_name,"if"));
+                impl_if(x, &mut body, methods,quote! {},&format!("{}:{}",block_name,"if"));
             }
             "trim" => {
                 let mut empty_string = String::new();
                 let prefix = x.attributes.get("prefix").unwrap_or(&empty_string).to_string();
-                let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
+                let mut suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
+                if suffix.is_empty(){
+                    suffix=" ".to_string();
+                }
                 let mut prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let mut suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
                 impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods,&format!("{}:{}",block_name,"trim"));
@@ -176,7 +179,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "where" => {
-                impl_trim("", "", "and |or ", " and| or", x, &mut body, arg, methods,&format!("{}:{}",block_name,"where:trim"));
+                impl_trim("", " ", "and |or ", " and| or", x, &mut body, arg, methods,&format!("{}:{}",block_name,"where:trim"));
             }
 
             "choose" => {
@@ -186,7 +189,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         panic!("choose node's childs must be when node and otherwise node!");
                     }
                     if x.tag.eq("when") {
-                        impl_if(x, &mut inner_body, methods,&format!("{}:{}",block_name,"choose:when:if"));
+                        impl_if(x, &mut inner_body, methods,quote! {return sql;},&format!("{}:{}",block_name,"choose:when:if"));
                     }
                     if x.tag.eq("otherwise") {
                         impl_otherwise(x, &mut inner_body, methods,&format!("{}:{}",block_name,"choose:otherwise"));
@@ -200,7 +203,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                    return sql;
                 };
                 let choose_strings = do_choose();
+                sql.push_str(" ");
                 sql.push_str(&choose_strings);
+                sql.push_str(" ");
               }
             }
 
@@ -294,7 +299,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "set" => {
-                impl_trim(" set ", "", ",", ",", x, &mut body, arg, methods,&format!("{}:{}",block_name,"set:trim"));
+                impl_trim(" set ", " ", ",", ",", x, &mut body, arg, methods,&format!("{}:{}",block_name,"set:trim"));
             }
 
             "select" => {
@@ -325,7 +330,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
     return body.into();
 }
 
-fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream,block_name:&str) {
+fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream,block_name:&str) {
     let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
     let method_name_string = encode(&test_value).replace("_", "__").replace("=", "_");
     let method_name = Ident::new(&method_name_string, Span::call_site());
@@ -350,7 +355,10 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
         *body = quote! {
                               #body
                               if #method_name {
+                                   sql.push_str(" ");
                                    #if_tag_body
+                                   sql.push_str(" ");
+                                   #appends
                               }
                           };
     }
@@ -360,7 +368,9 @@ fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mu
     let child_body = parse(&x.childs, methods, block_name);
     *body = quote!(
                         #body
+                        sql.push_str(" ");
                         #child_body
+                        sql.push_str(" ");
                        );
 }
 

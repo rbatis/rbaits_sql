@@ -27,7 +27,7 @@
         id in #{ids}
         id not in #{ids}
         <foreach collection="map">
-            #{k}=#{v}
+            ${index}=#{item}
         </foreach>
         name like #{name}
         or
