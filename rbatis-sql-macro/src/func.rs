@@ -43,12 +43,20 @@ fn convert_to_arg_access(context: &str, arg: Expr,as_proxy:bool) -> Expr {
     // println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
     match arg {
         Expr::Path(b) => {
-            if b.to_token_stream().to_string().trim() == "null" {
+            let token= b.to_token_stream().to_string();
+            if token == "null" {
                 return syn::parse_str::<Expr>("serde_json::Value::Null.into_proxy()").unwrap();
             }
-            if b.to_token_stream().to_string().trim() == "nil" {
+            if token == "nil" {
                 return syn::parse_str::<Expr>("&serde_json::Value::Null.into_proxy()").unwrap();
             }
+            if token == "sql" {
+                return Expr::Path(b);
+            }
+            if token == "args" {
+                return Expr::Path(b);
+            }
+
             let param = token_steam_string(b.to_token_stream());
 
             if as_proxy{
