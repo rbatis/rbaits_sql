@@ -293,7 +293,7 @@ pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serializ
     }
     return quote! {
         pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
-           use xmlsql::ops::AsProxy;
+           use rbatis_sql::ops::AsProxy;
            let result={#t};
            #result_impl
         }

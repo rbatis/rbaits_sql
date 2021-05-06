@@ -21,6 +21,6 @@ pub mod from_bool;
 
 
 #[macro_use]
-extern crate xmlsql_macro;
+extern crate rbatis_sql_macro;
 
-pub use xmlsql_macro::{expr,xml};
+pub use rbatis_sql_macro::{expr,xml};

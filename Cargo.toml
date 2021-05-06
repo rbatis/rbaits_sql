@@ -1,12 +1,12 @@
 [workspace]
 members = [
     ".",
-    "xmlsql-macro",
+    "rbatis-sql-macro",
     "example"
 ]
 
 [package]
-name = "xmlsql"
+name = "rbatis_sql"
 version = "1.0.7"
 description = "Rust Json Object access Runtime"
 authors = ["zhuxiujie <zhuxiujia@qq.com>"]
@@ -18,14 +18,14 @@ license = "Apache-2.0"
 
 [features]
 default = []
-debug_mode=["xmlsql-macro/debug_mode"]
+debug_mode = ["rbatis_sql_macro/debug_mode"]
 
 
 [dependencies]
 #serde
 serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1"}
+serde_json = { version = "1" }
 dashmap = { version = "4" }
 
-xmlsql-macro={version="0.1.0",path="xmlsql-macro"}
+rbatis_sql_macro = { version = "0.1.0", path = "rbatis-sql-macro" }
 base64 = "0.13"

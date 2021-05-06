@@ -1,5 +1,5 @@
 [package]
-name = "xmlsql-macro"
+name = "rbatis_sql_macro"
 version = "0.1.0"
 authors = ["zxj_pc <zhuxiujia@qq.com>"]
 edition = "2018"

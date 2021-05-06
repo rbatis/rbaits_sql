@@ -9,7 +9,7 @@ publish = false
 
 [dependencies]
 
-xmlsql={ path = "../" ,features = ["debug_mode"]}
+rbatis_sql={ path = "../" ,features = ["debug_mode"]}
 #serde
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }

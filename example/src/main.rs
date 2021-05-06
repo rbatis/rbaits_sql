@@ -7,12 +7,12 @@
 #![allow(unused_imports)]
 
 #[macro_use]
-extern crate xmlsql;
+extern crate rbatis_sql;
 
 use std::sync::Arc;
 
 use serde_json::json;
-use xmlsql::ops::AsProxy;
+use rbatis_sql::ops::AsProxy;
 
 #[xml]
 pub mod example {}
@@ -49,8 +49,8 @@ mod test {
     use serde_json::json;
 
     #[macro_use]
-    use xmlsql;
-    use xmlsql::ops::AsProxy;
+    use rbatis_sql;
+    use rbatis_sql::ops::AsProxy;
 
     #[test]
     fn test_node_run() {

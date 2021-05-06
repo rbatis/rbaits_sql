@@ -275,7 +275,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         #open_impl
                         #index_create
                         for #item_ident in #method_name.as_array().unwrap() {
-                          use xmlsql::ops::AsProxy;
+                          use rbatis_sql::ops::AsProxy;
                           let item=#item_ident.as_proxy();
                           #impl_body
                           #index_add
@@ -284,7 +284,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     }else if #method_name.is_object(){
                         #open_impl
                         for (#index_ident,#item_ident) in #method_name.as_object().unwrap() {
-                          use xmlsql::ops::AsProxy;
+                          use rbatis_sql::ops::AsProxy;
                           let item=#item_ident.as_proxy();
                           #impl_body
                         }

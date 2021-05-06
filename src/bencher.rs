@@ -32,7 +32,7 @@ impl QPS for std::time::Instant {
 macro_rules! bench {
     ($total:expr,$body:block) => {
        {
-        use xmlsql::bencher::QPS;
+        use rbatis_sql::bencher::QPS;
         let now = std::time::Instant::now();
         for _ in 0..$total {
             $body;
