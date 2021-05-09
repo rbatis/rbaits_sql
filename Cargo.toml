@@ -7,7 +7,7 @@ members = [
 
 [package]
 name = "rbatis_sql"
-version = "1.0.7"
+version = "1.0.0"
 description = "Rust Json Object access Runtime"
 authors = ["zhuxiujie <zhuxiujia@qq.com>"]
 edition = "2018"
@@ -29,3 +29,4 @@ dashmap = { version = "4" }
 
 rbatis_sql_macro = { version = "0.1.0", path = "rbatis-sql-macro" }
 base64 = "0.13"
+async-trait = "0.1"
