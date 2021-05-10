@@ -47,9 +47,6 @@ fn convert_to_arg_access(context: &str, arg: Expr,as_proxy:bool) -> Expr {
             if token == "null" {
                 return syn::parse_str::<Expr>("serde_json::Value::Null.into_proxy()").unwrap();
             }
-            if token == "nil" {
-                return syn::parse_str::<Expr>("&serde_json::Value::Null.into_proxy()").unwrap();
-            }
             if token == "sql" {
                 return Expr::Path(b);
             }

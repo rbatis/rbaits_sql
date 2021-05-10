@@ -46,11 +46,70 @@ fn main() {
 
 #[cfg(test)]
 mod test {
-    use serde_json::json;
-
     #[macro_use]
     use rbatis_sql;
     use rbatis_sql::ops::AsProxy;
+    use serde_json::{json, Value};
+    use rbatis_sql::backend::{Backend, BackendExecResult};
+    use rbatis_sql::error::Error;
+    use serde::de::DeserializeOwned;
+
+
+    #[xml]
+    pub mod example {}
+
+    pub struct B{
+
+    }
+
+    use async_trait::async_trait;
+    #[async_trait]
+    impl Backend for B{
+        async fn fetch<T>(&self, context_id: &str, sql: &str) -> Result<T, Error> where
+            T: DeserializeOwned {
+            todo!()
+        }
+
+        async fn exec(&self, context_id: &str, sql: &str) -> Result<BackendExecResult, Error> {
+            todo!()
+        }
+
+        async fn exec_prepare(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<BackendExecResult, Error> {
+            println!("sql:{}",sql);
+            println!("args:{:?}",args);
+            return Ok(BackendExecResult{
+                rows_affected: 1,
+                last_insert_id: None
+            })
+        }
+
+        async fn fetch_prepare<T>(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<T, Error> where T: DeserializeOwned {
+            todo!()
+        }
+    }
+
+    #[test]
+    fn test_backend(){
+        let b=B{};
+        let arg = serde_json::json!({
+        "id":1,
+        "order_by":["id","name"],
+        "ids":[1,2,3],
+        "name":"asdf",
+        "map":{"a":1},
+        "create_time":"2020-23-23"
+        });
+
+        // let v = gen(&arg);
+        // println!("{}", v);
+        // xml(&arg);
+        let (sql, args) = selectByCondition(&arg);
+        async_std::task::block_on(async{
+            let r=b.exec_prepare("",&sql,&args).await.unwrap();
+            println!("{:?}",r);
+        });
+    }
+
 
     #[test]
     fn test_node_run() {
@@ -113,11 +172,11 @@ mod test {
         call!(fn43, "2*(1+(1+1)+1)",json!(2 * (1 + (1 + 1) + 1)));
         call!(fn44, "(((34 + 21) / 5) - 12) * 348",json!((((34 + 21) / 5) - 12) * 348));
         call!(fn45,"11 ^ 1", json!(11 ^ 1));
-        call!(fn46,"e[0] != nil", json!(true));
+        call!(fn46,"e[0] != null", json!(true));
         call!(fn47,"null >= 0", json!(true));
         call!(fn48,"null <= a", json!(true));
-        call!(fn49,"nil >= 0", json!(true));
-        call!(fn50,"nil <= a", json!(true));
+        call!(fn49,"null >= 0", json!(true));
+        call!(fn50,"null <= a", json!(true));
         call!(fn51,"a == 1 && g", json!(true));
     }
 
