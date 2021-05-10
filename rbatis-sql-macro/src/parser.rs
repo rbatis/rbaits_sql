@@ -319,9 +319,57 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                             #select
                         };
             }
-            "update" => {}
-            "insert" => {}
-            "delete" => {}
+            "update" => {
+                let id = x.attributes.get("id").expect("<update> element must be have id!");
+                let method_name = Ident::new(id, Span::call_site());
+                let child_body = parse(&x.childs, methods, "select");
+                let mut select = quote! {
+                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                               let mut sql = String::with_capacity(1000);
+                               let mut args = Vec::with_capacity(20);
+                               #child_body
+                               return (sql,args);
+                            }
+                        };
+                body = quote! {
+                            #body
+                            #select
+                        };
+            }
+            "insert" => {
+                let id = x.attributes.get("id").expect("<insert> element must be have id!");
+                let method_name = Ident::new(id, Span::call_site());
+                let child_body = parse(&x.childs, methods, "select");
+                let mut select = quote! {
+                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                               let mut sql = String::with_capacity(1000);
+                               let mut args = Vec::with_capacity(20);
+                               #child_body
+                               return (sql,args);
+                            }
+                        };
+                body = quote! {
+                            #body
+                            #select
+                        };
+            }
+            "delete" => {
+                let id = x.attributes.get("id").expect("<delete> element must be have id!");
+                let method_name = Ident::new(id, Span::call_site());
+                let child_body = parse(&x.childs, methods, "select");
+                let mut select = quote! {
+                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                               let mut sql = String::with_capacity(1000);
+                               let mut args = Vec::with_capacity(20);
+                               #child_body
+                               return (sql,args);
+                            }
+                        };
+                body = quote! {
+                            #body
+                            #select
+                        };
+            }
             _ => {}
         }
     }
