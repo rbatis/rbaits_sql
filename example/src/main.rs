@@ -14,7 +14,7 @@ use std::sync::Arc;
 use serde_json::json;
 use rbatis_sql::ops::AsProxy;
 
-#[xml]
+#[xml("example/example.html")]
 pub mod example {}
 
 // #[expr("a+b*(e[0]+b)/2")]
