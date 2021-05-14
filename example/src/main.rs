@@ -15,12 +15,22 @@ use serde_json::json;
 use rbatis_sql::ops::AsProxy;
 
 #[xml("example/example.html")]
-pub mod example {}
+pub struct biz_activity {
+    pub id: Option<String>,
+    pub name: Option<String>,
+    pub pc_link: Option<String>,
+    pub h5_link: Option<String>,
+    pub remark: Option<String>,
+    pub sort: Option<i32>,
+    pub status: Option<i32>,
+    pub version: Option<i32>,
+    pub create_time: Option<String>,
+    pub delete_flag: Option<i32>,
+}
+
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
-
-
 fn main() {
     let arg = serde_json::json!({
         "id":1,
@@ -30,6 +40,19 @@ fn main() {
         "map":{"a":1},
         "create_time":"2020-23-23"
     });
+    let act = biz_activity {
+        id: None,
+        name: None,
+        pc_link: None,
+        h5_link: None,
+        remark: None,
+        sort: None,
+        status: None,
+        version: None,
+        create_time: None,
+        delete_flag: None,
+    };
+
 
     // let v = gen(&arg);
     // println!("{}", v);
@@ -58,13 +81,12 @@ mod test {
     #[xml]
     pub mod example {}
 
-    pub struct B{
-
-    }
+    pub struct B {}
 
     use async_trait::async_trait;
+
     #[async_trait]
-    impl Backend for B{
+    impl Backend for B {
         async fn fetch<T>(&self, context_id: &str, sql: &str) -> Result<T, Error> where
             T: DeserializeOwned {
             todo!()
@@ -75,12 +97,12 @@ mod test {
         }
 
         async fn exec_prepare(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<BackendExecResult, Error> {
-            println!("sql:{}",sql);
-            println!("args:{:?}",args);
-            return Ok(BackendExecResult{
+            println!("sql:{}", sql);
+            println!("args:{:?}", args);
+            return Ok(BackendExecResult {
                 rows_affected: 1,
-                last_insert_id: None
-            })
+                last_insert_id: None,
+            });
         }
 
         async fn fetch_prepare<T>(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<T, Error> where T: DeserializeOwned {
@@ -89,8 +111,8 @@ mod test {
     }
 
     #[test]
-    fn test_backend(){
-        let b=B{};
+    fn test_backend() {
+        let b = B {};
         let arg = serde_json::json!({
         "id":1,
         "order_by":["id","name"],
@@ -104,9 +126,9 @@ mod test {
         // println!("{}", v);
         // xml(&arg);
         let (sql, args) = selectByCondition(&arg);
-        async_std::task::block_on(async{
-            let r=b.exec_prepare("",&sql,&args).await.unwrap();
-            println!("{:?}",r);
+        async_std::task::block_on(async {
+            let r = b.exec_prepare("", &sql, &args).await.unwrap();
+            println!("{:?}", r);
         });
     }
 
