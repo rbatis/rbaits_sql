@@ -1,2 +1,2 @@
-# xml_sql
-xml_sql
+# rhql-rbatis html query lang
+rhql-rbatis html query lang
