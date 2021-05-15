@@ -1,2 +1,1 @@
-# rhql-rbatis html query lang
-rhql-rbatis html query lang
+rbatis html query lang
