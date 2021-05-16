@@ -17,7 +17,10 @@ const example_data: &'static str = include_str!("../../example/example.html");
 
 fn parse_str(arg: &str) -> TokenStream {
     let datas = load_html(arg).expect("load_html() fail!");
-    println!("load html:{:#?}", datas);
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("load html:{:#?}", datas);
+        }
     let mut methods = quote!();
     let fn_impl = parse(&datas, &mut methods, "");
     let token = quote! {
@@ -467,7 +470,10 @@ pub(crate) fn impl_fn(f: &ItemStruct, args: crate::proc_macro::TokenStream) -> T
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
         file_name = file_name[1..file_name.len() - 1].to_string();
     }
-    println!("try open file:{}", file_name);
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("try open file:{}", file_name);
+        }
     let mut data = String::new();
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
     f.read_to_string(&mut data);

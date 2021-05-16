@@ -1,12 +1,34 @@
 use std::collections::HashMap;
 use html_parser::{Dom, Node, Result};
+use std::fmt::{Debug, Formatter};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Element {
     pub tag: String,
     pub data: String,
     pub attributes: HashMap<String, String>,
     pub childs: Vec<Element>,
+}
+
+impl Debug for Element {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut s = f.debug_struct("");
+        match self.tag.as_str() {
+            "" => {
+                s.field("data", &self.data.clone());
+            }
+            _ => {
+                s.field("tag", &self.tag);
+                if !self.attributes.is_empty() {
+                    s.field("attributes", &self.attributes);
+                }
+                if !self.childs.is_empty() {
+                    s.field("childs", &self.childs);
+                }
+            }
+        }
+        return s.finish();
+    }
 }
 
 
@@ -25,8 +47,8 @@ pub fn as_element(args: &Vec<Node>) -> Vec<Element> {
             }
             Node::Element(element) => {
                 el.tag = element.name.to_string();
-                if element.id.is_some(){
-                    el.attributes.insert("id".to_string(),element.id.as_ref().unwrap_or(&String::new()).clone());
+                if element.id.is_some() {
+                    el.attributes.insert("id".to_string(), element.id.as_ref().unwrap_or(&String::new()).clone());
                 }
                 for (k, v) in &element.attributes {
                     el.attributes.insert(k.clone(), v.as_ref().unwrap_or(&String::new()).clone());
@@ -37,7 +59,7 @@ pub fn as_element(args: &Vec<Node>) -> Vec<Element> {
                 }
             }
             Node::Comment(comment) => {
-                println!("comment:{}",comment);
+                println!("comment:{}", comment);
             }
         }
         els.push(el);
