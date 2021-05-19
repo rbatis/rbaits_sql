@@ -1,0 +1,13 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "https://github.com/rbatis/rbatis_sql/raw/main/mybatis-3-mapper.dtd">
+<mapper>
+    <sql id="insert">
+        insert into biz_activity
+        <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
+            ${key}
+        </foreach>
+        values
+        <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
+            ${item}
+        </foreach>
+    </sql>
+</mapper>
