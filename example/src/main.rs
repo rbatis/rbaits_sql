@@ -54,6 +54,10 @@ fn main() {
     };
 
 
+    let (sql, args) = insert(&arg);
+    println!("sql: {}", sql);
+    println!("args: {:?}", args);
+
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);

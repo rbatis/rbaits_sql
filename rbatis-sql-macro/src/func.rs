@@ -50,6 +50,9 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
             if token == "sql" {
                 return Expr::Path(b);
             }
+            if token == "arg" {
+                return Expr::Path(b);
+            }
             if token == "args" {
                 return Expr::Path(b);
             }

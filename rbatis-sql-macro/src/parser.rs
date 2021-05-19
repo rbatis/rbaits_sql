@@ -259,6 +259,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let mut index_create = quote! {};
                 let mut index_add = quote! {};
+                let mut split_code = quote! {};
+                let mut split_code_end = quote! {};
                 index_create = quote! {
                         let mut #index_ident=0;
                     };
@@ -266,24 +268,43 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         #index_ident=#index_ident+1;
                     };
 
+                if !separator.is_empty() {
+                    split_code = quote! {    sql.push_str(#separator);  };
+                    split_code_end = quote! {
+                        if foreach_arr.len() != 0 {
+                             sql.pop();
+                        }
+                    };
+                }
+
                 body = quote! {
                     #body
                     if #method_name.is_array(){
                         #open_impl
                         #index_create
-                        for #item_ident in #method_name.as_array().unwrap() {
+                        {
                           use rbatis_sql::ops::AsProxy;
-                          let item=#item_ident.as_proxy();
-                          #impl_body
-                          #index_add
+                          let foreach_arr = #method_name.as_array().unwrap();
+                          for #item_ident in foreach_arr {
+                            let item=#item_ident.as_proxy();
+                            #impl_body
+                            #split_code
+                            #index_add
+                          }
+                          #split_code_end
                         }
                         #close_impl
                     }else if #method_name.is_object(){
                         #open_impl
-                        for (#index_ident,#item_ident) in #method_name.as_object().unwrap() {
+                        {
                           use rbatis_sql::ops::AsProxy;
-                          let item=#item_ident.as_proxy();
-                          #impl_body
+                          let foreach_arr = #method_name.as_object().unwrap();
+                          for (#index_ident,#item_ident) in foreach_arr {
+                              let item=#item_ident.as_proxy();
+                              #impl_body
+                              #split_code
+                          }
+                          #split_code_end
                         }
                         #close_impl
                     }

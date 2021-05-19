@@ -15,10 +15,11 @@
     </struct>
     <insert id="insert" lang="">
         insert into biz_activity
-        <foreach collection="arg" index="key" item="item" open="(" close=")">
+        <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
             ${key}
         </foreach>
-        <foreach collection="arg" index="key" item="item" open="(" close=")">
+         values
+        <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
             ${item}
         </foreach>
     </insert>
@@ -33,9 +34,7 @@
         id in #{ids}
         id not in #{ids}
         <foreach collection="map">
-            ${index}
-            =
-            #{item}
+            ${index} = #{item}
         </foreach>
         name like #{name}
         or
