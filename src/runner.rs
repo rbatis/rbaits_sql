@@ -10,7 +10,7 @@ pub struct BackendExecResult {
 }
 
 #[async_trait]
-pub trait FrontEnd {
+pub trait Frontend {
     /// fetch result(row sql)
     async fn fetch<Arg, T>(&self, context_id: &str, method: &str, arg: &Arg) -> Result<T, Error> where T: DeserializeOwned, Arg: Serialize;
 
