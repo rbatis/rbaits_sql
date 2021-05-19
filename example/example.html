@@ -13,7 +13,7 @@
         <result column="delete_flag" type="Option<i32>" logic_enable="true" logic_undelete="1"
                 logic_deleted="0"></result>
     </struct>
-    <insert id="insert" lang="">
+    <insert id="insert">
         insert into biz_activity
         <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
             ${key}

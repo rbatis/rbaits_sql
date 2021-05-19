@@ -76,10 +76,9 @@
         <!ELEMENT insert (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST insert
                 id CDATA #REQUIRED
-               
-                
-                useGeneratedKeys (true|false) #IMPLIED
-                lang CDATA #IMPLIED
+
+<!--                not support for now-->
+<!--                useGeneratedKeys (true|false) #IMPLIED-->
                 >
 
         <!ELEMENT insertTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
@@ -94,7 +93,6 @@
         <!ELEMENT update (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST update
                 id CDATA #REQUIRED
-                lang CDATA #IMPLIED
                 >
         <!--sets指定值(例如 sets="name?name = #{name}"  )会更新对应值，否则为""设置全部属性-->
         <!ELEMENT updateTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
@@ -110,8 +108,6 @@
         <!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST delete
                 id CDATA #REQUIRED
-
-                lang CDATA #IMPLIED
                 >
         <!ELEMENT deleteTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST deleteTemplate
