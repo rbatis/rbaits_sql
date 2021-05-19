@@ -105,7 +105,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
         }
         Expr::Unary(mut b) => {
             b.expr = Box::new(convert_to_arg_access(context, *b.expr.clone(), as_proxy));
-            if b.op.to_token_stream().to_string().trim() == "-" && b.expr.to_token_stream().to_string().trim().ends_with("as_proxy()") {
+            if b.op.to_token_stream().to_string().trim() == "-" {
                 return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
             }
             return Expr::Unary(b);
@@ -282,8 +282,6 @@ pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serializ
     let t = syn::parse_str::<Expr>(&string_data);
     if t.is_err() {
         panic!("[rexpr]syn::parse_str: {} fail for: {}", string_data, t.err().unwrap().to_string())
-    } else {
-        //println!("[rexpr]parse expr:{} success!", string_data);
     }
     let t = t.unwrap();
     let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
