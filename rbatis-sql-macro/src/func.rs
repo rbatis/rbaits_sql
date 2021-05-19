@@ -73,7 +73,6 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
             let s = ex.to_token_stream().to_string();
             for x in s.chars() {
                 if is_param_char(x) {
-                    //println!("re:{},Type:{}", s, expr_type_box(&b.receiver));
                     b.receiver = Box::new(convert_to_arg_access(context, *b.receiver.clone(), as_proxy));
                     return Expr::MethodCall(b);
                 }
