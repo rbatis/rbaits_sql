@@ -51,11 +51,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     match x.tag.as_ref() {
                         "id" => {
                             let column = x.attributes.get("column").unwrap_or(&empty_string);
-                            let mut type_lang = x.attributes.get("type_lang").unwrap_or(&empty_string).to_string();
-                            let type_option = x.attributes.get("type_option").unwrap_or(&empty_string);
-                            if !type_option.is_empty() {
-                                type_lang = format!("Option<{}>", type_option);
-                            }
+                            let mut type_lang = x.attributes.get("type").unwrap_or(&empty_string).to_string();
                             if column.is_empty() {
                                 panic!("<id> column can not be empty!")
                             }
@@ -71,19 +67,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         }
                         "result" => {
                             let column = x.attributes.get("column").unwrap_or(&empty_string);
-                            let mut type_lang = x.attributes.get("type_lang").unwrap_or(&empty_string).to_string();
-                            let type_option = x.attributes.get("type_option").unwrap_or(&empty_string);
-                            if !type_option.is_empty() {
-                                type_lang = format!("Option<{}>", type_option);
-                            }
+                            let mut _type = x.attributes.get("type").unwrap_or(&empty_string).to_string();
                             if column.is_empty() {
                                 panic!("<id> column can not be empty!")
                             }
-                            if type_lang.is_empty() {
-                                panic!("<id> type_lang can not be empty!")
-                            }
                             let column_ident = Ident::new(&column, Span::call_site());
-                            let type_lang_ident = parse_path(&type_lang);
+                            let type_lang_ident = parse_path(&_type);
                             table_fields = quote! {
                                 #table_fields
                                 pub #column_ident:#type_lang_ident,

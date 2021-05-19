@@ -1,18 +1,27 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "https://github.com/rbatis/rbatis_sql/raw/main/mybatis-3-mapper.dtd">
 <mapper>
     <struct name="biz_activity">
-        <id column="id" type_lang='Option<String>'></id>
-        <result column="name" type_option="String"></result>
-        <result column="pc_link" type_option="String"></result>
-        <result column="h5_link" type_option="String"></result>
-        <result column="remark" type_option="String"></result>
-        <result column="sort" type_option="i32"></result>
-        <result column="status" type_option="i32"></result>
-        <result column="version" type_option="i32" version_enable="true"></result>
-        <result column="create_time" type_option="String"></result>
-        <result column="delete_flag" type_option="i32" logic_enable="true" logic_undelete="1"
+        <id column="id" type="Option<String>"></id>
+        <result column="name" type="Option<String>"></result>
+        <result column="pc_link" type="Option<String>"></result>
+        <result column="h5_link" type="Option<String>"></result>
+        <result column="remark" type="Option<String>"></result>
+        <result column="sort" type="Option<i32>"></result>
+        <result column="status" type="Option<i32>"></result>
+        <result column="version" type="Option<i32>" version_enable="true"></result>
+        <result column="create_time" type="Option<String>"></result>
+        <result column="delete_flag" type="Option<i32>" logic_enable="true" logic_undelete="1"
                 logic_deleted="0"></result>
     </struct>
+    <insert id="insert" lang="">
+        insert into biz_activity
+        <foreach collection="arg" index="key" item="item" open="(" close=")">
+            ${key}
+        </foreach>
+        <foreach collection="arg" index="key" item="item" open="(" close=")">
+            ${item}
+        </foreach>
+    </insert>
     <select id="selectByCondition" struct="biz_activity">
         select * from table where
         <if test="id > 0 && id == 1">
