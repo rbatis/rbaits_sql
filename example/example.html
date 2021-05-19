@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "https://github.com/rbatis/rbatis_sql/raw/main/mybatis-3-mapper.dtd">
 <mapper>
-    <table name="biz_activity">
+    <struct name="biz_activity">
         <id column="id" type_lang='Option<String>'></id>
         <result column="name" type_option="String"></result>
         <result column="pc_link" type_option="String"></result>
@@ -8,15 +8,12 @@
         <result column="remark" type_option="String"></result>
         <result column="sort" type_option="i32"></result>
         <result column="status" type_option="i32"></result>
-        <result column="version" type_option="i32"
-                version_enable="true"></result>
+        <result column="version" type_option="i32" version_enable="true"></result>
         <result column="create_time" type_option="String"></result>
-        <result column="delete_flag" type_option="i32"
-                logic_enable="true"
-                logic_undelete="1"
+        <result column="delete_flag" type_option="i32" logic_enable="true" logic_undelete="1"
                 logic_deleted="0"></result>
-    </table>
-    <select id="selectByCondition" table="biz_activity">
+    </struct>
+    <select id="selectByCondition" struct="biz_activity">
         select * from table where
         <if test="id > 0 && id == 1">
             id = ${id}
@@ -27,7 +24,9 @@
         id in #{ids}
         id not in #{ids}
         <foreach collection="map">
-            ${index}=#{item}
+            ${index}
+            =
+            #{item}
         </foreach>
         name like #{name}
         or

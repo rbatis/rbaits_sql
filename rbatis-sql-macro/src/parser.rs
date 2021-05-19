@@ -39,7 +39,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "mapper" => {
                 return parse(&x.childs, methods, "mapper");
             }
-            "table" => {
+            "struct" => {
                 let table_name = x.attributes.get("name").expect("<table> mut have name attr!");
                 if table_name.is_empty() {
                     panic!("<table> mut have name attr!");
