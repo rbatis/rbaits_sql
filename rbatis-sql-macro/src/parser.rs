@@ -1,5 +1,5 @@
 use quote::{quote, ToTokens};
-use syn::{AttributeArgs,ItemFn, Expr, ItemMod, Path, ItemStruct};
+use syn::{AttributeArgs, ItemFn, Expr, ItemMod, Path, ItemStruct};
 use crate::proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 
@@ -38,6 +38,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
         match x.tag.as_str() {
             "mapper" => {
                 return parse(&x.childs, methods, "mapper");
+            }
+            "sql" => {
+                //TODO
+            }
+            "include" => {
+                //TODO
             }
             "struct" => {
                 let table_name = x.attributes.get("name").expect("<table> mut have name attr!");
