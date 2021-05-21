@@ -1,5 +1,5 @@
 use quote::{quote, ToTokens};
-use syn::{ItemFn, Expr, ItemMod, Path, ItemStruct};
+use syn::{AttributeArgs,ItemFn, Expr, ItemMod, Path, ItemStruct};
 use crate::proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 
@@ -475,8 +475,8 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
                 };
 }
 
-pub(crate) fn impl_fn(f: &ItemStruct, args: crate::proc_macro::TokenStream) -> TokenStream {
-    let mut file_name = args.to_string();
+pub(crate) fn impl_fn(f: &ItemStruct, args: &AttributeArgs) -> TokenStream {
+    let mut file_name = args.get(0).to_token_stream().to_string();
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
         file_name = file_name[1..file_name.len() - 1].to_string();
     }

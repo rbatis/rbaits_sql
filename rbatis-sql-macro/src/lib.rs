@@ -1,7 +1,7 @@
 #![allow(unused_assignments)]
 extern crate proc_macro;
 
-use syn::{ItemFn, DataStruct};
+use syn::{ItemFn, DataStruct,parse_macro_input,AttributeArgs};
 use crate::proc_macro::TokenStream;
 
 mod func;
@@ -25,9 +25,9 @@ pub fn expr(args: TokenStream, func: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn xml(args: TokenStream, func: TokenStream) -> TokenStream {
-    //let args = parse_macro_input!(args as AttributeArgs);
+    let args = parse_macro_input!(args as AttributeArgs);
     let target_fn = syn::parse(func).unwrap();
-    let stream = parser::impl_fn(&target_fn, args);
+    let stream = parser::impl_fn(&target_fn, &args);
     #[cfg(feature = "debug_mode")]
         {
             println!("............gen macro xml:\n {}", stream);
