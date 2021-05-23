@@ -23,7 +23,7 @@
             ${item}
         </foreach>
     </insert>
-    <select id="selectByCondition" struct="biz_activity">
+    <select id="select_by_condition" struct="biz_activity">
         select * from table where
         <if test="id > 0 && id == 1">
             id = ${id}

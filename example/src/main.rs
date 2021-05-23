@@ -61,12 +61,12 @@ fn main() {
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
-    let (sql, args) = selectByCondition(&arg);
+    let (sql, args) = select_by_condition(&arg);
     println!("sql: {}", sql);
     println!("args: {:?}", args);
 
     bench!(1000000,{
-        selectByCondition(&arg);
+        select_by_condition(&arg);
     });
 }
 
@@ -129,7 +129,7 @@ mod test {
         // let v = gen(&arg);
         // println!("{}", v);
         // xml(&arg);
-        let (sql, args) = selectByCondition(&arg);
+        let (sql, args) = select_by_condition(&arg);
         async_std::task::block_on(async {
             let r = b.exec_prepare("", &sql, &args).await.unwrap();
             println!("{:?}", r);
