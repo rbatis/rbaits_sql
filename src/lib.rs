@@ -24,4 +24,4 @@ pub mod from_bool;
 #[macro_use]
 extern crate rbatis_sql_macro;
 
-pub use rbatis_sql_macro::{expr,xml};
+pub use rbatis_sql_macro::{expr,hsql};

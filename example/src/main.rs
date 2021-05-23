@@ -14,7 +14,7 @@ use std::sync::Arc;
 use serde_json::json;
 use rbatis_sql::ops::AsProxy;
 
-#[xml("example/example.html")]
+#[hsql("example/example.html")]
 pub struct biz_activity {
     pub id: Option<String>,
     pub name: Option<String>,
@@ -77,12 +77,12 @@ mod test {
     use rbatis_sql;
     use rbatis_sql::ops::AsProxy;
     use serde_json::{json, Value};
-    use rbatis_sql::backend::{Backend, BackendExecResult};
+    use rbatis_sql::runner ::{Backend, BackendExecResult};
     use rbatis_sql::error::Error;
     use serde::de::DeserializeOwned;
 
 
-    #[xml]
+    #[hsql]
     pub mod example {}
 
     pub struct B {}
