@@ -24,7 +24,7 @@ pub fn expr(args: TokenStream, func: TokenStream) -> TokenStream {
 
 
 #[proc_macro_attribute]
-pub fn hsql(args: TokenStream, func: TokenStream) -> TokenStream {
+pub fn rsql(args: TokenStream, func: TokenStream) -> TokenStream {
     let args = parse_macro_input!(args as AttributeArgs);
     let target_fn = syn::parse(func).unwrap();
     let stream = parser::impl_fn(&target_fn, &args);
