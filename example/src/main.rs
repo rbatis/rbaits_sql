@@ -14,8 +14,8 @@ use std::sync::Arc;
 use serde_json::json;
 use rbatis_sql::ops::AsProxy;
 
-#[rsql("example/example.html")]
-pub struct biz_activity {
+
+pub struct BizActivity {
     pub id: Option<String>,
     pub name: Option<String>,
     pub pc_link: Option<String>,
@@ -28,6 +28,8 @@ pub struct biz_activity {
     pub delete_flag: Option<i32>,
 }
 
+#[rsql("example/example.html")]
+pub struct Example{}
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
@@ -40,7 +42,7 @@ fn main() {
         "map":{"a":1},
         "create_time":"2020-23-23"
     });
-    let act = biz_activity {
+    let act = BizActivity {
         id: None,
         name: None,
         pc_link: None,

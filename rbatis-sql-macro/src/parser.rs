@@ -45,58 +45,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "include" => {
                 //TODO
             }
-            "struct" => {
-                let table_name = x.attributes.get("name").expect("<table> mut have name attr!");
-                if table_name.is_empty() {
-                    panic!("<table> mut have name attr!");
-                }
-                let table_ident = Ident::new(&table_name, Span::call_site());
-
-                let mut table_fields = quote! {};
-                for x in &x.childs {
-                    match x.tag.as_ref() {
-                        "id" => {
-                            let column = x.attributes.get("column").unwrap_or(&empty_string);
-                            let mut type_lang = x.attributes.get("type").unwrap_or(&empty_string).to_string();
-                            if column.is_empty() {
-                                panic!("<id> column can not be empty!")
-                            }
-                            if type_lang.is_empty() {
-                                panic!("<id> type_lang can not be empty!")
-                            }
-                            let column_ident = Ident::new(&column, Span::call_site());
-                            let type_lang_ident = parse_path(&type_lang);
-                            table_fields = quote! {
-                                #table_fields
-                                pub #column_ident:#type_lang_ident,
-                            };
-                        }
-                        "result" => {
-                            let column = x.attributes.get("column").unwrap_or(&empty_string);
-                            let mut _type = x.attributes.get("type").unwrap_or(&empty_string).to_string();
-                            if column.is_empty() {
-                                panic!("<id> column can not be empty!")
-                            }
-                            let column_ident = Ident::new(&column, Span::call_site());
-                            let type_lang_ident = parse_path(&_type);
-                            table_fields = quote! {
-                                #table_fields
-                                pub #column_ident:#type_lang_ident,
-                            };
-                        }
-                        _ => {}
-                    }
-                }
-
-                body = quote! {
-                    #body
-                    #[derive(Clone, Debug)]
-                    #[derive(serde::Serialize, serde::Deserialize)]
-                    pub struct #table_ident{
-                         #table_fields
-                    }
-                }
-            }
             "" => {
                 let mut string_data = x.data.trim().to_string();
                 let convert_list = find_convert_string(&string_data);

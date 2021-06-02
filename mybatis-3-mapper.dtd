@@ -16,29 +16,8 @@
                limitations under the License.
 
         -->
-        <!ELEMENT mapper (struct*  | sql* | insert* | update* |updateTemplate* | delete* |deleteTemplate* | select* | selectTemplate* | insertTemplate* )+>
+        <!ELEMENT mapper (sql* | insert* | update* |updateTemplate* | delete* |deleteTemplate* | select* | selectTemplate* | insertTemplate* )+>
         <!ATTLIST mapper
-                >
-
-        <!ELEMENT struct (id*,result*)>
-        <!ATTLIST struct
-                name CDATA #REQUIRED
-                >
-
-        <!ELEMENT id EMPTY>
-        <!ATTLIST id
-                type CDATA #IMPLIED
-                column CDATA #IMPLIED
-                >
-
-        <!ELEMENT result EMPTY>
-        <!ATTLIST result
-                type CDATA #IMPLIED
-                column CDATA #REQUIRED
-                version_enable CDATA #IMPLIED
-                logic_enable CDATA #IMPLIED
-                logic_deleted CDATA #IMPLIED
-                logic_undelete CDATA #IMPLIED
                 >
 
         <!ELEMENT arg EMPTY>
