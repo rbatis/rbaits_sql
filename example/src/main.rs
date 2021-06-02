@@ -29,7 +29,7 @@ pub struct BizActivity {
 }
 
 #[rsql("example/example.html")]
-pub mod Example {
+pub mod example {
     pub fn select_by_condition(arg: &serde_json::Value) {}
     pub fn insert(arg: &serde_json::Value) {}
 }
@@ -59,19 +59,19 @@ fn main() {
     };
 
 
-    let (sql, args) = Example::insert(&arg);
+    let (sql, args) = example::insert(&arg);
     println!("sql: {}", sql);
     println!("args: {:?}", args);
 
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
-    let (sql, args) = Example::select_by_condition(&arg);
+    let (sql, args) = example::select_by_condition(&arg);
     println!("sql: {}", sql);
     println!("args: {:?}", args);
 
     bench!(1000000,{
-        Example::select_by_condition(&arg);
+        example::select_by_condition(&arg);
     });
 }
 
