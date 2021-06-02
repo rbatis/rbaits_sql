@@ -16,7 +16,7 @@
                limitations under the License.
 
         -->
-        <!ELEMENT mapper (sql* | insert* | update* |updateTemplate* | delete* |deleteTemplate* | select* | selectTemplate* | insertTemplate* )+>
+        <!ELEMENT mapper (sql* | insert* | update* | delete* | select* )+>
         <!ATTLIST mapper
                 >
 
@@ -25,7 +25,6 @@
                 type CDATA #IMPLIED
                 column CDATA #IMPLIED
                 select CDATA #IMPLIED
-                struct CDATA #IMPLIED
                 name CDATA #IMPLIED
                 >
 
@@ -38,19 +37,7 @@
         <!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST select
                 id CDATA #REQUIRED
-                struct CDATA #IMPLIED
                 >
-
-        <!ELEMENT selectTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
-        <!ATTLIST selectTemplate
-                id CDATA #IMPLIED
-                struct (Basestruct) #IMPLIED
-                lang CDATA #IMPLIED
-                structs CDATA #IMPLIED
-                columns CDATA #IMPLIED
-                wheres CDATA #IMPLIED
-                >
-
 
         <!ELEMENT insert (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST insert
@@ -60,42 +47,13 @@
 <!--                useGeneratedKeys (true|false) #IMPLIED-->
                 >
 
-        <!ELEMENT insertTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
-        <!ATTLIST insertTemplate
-                id CDATA #IMPLIED
-                struct CDATA #IMPLIED
-                structs CDATA #IMPLIED
-                inserts CDATA #IMPLIED
-                struct (Basestruct) #IMPLIED
-                >
-
         <!ELEMENT update (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST update
                 id CDATA #REQUIRED
                 >
-        <!--sets指定值(例如 sets="name?name = #{name}"  )会更新对应值，否则为""设置全部属性-->
-        <!ELEMENT updateTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
-        <!ATTLIST updateTemplate
-                id CDATA #IMPLIED
-                struct (Basestruct) #IMPLIED
-                lang CDATA #IMPLIED
-                structs CDATA #IMPLIED
-                sets CDATA #IMPLIED
-                wheres CDATA #IMPLIED
-                >
-
         <!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST delete
                 id CDATA #REQUIRED
-                >
-        <!ELEMENT deleteTemplate (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
-        <!ATTLIST deleteTemplate
-                id CDATA #IMPLIED
-
-                lang CDATA #IMPLIED
-                structs CDATA #IMPLIED
-                wheres CDATA #IMPLIED
-                struct (Basestruct) #IMPLIED
                 >
         <!-- Dynamic -->
 
