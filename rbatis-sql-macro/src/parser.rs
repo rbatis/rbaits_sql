@@ -15,7 +15,7 @@ use crate::html_loader::{load_html, Element};
 const example_data: &'static str = include_str!("../../example/example.html");
 
 
-fn parse_str(arg: &str) -> TokenStream {
+fn parse_str(arg: &str) -> proc_macro2::TokenStream {
     let datas = load_html(arg).expect("load_html() fail!");
     #[cfg(feature = "debug_mode")]
         {
@@ -27,7 +27,17 @@ fn parse_str(arg: &str) -> TokenStream {
         #methods
         #fn_impl
     };
-    token.into()
+    token
+}
+
+fn to_mod(m:&ItemMod,t:&proc_macro2::TokenStream) -> TokenStream{
+    let ident = &m.ident;
+    let mod_token = quote! {
+        pub mod #ident{
+            #t
+        }
+    };
+    mod_token.into()
 }
 
 /// gen rust code
@@ -429,7 +439,7 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
                 };
 }
 
-pub(crate) fn impl_fn(f: &ItemStruct, args: &AttributeArgs) -> TokenStream {
+pub(crate) fn impl_fn(m: &ItemMod, args: &AttributeArgs) -> TokenStream {
     let mut file_name = args.get(0).to_token_stream().to_string();
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
         file_name = file_name[1..file_name.len() - 1].to_string();
@@ -442,7 +452,7 @@ pub(crate) fn impl_fn(f: &ItemStruct, args: &AttributeArgs) -> TokenStream {
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
     f.read_to_string(&mut data);
     let t = parse_str(&data);
-    return t.into();
+    return to_mod(m,&t);
 }
 
 /// parse to expr

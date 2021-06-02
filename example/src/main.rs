@@ -29,7 +29,10 @@ pub struct BizActivity {
 }
 
 #[rsql("example/example.html")]
-pub struct Example{}
+pub mod Example {
+    pub fn select_by_condition(arg: &serde_json::Value) {}
+    pub fn insert(arg: &serde_json::Value) {}
+}
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
@@ -56,19 +59,19 @@ fn main() {
     };
 
 
-    let (sql, args) = insert(&arg);
+    let (sql, args) = Example::insert(&arg);
     println!("sql: {}", sql);
     println!("args: {:?}", args);
 
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
-    let (sql, args) = select_by_condition(&arg);
+    let (sql, args) = Example::select_by_condition(&arg);
     println!("sql: {}", sql);
     println!("args: {:?}", args);
 
     bench!(1000000,{
-        select_by_condition(&arg);
+        Example::select_by_condition(&arg);
     });
 }
 
@@ -79,7 +82,7 @@ mod test {
     use rbatis_sql;
     use rbatis_sql::ops::AsProxy;
     use serde_json::{json, Value};
-    use rbatis_sql::runner ::{Backend, BackendExecResult};
+    use rbatis_sql::runner::{Backend, BackendExecResult};
     use rbatis_sql::error::Error;
     use serde::de::DeserializeOwned;
 
