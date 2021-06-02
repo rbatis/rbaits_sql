@@ -82,40 +82,25 @@ mod test {
     use rbatis_sql;
     use rbatis_sql::ops::AsProxy;
     use serde_json::{json, Value};
-    use rbatis_sql::runner::{Backend, BackendExecResult};
     use rbatis_sql::error::Error;
     use serde::de::DeserializeOwned;
 
 
-    #[rsql]
-    pub mod example {}
+    #[rsql("example/example.html")]
+    pub mod example {
+        pub fn select_by_condition(arg: &serde_json::Value) {}
+        pub fn insert(arg: &serde_json::Value) {}
+    }
 
     pub struct B {}
 
     use async_trait::async_trait;
 
-    #[async_trait]
-    impl Backend for B {
-        async fn fetch<T>(&self, context_id: &str, sql: &str) -> Result<T, Error> where
-            T: DeserializeOwned {
-            todo!()
-        }
-
-        async fn exec(&self, context_id: &str, sql: &str) -> Result<BackendExecResult, Error> {
-            todo!()
-        }
-
-        async fn exec_prepare(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<BackendExecResult, Error> {
+    impl B {
+        async fn exec_prepare(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<(), Error> {
             println!("sql:{}", sql);
             println!("args:{:?}", args);
-            return Ok(BackendExecResult {
-                rows_affected: 1,
-                last_insert_id: None,
-            });
-        }
-
-        async fn fetch_prepare<T>(&self, context_id: &str, sql: &str, args: &Vec<Value>) -> Result<T, Error> where T: DeserializeOwned {
-            todo!()
+            Ok(())
         }
     }
 
@@ -134,10 +119,9 @@ mod test {
         // let v = gen(&arg);
         // println!("{}", v);
         // xml(&arg);
-        let (sql, args) = select_by_condition(&arg);
+        let (sql, args) = example::select_by_condition(&arg);
         async_std::task::block_on(async {
-            let r = b.exec_prepare("", &sql, &args).await.unwrap();
-            println!("{:?}", r);
+            b.exec_prepare("", &sql, &args).await.unwrap();
         });
     }
 
