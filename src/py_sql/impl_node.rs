@@ -8,7 +8,7 @@ use crate::py_sql::choose_node::ChooseNode;
 use crate::py_sql::otherwise_node::OtherwiseNode;
 use crate::py_sql::when_node::WhenNode;
 use crate::py_sql::bind_node::BindNode;
-use crate::error::Error;
+use crate::py_sql::error::Error;
 use crate::py_sql::set_node::SetNode;
 use crate::py_sql::where_node::WhereNode;
 use crate::py_sql::print_node::PrintNode;
@@ -19,7 +19,7 @@ impl NodeType {
         x: &str,
         space: usize,
         mut childs: Vec<NodeType>,
-    ) -> Result<(), crate::error::Error> {
+    ) -> Result<(), Error> {
         let mut trim_x = x.trim();
         if trim_x.starts_with("//") {
             return Ok(());
@@ -125,7 +125,7 @@ impl NodeType {
         trim_express: &str,
         source_str: &str,
         childs: Vec<NodeType>,
-    ) -> Result<NodeType, crate::error::Error> {
+    ) -> Result<NodeType, Error> {
         if trim_express.starts_with(IfNode::name()) {
             return Ok(NodeType::NIf(IfNode {
                 childs,
@@ -133,7 +133,7 @@ impl NodeType {
             }));
         } else if trim_express.starts_with(ForEachNode::name()) {
             if !trim_express.contains("in ") {
-                return Err(crate::error::Error::from(
+                return Err(Error::from(
                     "[rbatis] parser express fail:".to_string() + source_str,
                 ));
             }
@@ -156,7 +156,7 @@ impl NodeType {
                     trim: express.to_string(),
                 }));
             } else {
-                return Err(crate::error::Error::from(format!("[rbatis] express trim value must be string value, for example:  trim 'value',error express: {}", trim_express)));
+                return Err(Error::from(format!("[rbatis] express trim value must be string value, for example:  trim 'value',error express: {}", trim_express)));
             }
         } else if trim_express.starts_with(ChooseNode::name()) {
             let mut node = ChooseNode {
@@ -175,7 +175,7 @@ impl NodeType {
                         node.otherwise_node = Some(Box::new(x));
                     }
                     _ => {
-                        return Err(crate::error::Error::from("[rbatis] parser node fail,choose node' child must be when and otherwise nodes!".to_string()));
+                        return Err(Error::from("[rbatis] parser node fail,choose node' child must be when and otherwise nodes!".to_string()));
                     }
                 }
             }
@@ -203,7 +203,7 @@ impl NodeType {
             }
             let name_value: Vec<&str> = express.split("=").collect();
             if name_value.len() != 2 {
-                return Err(crate::error::Error::from(
+                return Err(Error::from(
                     "[rbatis] parser bind express fail:".to_string() + trim_express,
                 ));
             }
@@ -226,7 +226,7 @@ impl NodeType {
             }));
         } else {
             // unkonw tag
-            return Err(crate::error::Error::from(
+            return Err(Error::from(
                 "[rbatis] unknow tag: ".to_string() + source_str,
             ));
         }

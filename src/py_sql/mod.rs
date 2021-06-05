@@ -10,6 +10,7 @@ pub mod set_node;
 pub mod where_node;
 pub mod print_node;
 pub mod impl_node;
+pub mod error;
 
 use crate::py_sql::string_node::StringNode;
 use crate::py_sql::if_node::IfNode;
@@ -50,5 +51,5 @@ pub trait DefName {
 }
 
 pub trait ParsePySql {
-    fn parse(arg: &str) -> Result<Vec<NodeType>, crate::error::Error>;
+    fn parse(arg: &str) -> Result<Vec<NodeType>, crate::py_sql::error::Error>;
 }
