@@ -11,18 +11,23 @@ use std::io::{Read, Write};
 use std::collections::HashMap;
 use crate::string_util::find_convert_string;
 use crate::html_loader::{load_html, Element};
+use crate::py_sql::{NodeType, ParsePySql};
 
 const example_data: &'static str = include_str!("../../example/example.html");
 
 
-fn parse_str(arg: &str) -> proc_macro2::TokenStream {
-    let datas = load_html(arg).expect("load_html() fail!");
+fn parse_html_str(html: &str) -> proc_macro2::TokenStream {
+    let datas = load_html(html).expect("load_html() fail!");
+    return parse_html_node(datas);
+}
+
+fn parse_html_node(htmls: Vec<Element>) -> proc_macro2::TokenStream {
     #[cfg(feature = "debug_mode")]
         {
-            println!("load html:{:#?}", datas);
+            println!("load html:{:#?}", htmls);
         }
     let mut methods = quote!();
-    let fn_impl = parse(&datas, &mut methods, "");
+    let fn_impl = parse(&htmls, &mut methods, "");
     let token = quote! {
         #methods
         #fn_impl
@@ -475,6 +480,7 @@ pub(crate) fn impl_fn(m: &ItemMod, args: &AttributeArgs) -> TokenStream {
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
         file_name = file_name[1..file_name.len() - 1].to_string();
     }
+    let t;
     #[cfg(feature = "debug_mode")]
         {
             println!("try open file:{}", file_name);
@@ -482,7 +488,7 @@ pub(crate) fn impl_fn(m: &ItemMod, args: &AttributeArgs) -> TokenStream {
     let mut data = String::new();
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
     f.read_to_string(&mut data);
-    let t = parse_str(&data);
+    t = parse_html_str(&data);
     return to_mod(m, &t);
 }
 

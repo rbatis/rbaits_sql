@@ -3,7 +3,7 @@ use crate::py_sql::NodeType;
 use std::collections::HashMap;
 
 
-fn from_childs(arg: Vec<NodeType>) -> Vec<Element> {
+pub fn as_elements(arg: Vec<NodeType>) -> Vec<Element> {
     let mut res = vec![];
     for x in arg {
         res.push(Element::from(x));
@@ -30,7 +30,7 @@ impl From<NodeType> for Element {
                     tag: "if".to_string(),
                     data: "".to_string(),
                     attributes: m,
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NTrim(n) => {
@@ -40,7 +40,7 @@ impl From<NodeType> for Element {
                     tag: "trim".to_string(),
                     data: "".to_string(),
                     attributes: m,
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NForEach(n) => {
@@ -52,11 +52,11 @@ impl From<NodeType> for Element {
                     tag: "foreach".to_string(),
                     data: "".to_string(),
                     attributes: m,
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NChoose(n) => {
-                let mut whens = from_childs(n.when_nodes);
+                let mut whens = as_elements(n.when_nodes);
                 if let Some(v) = n.otherwise_node {
                     whens.push(Element::from(*v));
                 }
@@ -72,7 +72,7 @@ impl From<NodeType> for Element {
                     tag: "otherwise".to_string(),
                     data: "".to_string(),
                     attributes: Default::default(),
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NWhen(n) => {
@@ -82,7 +82,7 @@ impl From<NodeType> for Element {
                     tag: "when".to_string(),
                     data: "".to_string(),
                     attributes: m,
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NBind(n) => {
@@ -101,7 +101,7 @@ impl From<NodeType> for Element {
                     tag: "set".to_string(),
                     data: "".to_string(),
                     attributes: Default::default(),
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NWhere(n) => {
@@ -109,7 +109,7 @@ impl From<NodeType> for Element {
                     tag: "where".to_string(),
                     data: "".to_string(),
                     attributes: Default::default(),
-                    childs: from_childs(n.childs),
+                    childs: as_elements(n.childs),
                 };
             }
             NodeType::NPrint(n) => {
