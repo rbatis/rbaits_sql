@@ -97,7 +97,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                         *index+=1;
                     } else {
                         if replaced.get(&v).is_none() {
-                            replaces = quote! {#replaces.replace(#v, &#method_name.to_string())};
+                            replaces = quote! {#replaces.replacen(#v, &#method_name.to_string(), 1)};
                             replaced.insert(v.to_string(), true);
                         }
                     }
