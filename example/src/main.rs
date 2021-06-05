@@ -67,12 +67,12 @@ fn main() {
     // println!("{}", v);
     // xml(&arg);
     let (sql, args) = example::select_by_condition(&arg);
-    // println!("sql: {}", sql);
-    // println!("args: {:?}", args);
-    //
-    // bench!(1000000,{
-    //     example::select_by_condition(&arg);
-    // });
+    println!("sql: {}", sql);
+    println!("args: {:?}", args);
+
+    bench!(1000000,{
+        example::select_by_condition(&arg);
+    });
 }
 
 
