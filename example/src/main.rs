@@ -28,7 +28,7 @@ pub struct BizActivity {
     pub delete_flag: Option<i32>,
 }
 
-#[rb_sql("example/example.html")]
+#[rbs_html("example/example.html")]
 pub mod example {
     pub fn select_by_condition(arg: &serde_json::Value) {}
     pub fn insert(arg: &serde_json::Value) {}
@@ -86,7 +86,7 @@ mod test {
     use serde::de::DeserializeOwned;
 
 
-    #[rb_sql("example/example.html")]
+    #[rbs_html("example/example.html")]
     pub mod example {
         pub fn select_by_condition(arg: &serde_json::Value) {}
         pub fn insert(arg: &serde_json::Value) {}

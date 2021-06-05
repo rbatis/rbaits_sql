@@ -1,0 +1,11 @@
+insert:
+   insert into biz_activity
+      (
+      for key,_ in arg:
+         ${key}
+      )
+      values
+      (
+      for _,item in arg:
+         ${item}
+      )

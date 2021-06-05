@@ -27,7 +27,20 @@ pub fn expr(args: TokenStream, func: TokenStream) -> TokenStream {
 
 
 #[proc_macro_attribute]
-pub fn rb_sql(args: TokenStream, func: TokenStream) -> TokenStream {
+pub fn rbs_html(args: TokenStream, func: TokenStream) -> TokenStream {
+    let args = parse_macro_input!(args as AttributeArgs);
+    let target_fn = syn::parse(func).unwrap();
+    let stream = parser::impl_fn(&target_fn, &args);
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("............gen macro xml:\n {}", stream);
+            println!("............gen macro xml end............");
+        }
+    stream
+}
+
+#[proc_macro_attribute]
+pub fn rbs_py_sql(args: TokenStream, func: TokenStream) -> TokenStream {
     let args = parse_macro_input!(args as AttributeArgs);
     let target_fn = syn::parse(func).unwrap();
     let stream = parser::impl_fn(&target_fn, &args);

@@ -1,5 +1,5 @@
 pub use ops::Value;
-pub use rbatis_sql_macro::{expr, rb_sql};
+pub use rbatis_sql_macro::{expr, rbs_html, rbs_py_sql};
 
 pub mod string_util;
 pub mod error;
