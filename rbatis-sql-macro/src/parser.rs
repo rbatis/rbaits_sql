@@ -192,6 +192,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                 let impl_body = parse(index,&x.childs, methods, "foreach");
                 //do replace arg get index and item
                 let mut body_strings = impl_body.to_string().replace("  ", " ").replace("\n", "");
+                //TODO batter way do not replace
                 body_strings = body_strings.replace(&format!("(arg) [\"{}\"]", findex), &findex);
                 body_strings = body_strings.replace(&format!("(arg) [\"{}\"]", item), &item);
 
