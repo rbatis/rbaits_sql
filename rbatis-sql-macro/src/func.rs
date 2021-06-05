@@ -40,7 +40,6 @@ fn token_steam_string(arg: proc_macro2::TokenStream) -> String {
 
 
 fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
-    // println!("tk:{},expr:{}", expr_type(arg.clone()), arg.to_token_stream());
     match arg {
         Expr::Path(b) => {
             let token = b.to_token_stream().to_string();
@@ -63,12 +62,12 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
                 if context.contains(&format!("let {} =", param)) {
                     return syn::parse_str::<Expr>(&format!("{}.as_proxy()", param)).unwrap();
                 }
-                return syn::parse_str::<Expr>(&format!("&arg[\"{}\"].as_proxy()", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!("(&arg)[\"{}\"].as_proxy()", param)).unwrap();
             } else {
                 if context.contains(&format!("let {} =", param)) {
                     return syn::parse_str::<Expr>(&format!("{}", param)).unwrap();
                 }
-                return syn::parse_str::<Expr>(&format!("&arg[\"{}\"]", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!("(&arg)[\"{}\"].as_proxy()", param)).unwrap();
             }
         }
         Expr::MethodCall(mut b) => {
@@ -286,17 +285,26 @@ pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serializ
         panic!("[rexpr]syn::parse_str: {} fail for: {}", string_data, t.err().unwrap().to_string())
     }
     let t = t.unwrap();
-    let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
-
     let mut result_impl = quote! { result };
     if serialize_result {
         result_impl = quote! {serde_json::json!(result)};
     }
-    return quote! {
+    if func_name_ident.is_empty() || func_name_ident.eq("\"\""){
+        return quote! {
+         {
+           use rbatis_sql::ops::AsProxy;
+           let result={#t};
+           #result_impl
+        }
+    }.to_token_stream();
+    }else{
+        let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
+        return quote! {
         pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
            use rbatis_sql::ops::AsProxy;
            let result={#t};
            #result_impl
         }
     }.to_token_stream();
+    }
 }

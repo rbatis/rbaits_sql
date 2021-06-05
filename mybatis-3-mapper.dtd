@@ -34,12 +34,12 @@
                 type CDATA #REQUIRED
                 >
 
-        <!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT select (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST select
                 id CDATA #REQUIRED
                 >
 
-        <!ELEMENT insert (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT insert (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST insert
                 id CDATA #REQUIRED
 
@@ -47,11 +47,11 @@
 <!--                useGeneratedKeys (true|false) #IMPLIED-->
                 >
 
-        <!ELEMENT update (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT update (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST update
                 id CDATA #REQUIRED
                 >
-        <!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT delete (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST delete
                 id CDATA #REQUIRED
                 >
@@ -68,24 +68,24 @@
                 value CDATA #REQUIRED
                 >
 
-        <!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST sql
                 id CDATA #REQUIRED
                 lang CDATA #IMPLIED
                 
                 >
 
-        <!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST trim
                 prefix CDATA #IMPLIED
                 prefixOverrides CDATA #IMPLIED
                 suffix CDATA #IMPLIED
                 suffixOverrides CDATA #IMPLIED
                 >
-        <!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
-        <!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
+        <!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
 
-        <!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST foreach
                 collection CDATA #REQUIRED
                 item CDATA #IMPLIED
@@ -96,15 +96,19 @@
                 >
 
         <!ELEMENT choose (when* , otherwise?)>
-        <!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST when
                 test CDATA #REQUIRED
                 >
-        <!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
 
-        <!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+        <!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
         <!ATTLIST if
                 test CDATA #REQUIRED
                 >
 
-
+        <!ELEMENT println (#PCDATA | include | trim | where | set | foreach | choose | if | bind | println)*>
+        <!ATTLIST println
+                format CDATA #IMPLIED
+                value CDATA #REQUIRED
+                >

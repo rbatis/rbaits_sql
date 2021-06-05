@@ -30,7 +30,7 @@ fn parse_str(arg: &str) -> proc_macro2::TokenStream {
     token
 }
 
-fn to_mod(m:&ItemMod,t:&proc_macro2::TokenStream) -> TokenStream{
+fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
     let ident = &m.ident;
     let mod_token = quote! {
         pub mod #ident{
@@ -54,6 +54,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
             "include" => {
                 //TODO
+            }
+            "println" => {
+                impl_println(x, &mut body);
             }
             "" => {
                 let mut string_data = x.data.trim().to_string();
@@ -355,19 +358,41 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
     return body.into();
 }
 
-fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str) {
-    let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+
+fn impl_println(x: &Element, body: &mut proc_macro2::TokenStream) {
+    let value = x.attributes.get("value").expect(&format!("{} element must be have value field!", x.tag));
+    let method_name = add_context_method(value, body);
+    let mut format = String::new();
+    if let Some(s) = x.attributes.get("format") {
+        format = s.to_string();
+    }
+    if format.is_empty() {
+        *body = quote! {
+                   #body
+                   println!("{}",#method_name);
+                  };
+    } else {
+        let format_expr = syn::parse_str::<syn::Lit>(&format!("\"{}\"", format)).expect(&format!("[rexpr]syn::parse_str: {}", format));
+        *body = quote! {
+                   #body
+                   println!(#format_expr,#method_name);
+                  };
+    }
+}
+
+fn gen_method_name(test_value: &str) -> (String, Ident) {
     let method_name_string = encode(&test_value).replace("_", "__").replace("=", "_");
-    let method_name = Ident::new(&method_name_string, Span::call_site());
+    (method_name_string.clone(), Ident::new(&method_name_string, Span::call_site()))
+}
+
+
+fn add_context_method(test_value: &str, body: &mut proc_macro2::TokenStream) -> Ident {
+    let (_, method_name) = gen_method_name(&test_value);
     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true);
     let mut method_string = method_impl.to_string();
-
     let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
-
     let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
     let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
-
-
     //check append value
     if !body.to_string().contains(&format!("{} ", method_name)) {
         *body = quote! {
@@ -375,6 +400,12 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
                               let #method_name = #method_impl;
                           };
     }
+    return method_name;
+}
+
+fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str) {
+    let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+    let method_name = add_context_method(test_value, body);
     if x.childs.len() != 0 {
         let if_tag_body = parse(&x.childs, methods, block_name);
         *body = quote! {
@@ -452,7 +483,7 @@ pub(crate) fn impl_fn(m: &ItemMod, args: &AttributeArgs) -> TokenStream {
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
     f.read_to_string(&mut data);
     let t = parse_str(&data);
-    return to_mod(m,&t);
+    return to_mod(m, &t);
 }
 
 /// parse to expr
