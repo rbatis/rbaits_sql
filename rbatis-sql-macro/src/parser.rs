@@ -58,9 +58,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
        for x in &s {
            data.push_str(x);
            if s.len()!=(index+1){
-                data.push_str(" $");
-                data.push_str(&index.to_string());
-                data.push_str(" ");
+                data.push_str(&format!(" {} ",index));
            }
            index+=1;
        }
