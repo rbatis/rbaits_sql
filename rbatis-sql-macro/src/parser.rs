@@ -70,8 +70,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let mut replaced = HashMap::<String, bool>::new();
                 for (k, v) in convert_list {
-                    let method_name_string = encode(&format!("{}:{}", block_name, k)).replace("_", "__").replace("=", "_");
-                    let mut method_name = Ident::new(&method_name_string, Span::call_site());
+                    let (method_name_string,method_name) = gen_method_name(&format!("{}:{}", block_name, k));
                     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true);
                     let mut method_string = method_impl.to_string();
                     method_string = method_string.replace("& arg", "arg");
@@ -196,9 +195,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let s = syn::parse::<syn::LitStr>(body_strings.to_token_stream().into()).unwrap();
                 let impl_body = syn::parse_str::<proc_macro2::TokenStream>(&s.value()).unwrap();
 
-
-                let method_name_string = encode(&format!("{}:{}", block_name, collection)).replace("_", "__").replace("=", "_");
-                let method_name = Ident::new(&method_name_string, Span::call_site());
+                let (method_name_string,method_name) = gen_method_name(&format!("{}:{}", block_name, collection));
                 let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false);
                 let mut method_string = method_impl.to_string();
                 let mut method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
@@ -366,7 +363,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
 fn impl_println(x: &Element, body: &mut proc_macro2::TokenStream) {
     let value = x.attributes.get("value").expect(&format!("{} element must be have value field!", x.tag));
-    let method_name = add_context_method(value, body);
+    let method_name = impl_method(value, body);
     let mut format = String::new();
     if let Some(s) = x.attributes.get("format") {
         format = s.to_string();
@@ -391,7 +388,7 @@ fn gen_method_name(test_value: &str) -> (String, Ident) {
 }
 
 
-fn add_context_method(test_value: &str, body: &mut proc_macro2::TokenStream) -> Ident {
+fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream) -> Ident {
     let (_, method_name) = gen_method_name(&test_value);
     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true);
     let mut method_string = method_impl.to_string();
@@ -410,7 +407,7 @@ fn add_context_method(test_value: &str, body: &mut proc_macro2::TokenStream) -> 
 
 fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str) {
     let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
-    let method_name = add_context_method(test_value, body);
+    let method_name = impl_method(test_value, body);
     if x.childs.len() != 0 {
         let if_tag_body = parse(&x.childs, methods, block_name);
         *body = quote! {
