@@ -68,7 +68,7 @@ fn main() {
     // xml(&arg);
     let (sql, args) = example::select_by_condition(&arg);
     println!("sql: {}", sql);
-    println!("args: {:?}", args);
+    println!("args: {}", serde_json::to_string(&args).unwrap());
 
     bench!(1000000,{
         example::select_by_condition(&arg);
