@@ -15,7 +15,7 @@ impl Debug for Element {
         let mut s = f.debug_struct("");
         match self.tag.as_str() {
             "" => {
-                s.field("data", &self.data.clone());
+                s.field("data", &self.data);
             }
             _ => {
                 s.field("tag", &self.tag);
