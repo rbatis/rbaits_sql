@@ -27,7 +27,6 @@ use crate::py_sql::print_node::PrintNode;
 
 #[derive(Clone, Debug)]
 pub enum NodeType {
-    Null,
     NString(StringNode),
     NIf(IfNode),
     NTrim(TrimNode),

@@ -1,9 +1,11 @@
+pub use ops::Value;
+pub use rbatis_sql_macro::{expr, rb_sql};
+
 pub mod string_util;
 pub mod error;
 #[macro_use]
 pub mod bencher;
 pub mod ops;
-pub use ops::Value;
 pub mod ops_eq;
 pub mod ops_cmp;
 
@@ -18,10 +20,8 @@ pub mod ops_not;
 pub mod ops_bit_and;
 pub mod ops_bit_or;
 pub mod from_bool;
-pub mod py_sql;
 
 
 #[macro_use]
 extern crate rbatis_sql_macro;
 
-pub use rbatis_sql_macro::{expr,rb_sql};

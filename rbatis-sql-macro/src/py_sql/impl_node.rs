@@ -160,16 +160,13 @@ impl NodeType {
             }
         } else if trim_express.starts_with(ChooseNode::name()) {
             let mut node = ChooseNode {
-                when_nodes: None,
+                when_nodes: vec![],
                 otherwise_node: None,
             };
             for x in childs {
                 match x {
                     NodeType::NWhen(_) => {
-                        if node.when_nodes.is_none() {
-                            node.when_nodes = Some(vec![]);
-                        }
-                        node.when_nodes.as_mut().unwrap().push(x);
+                        node.when_nodes.push(x);
                     }
                     NodeType::NOtherwise(_) => {
                         node.otherwise_node = Some(Box::new(x));
