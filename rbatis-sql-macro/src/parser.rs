@@ -45,8 +45,10 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
     };
     mod_token.into()
 }
+
+//TODO outside method or dyn method
 fn convert( index: usize) -> String {
-    format!(" ${} ",index)
+    format!(" ${} ",index+1)
 }
 /// gen rust code
 fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) -> proc_macro2::TokenStream {
@@ -87,7 +89,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                           };
                     }
                     if v.starts_with("#") {
-                        string_data = string_data.replace(&v, &convert(*index));
+                        string_data = string_data.replacen(&v, &convert(*index),1);
                         body = quote! {
                               #body
                               args.push(serde_json::json!(#method_name));
