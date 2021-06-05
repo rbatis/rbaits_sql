@@ -1,15 +1,14 @@
-insert insert:
-   insert into biz_activity
-      (
-      for key,_ in arg:
-         ${key}
-      )
-      values
-      (
-      for _,item in arg:
-         ${item}
-      )
-select select_by_condition:
-    select * from table where
-       if id > 0 && id == 1:
-          id = ${id}
+id=insert:
+  insert into biz_activity
+  (
+  for key,_ in arg:
+    ${key}
+  )
+  values(
+  for _,item in arg:
+    ${item}
+  )
+id=select_by_condition:
+  select * from table where
+  if id > 0 && id == 1:
+    id = ${id}
