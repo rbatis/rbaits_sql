@@ -28,6 +28,7 @@ fn parse_html_node(htmls: Vec<Element>) -> proc_macro2::TokenStream {
         }
     let mut index=0;
     let mut methods = quote!();
+
     let fn_impl = parse(&mut index,&htmls, &mut methods, "");
     let token = quote! {
         #methods
@@ -54,6 +55,19 @@ fn convert( index: usize) -> String {
 fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) -> proc_macro2::TokenStream {
     let empty_string = String::new();
     let mut body = quote! {};
+    let fix_sql=quote! {
+       let mut data =String::new();
+       let s:Vec<&str>= sql.split(" ? ").collect();
+       let mut index=0;
+       for x in &s {
+           data.push_str(x);
+           if s.len()!=(index+1){
+               data.push_str(&format!(" ${} ",index));
+           }
+           index+=1;
+       }
+       sql=data;
+    };
     for x in arg {
         match x.tag.as_str() {
             "mapper" => {
@@ -89,7 +103,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                           };
                     }
                     if v.starts_with("#") {
-                        string_data = string_data.replacen(&v, &convert(*index),1);
+                        string_data = string_data.replacen(&v, &" ? ",1);
                         body = quote! {
                               #body
                               args.push(serde_json::json!(#method_name));
@@ -299,6 +313,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
                                #child_body
+                               #fix_sql
                                return (sql,args);
                             }
                         };
@@ -316,6 +331,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
                                #child_body
+                               #fix_sql
                                return (sql,args);
                             }
                         };
@@ -333,6 +349,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
                                #child_body
+                               #fix_sql
                                return (sql,args);
                             }
                         };
@@ -350,6 +367,7 @@ fn parse(index: &mut usize,arg: &Vec<Element>, methods: &mut proc_macro2::TokenS
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
                                #child_body
+                               #fix_sql
                                return (sql,args);
                             }
                         };
@@ -505,4 +523,17 @@ fn parse_expr(lit_str: &str) -> Expr {
 fn parse_path(lit_str: &str) -> Path {
     let s = syn::parse::<syn::LitStr>(lit_str.to_token_stream().into()).expect(&format!("parse::<syn::LitStr> fail: {}", lit_str));
     return syn::parse_str::<Path>(&s.value()).expect(&format!("parse_str::<Path> fail: {}", lit_str));
+}
+
+fn fix_sql(sql:&mut String){
+    let mut data =String::new();
+   let s:Vec<&str>= sql.split(" ? ").collect();
+    let mut index=0;
+    for x in &s {
+        data.push_str(x);
+        if s.len()!=(index+1){
+            data.push_str(&format!(" ${} ",index));
+        }
+    }
+    *sql=data
 }
