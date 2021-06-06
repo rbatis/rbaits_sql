@@ -56,7 +56,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
        for x in &s {
            data.push_str(x);
            if s.len()!=(index+1){
-                data.push_str(&format!(" {} ",index));
+                data.push_str(&format!(" ${} ",index));
+                data.push
            }
            index+=1;
        }
