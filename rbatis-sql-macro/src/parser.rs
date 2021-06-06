@@ -26,10 +26,8 @@ fn parse_html_node(htmls: Vec<Element>) -> proc_macro2::TokenStream {
         {
             println!("load html:{:#?}", htmls);
         }
-    let mut index = 0;
     let mut methods = quote!();
-
-    let fn_impl = parse(&mut index, &htmls, &mut methods, "");
+    let fn_impl = parse(&htmls, &mut methods, "");
     let token = quote! {
         #methods
         #fn_impl
@@ -48,7 +46,7 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
 }
 
 /// gen rust code
-fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) -> proc_macro2::TokenStream {
+fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) -> proc_macro2::TokenStream {
     let empty_string = String::new();
     let mut body = quote! {};
     let fix_sql = quote! {
@@ -67,7 +65,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
     for x in arg {
         match x.tag.as_str() {
             "mapper" => {
-                return parse(index, &x.childs, methods, "mapper");
+                return parse(&x.childs, methods, "mapper");
             }
             "sql" => {
                 //TODO
@@ -104,7 +102,6 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
                               #body
                               args.push(serde_json::json!(#method_name));
                           };
-                        *index += 1;
                     } else {
                         if replaced.get(&v).is_none() {
                             replaces = quote! {#replaces.replacen(#v, &#method_name.to_string(), 1)};
@@ -125,7 +122,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
                 }
             }
             "if" => {
-                impl_if(index, x, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"));
+                impl_if(x, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"));
             }
             "trim" => {
                 let mut empty_string = String::new();
@@ -136,7 +133,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
                 }
                 let mut prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let mut suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
-                impl_trim(index, &prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"));
+                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"));
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
@@ -158,7 +155,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
             }
 
             "where" => {
-                impl_trim(index, "", " ", "and |or ", " and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"));
+                impl_trim("", " ", "and |or ", " and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"));
             }
 
             "choose" => {
@@ -168,10 +165,10 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
                         panic!("choose node's childs must be when node and otherwise node!");
                     }
                     if x.tag.eq("when") {
-                        impl_if(index, x, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"));
+                        impl_if(x, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"));
                     }
                     if x.tag.eq("otherwise") {
-                        impl_otherwise(index, x, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"));
+                        impl_otherwise(x, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"));
                     }
                 }
                 body = quote! {
@@ -201,7 +198,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
                 let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
-                let impl_body = parse(index, &x.childs, methods, "foreach");
+                let impl_body = parse(&x.childs, methods, "foreach");
                 //do replace arg get index and item
                 let mut body_strings = impl_body.to_string().replace("\n", " ").replace("  ", " ");
                 //TODO batter way do not replace
@@ -297,13 +294,13 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
             }
 
             "set" => {
-                impl_trim(index, " set ", " ", ",", ",", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"));
+                impl_trim(" set ", " ", ",", ",", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"));
             }
 
             "select" => {
                 let id = x.attributes.get("id").expect("<select> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(index, &x.childs, methods, "select");
+                let child_body = parse(&x.childs, methods, "select");
                 let mut select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut sql = String::with_capacity(1000);
@@ -321,7 +318,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
             "update" => {
                 let id = x.attributes.get("id").expect("<update> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(index, &x.childs, methods, "select");
+                let child_body = parse(&x.childs, methods, "select");
                 let mut select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut sql = String::with_capacity(1000);
@@ -339,7 +336,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
             "insert" => {
                 let id = x.attributes.get("id").expect("<insert> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(index, &x.childs, methods, "select");
+                let child_body = parse(&x.childs, methods, "select");
                 let mut select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut sql = String::with_capacity(1000);
@@ -357,7 +354,7 @@ fn parse(index: &mut usize, arg: &Vec<Element>, methods: &mut proc_macro2::Token
             "delete" => {
                 let id = x.attributes.get("id").expect("<delete> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(index, &x.childs, methods, "select");
+                let child_body = parse(&x.childs, methods, "select");
                 let mut select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                let mut sql = String::with_capacity(1000);
@@ -425,11 +422,11 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream) -> Ident {
     return method_name;
 }
 
-fn impl_if(index: &mut usize, x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str) {
+fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str) {
     let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
     let method_name = impl_method(test_value, body);
     if x.childs.len() != 0 {
-        let if_tag_body = parse(index, &x.childs, methods, block_name);
+        let if_tag_body = parse(&x.childs, methods, block_name);
         *body = quote! {
                               #body
                               if #method_name {
@@ -442,8 +439,8 @@ fn impl_if(index: &mut usize, x: &Element, body: &mut proc_macro2::TokenStream, 
     }
 }
 
-fn impl_otherwise(index: &mut usize, x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str) {
-    let child_body = parse(index, &x.childs, methods, block_name);
+fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str) {
+    let child_body = parse(&x.childs, methods, block_name);
     *body = quote!(
                         #body
                         sql.push_str(" ");
@@ -453,8 +450,8 @@ fn impl_otherwise(index: &mut usize, x: &Element, body: &mut proc_macro2::TokenS
 }
 
 
-fn impl_trim(index: &mut usize, prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) {
-    let mut trim_body = parse(index, &x.childs, methods, block_name);
+fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) {
+    let mut trim_body = parse(&x.childs, methods, block_name);
     let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
     let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
     let have_trim = prefixs.len() != 0 && suffixs.len() != 0;
