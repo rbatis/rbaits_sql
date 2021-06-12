@@ -53,7 +53,7 @@ pub fn rb_html(args: TokenStream, func: TokenStream) -> TokenStream {
 //     stream
 // }
 
-//TODO
+/// support py_sql fn convert
 #[proc_macro_attribute]
 pub fn rb_pysql_fn(args: TokenStream, func: TokenStream) -> TokenStream {
     let args = parse_macro_input!(args as AttributeArgs);
