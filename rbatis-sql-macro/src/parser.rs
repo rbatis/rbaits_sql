@@ -82,7 +82,15 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             if x=='?' && formater != '?' {
                 index+=1;
                 new_sql.push(formater);
-                if index>=100000{
+                if index>=1000000{
+                    let index = push_index!(1000000,new_sql,index);
+                    let index = push_index!(100000,new_sql,index);
+                    let index = push_index!(10000,new_sql,index);
+                    let index = push_index!(1000,new_sql,index);
+                    let index = push_index!(100,new_sql,index);
+                    let index = push_index!(10,new_sql,index);
+                    let index = push_index!(1,new_sql,index);
+                }else if index>=100000{
                     let index = push_index!(100000,new_sql,index);
                     let index = push_index!(10000,new_sql,index);
                     let index = push_index!(1000,new_sql,index);
