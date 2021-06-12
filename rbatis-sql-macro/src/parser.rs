@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use crate::string_util::find_convert_string;
 use crate::html_loader::{load_html, Element};
 use crate::py_sql::{NodeType, ParsePySql};
+use std::str::Chars;
 
 const example_data: &'static str = include_str!("../../example/example.html");
 
@@ -45,22 +46,41 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
     mod_token.into()
 }
 
+
 /// gen rust code
 fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str) -> proc_macro2::TokenStream {
     let empty_string = String::new();
     let mut body = quote! {};
     let fix_sql = quote! {
-       let mut data =String::new();
-       let s:Vec<&str>= sql.split(" ? ").collect();
-       let mut index=0;
-       for x in &s {
-           data.push_str(x);
-           if s.len()!=(index+1){
-                data.push_str(&format!(" ${} ",index));
-           }
-           index+=1;
-       }
-       sql=data;
+    let formater='$';
+    let mut new_sql = String::with_capacity(sql.len()+20);
+    let mut string_start = false;
+    let mut index:i32 = 0;
+    for x in sql.chars() {
+        if x == '\'' || x == '"' {
+            if string_start == true {
+                string_start = false;
+                new_sql.push(x);
+                continue;
+            }
+            string_start = true;
+            new_sql.push(x);
+            continue;
+        }
+        if string_start {
+            new_sql.push(x);
+        } else {
+            if x=='?' && formater != '?' {
+                if index > 9 {
+                    new_sql.push_str(&format!("{}{}",formater,index));
+                }
+                index+=1;
+            }else{
+                new_sql.push(x);
+            }
+        }
+    }
+       sql=new_sql;
     };
     for x in arg {
         match x.tag.as_str() {
