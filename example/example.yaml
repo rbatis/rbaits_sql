@@ -1,4 +1,4 @@
-id=insert:
+id="insert":
   insert into biz_activity
   (
   for key,_ in arg:
@@ -8,7 +8,7 @@ id=insert:
   for _,item in arg:
     ${item}
   )
-id=select_by_condition:
+id="select_by_condition":
   select * from table where
   if id > 0 && id == 1:
     id = ${id}

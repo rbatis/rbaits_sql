@@ -39,19 +39,19 @@ pub fn rb_html(args: TokenStream, func: TokenStream) -> TokenStream {
     stream
 }
 
-//TODO
-#[proc_macro_attribute]
-pub fn rb_pysql(args: TokenStream, func: TokenStream) -> TokenStream {
-    let args = parse_macro_input!(args as AttributeArgs);
-    let target_fn = syn::parse(func).unwrap();
-    let stream = parser::impl_fn(&target_fn, &args);
-    #[cfg(feature = "debug_mode")]
-        {
-            println!("............gen macro xml:\n {}", stream);
-            println!("............gen macro xml end............");
-        }
-    stream
-}
+//TODO impl pysql yaml file parse
+// #[proc_macro_attribute]
+// pub fn rb_pysql_yaml(args: TokenStream, func: TokenStream) -> TokenStream {
+//     let args = parse_macro_input!(args as AttributeArgs);
+//     let target_fn = syn::parse(func).unwrap();
+//     let stream = parser::impl_fn(&target_fn, &args);
+//     #[cfg(feature = "debug_mode")]
+//         {
+//             println!("............gen rb_pysql_yaml:\n {}", stream);
+//             println!("............gen rb_pysql_yaml end............");
+//         }
+//     stream
+// }
 
 //TODO
 #[proc_macro_attribute]
@@ -61,8 +61,8 @@ pub fn rb_pysql_fn(args: TokenStream, func: TokenStream) -> TokenStream {
     let stream = parser::impl_fn(&target_fn, &args);
     #[cfg(feature = "debug_mode")]
         {
-            println!("............gen macro xml:\n {}", stream);
-            println!("............gen macro xml end............");
+            println!("............gen rb_pysql_fn:\n {}", stream);
+            println!("............gen rb_pysql_fn end............");
         }
     stream
 }
