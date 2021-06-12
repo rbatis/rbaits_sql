@@ -12,10 +12,6 @@ use std::collections::HashMap;
 use crate::string_util::find_convert_string;
 use crate::html_loader::{load_html, Element};
 use crate::py_sql::{NodeType, ParsePySql};
-use std::str::Chars;
-
-const example_data: &'static str = include_str!("../../example/example.html");
-
 
 fn parse_html_str(html: &str) -> proc_macro2::TokenStream {
     let datas = load_html(html).expect("load_html() fail!");
