@@ -572,7 +572,7 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
                 };
 }
 
-pub(crate) fn impl_fn(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
+pub(crate) fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     let fn_name = m.sig.ident.to_string();
     let mut file_name = args.get(0).to_token_stream().to_string();
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
@@ -598,6 +598,36 @@ pub(crate) fn impl_fn(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
         };
     }
     t = parse_html_str(&data, format_char, &fn_name);
+    return t.into();
+}
+
+pub(crate) fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
+    let fn_name = m.sig.ident.to_string();
+    let mut data = args.get(0).to_token_stream().to_string();
+    if data.ne("\"\"") && data.starts_with("\"") && data.ends_with("\"") {
+        data = data[1..data.len() - 1].to_string();
+    }
+    let t;
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("py_sql:{}", data);
+        }
+    let mut format_char = '?';
+    if args.len() > 1 {
+        for x in args.get(1).to_token_stream().to_string().chars() {
+            if x != '\'' && x != '"' {
+                format_char = x;
+                break;
+            }
+        };
+    }
+    let nodes = NodeType::parse(&data).expect("[rbatis] parse py_sql fail!");
+    let htmls=crate::py_sql::to_html(&nodes,data.starts_with("select") || data.starts_with(" select"),&fn_name);
+    #[cfg(feature = "debug_mode")]
+        {
+            println!("html:{}", htmls);
+        }
+    t = parse_html_str(&htmls, format_char, &fn_name);
     return t.into();
 }
 

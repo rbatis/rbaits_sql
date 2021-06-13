@@ -31,6 +31,12 @@ pub struct BizActivity {
 #[rb_html("example/example.html",'$')]
 pub fn select_by_condition(arg: &serde_json::Value) {}
 
+
+#[rb_py("select * from biz_activity where delete_flag = 0
+                  if name != '':
+                    and name=#{name}",'$')]
+pub fn py_select_by_condition(arg: &serde_json::Value) {}
+
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 fn main() {
@@ -63,6 +69,13 @@ fn main() {
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
+
+
+    let (sql, args) = py_select_by_condition(&arg);
+    println!("py->sql: {}", sql);
+    println!("py->args: {}", serde_json::to_string(&args).unwrap());
+
+
     let (sql, args) = select_by_condition(&arg);
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());

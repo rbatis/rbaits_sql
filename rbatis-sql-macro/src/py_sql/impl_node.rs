@@ -129,7 +129,7 @@ impl NodeType {
         if trim_express.starts_with(IfNode::name()) {
             return Ok(NodeType::NIf(IfNode {
                 childs,
-                test: trim_express.to_string(),
+                test: trim_express.trim_start_matches("if ").to_string(),
             }));
         } else if trim_express.starts_with(ForEachNode::name()) {
             if !trim_express.contains("in ") {
