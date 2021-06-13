@@ -1,5 +1,4 @@
 pub use ops::Value;
-pub use rbatis_sql_macro::{expr, rb_html, rb_py};
 
 pub mod string_util;
 pub mod error;
@@ -23,4 +22,6 @@ pub mod from_bool;
 
 #[macro_use]
 extern crate rbatis_sql_macro;
+
+pub use rbatis_sql_macro::{expr, rb_html, rb_py};
 
