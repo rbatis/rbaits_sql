@@ -13,9 +13,25 @@ use crate::string_util::find_convert_string;
 use crate::html_loader::{load_html, Element};
 use crate::py_sql::{NodeType, ParsePySql};
 
-fn parse_html_str(html: &str, format_char: char) -> proc_macro2::TokenStream {
-    let datas = load_html(html).expect("load_html() fail!");
-    return parse_html_node(datas, format_char);
+fn parse_html_str(html: &str, format_char: char, fn_name: &str) -> proc_macro2::TokenStream {
+    let mut datas = load_html(html).expect("load_html() fail!");
+    for x in datas {
+        if x.tag.eq("mapper") {
+            for x in x.childs {
+                match x.attributes.get("id") {
+                    Some(id) => {
+                        if id.eq(fn_name) {
+                            return parse_html_node(vec![x], format_char);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            break;
+        }
+    }
+    panic!("html not find fn:{}", fn_name);
 }
 
 fn parse_html_node(htmls: Vec<Element>, format_char: char) -> proc_macro2::TokenStream {
@@ -556,7 +572,8 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
                 };
 }
 
-pub(crate) fn impl_fn(m: &ItemMod, args: &AttributeArgs) -> TokenStream {
+pub(crate) fn impl_fn(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
+    let fn_name = m.sig.ident.to_string();
     let mut file_name = args.get(0).to_token_stream().to_string();
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
         file_name = file_name[1..file_name.len() - 1].to_string();
@@ -574,14 +591,14 @@ pub(crate) fn impl_fn(m: &ItemMod, args: &AttributeArgs) -> TokenStream {
     let mut format_char = '?';
     if args.len() > 1 {
         for x in args.get(1).to_token_stream().to_string().chars() {
-            if x!='\'' && x!='"'{
+            if x != '\'' && x != '"' {
                 format_char = x;
                 break;
             }
         };
     }
-    t = parse_html_str(&data, format_char);
-    return to_mod(m, &t);
+    t = parse_html_str(&data, format_char, &fn_name);
+    return t.into();
 }
 
 /// parse to expr

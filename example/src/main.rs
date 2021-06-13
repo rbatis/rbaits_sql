@@ -29,10 +29,7 @@ pub struct BizActivity {
 }
 
 #[rb_html("example/example.html",'$')]
-pub mod example {
-    pub fn select_by_condition(arg: &serde_json::Value) {}
-    pub fn insert(arg: &serde_json::Value) {}
-}
+pub fn select_by_condition(arg: &serde_json::Value) {}
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
@@ -66,12 +63,12 @@ fn main() {
     // let v = gen(&arg);
     // println!("{}", v);
     // xml(&arg);
-    let (sql, args) = example::select_by_condition(&arg);
+    let (sql, args) = select_by_condition(&arg);
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());
 
     bench!(1000000,{
-        example::select_by_condition(&arg);
+        select_by_condition(&arg);
     });
 }
 
@@ -87,10 +84,10 @@ mod test {
 
 
     #[rb_html("example/example.html")]
-    pub mod example {
-        pub fn select_by_condition(arg: &serde_json::Value) {}
-        pub fn insert(arg: &serde_json::Value) {}
-    }
+    pub fn select_by_condition(arg: &serde_json::Value) {}
+
+    #[rb_html("example/example.html")]
+    pub fn insert(arg: &serde_json::Value) {}
 
     pub struct B {}
 
