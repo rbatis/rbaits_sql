@@ -572,7 +572,7 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
                 };
 }
 
-pub(crate) fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
+pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     let fn_name = m.sig.ident.to_string();
     let mut file_name = args.get(0).to_token_stream().to_string();
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
@@ -601,7 +601,7 @@ pub(crate) fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     return t.into();
 }
 
-pub(crate) fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
+pub fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     let fn_name = m.sig.ident.to_string();
     let mut data = args.get(0).to_token_stream().to_string();
     if data.ne("\"\"") && data.starts_with("\"") && data.ends_with("\"") {

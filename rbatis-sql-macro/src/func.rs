@@ -256,7 +256,7 @@ fn expr_type(expr: Expr) -> String {
 }
 
 
-pub(crate) fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool, as_proxy: bool) -> proc_macro2::TokenStream {
+pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool, as_proxy: bool) -> proc_macro2::TokenStream {
     let mut string_data = args.to_string();
     string_data = string_data[1..string_data.len() - 1].to_string();
     string_data = string_data.replace(".string()", ".to_string()");
