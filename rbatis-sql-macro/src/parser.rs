@@ -65,13 +65,64 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
     let mut body = quote! {};
     let fix_sql = quote! {
     macro_rules! push_index {
-    ($n:expr,$new_sql:ident,$index:ident) => {
+     ($n:expr,$new_sql:ident,$index:expr) => {
                   {
                      let mut num=$index/$n;
-                     $new_sql.push((num+48)as u8 as char);
+                     $new_sql.push((num+48) as u8 as char);
                      $index % $n
                   }
-              }
+              };
+    ($index:ident,$new_sql:ident) => {
+               if $index >= 100000000{
+                    use std::fmt::Write;
+                    $new_sql.write_fmt(format_args!("{}", $index))
+                    .expect("a Display implementation returned an error unexpectedly");
+                }else if $index>=10000000{
+                    let $index = push_index!(10000000,$new_sql,$index);
+                    let $index = push_index!(1000000,$new_sql,$index);
+                    let $index = push_index!(100000,$new_sql,$index);
+                    let $index = push_index!(10000,$new_sql,$index);
+                    let $index = push_index!(1000,$new_sql,$index);
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=1000000{
+                    let $index = push_index!(1000000,$new_sql,$index);
+                    let $index = push_index!(100000,$new_sql,$index);
+                    let $index = push_index!(10000,$new_sql,$index);
+                    let $index = push_index!(1000,$new_sql,$index);
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=100000{
+                    let $index = push_index!(100000,$new_sql,$index);
+                    let $index = push_index!(10000,$new_sql,$index);
+                    let $index = push_index!(1000,$new_sql,$index);
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=10000{
+                    let $index = push_index!(10000,$new_sql,$index);
+                    let $index = push_index!(1000,$new_sql,$index);
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=1000{
+                    let $index = push_index!(1000,$new_sql,$index);
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=100{
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=10{
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else {
+                    $new_sql.push(($index+48)as u8 as char);
+                }
+        };
     }
     let mut new_sql = String::with_capacity(sql.len()+20);
     let mut string_start = false;
@@ -93,51 +144,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             if x=='?' && #format_char != '?' {
                 index+=1;
                 new_sql.push(#format_char);
-                if index>=10000000{
-                    let index = push_index!(10000000,new_sql,index);
-                    let index = push_index!(1000000,new_sql,index);
-                    let index = push_index!(100000,new_sql,index);
-                    let index = push_index!(10000,new_sql,index);
-                    let index = push_index!(1000,new_sql,index);
-                    let index = push_index!(100,new_sql,index);
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }if index>=1000000{
-                    let index = push_index!(1000000,new_sql,index);
-                    let index = push_index!(100000,new_sql,index);
-                    let index = push_index!(10000,new_sql,index);
-                    let index = push_index!(1000,new_sql,index);
-                    let index = push_index!(100,new_sql,index);
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }else if index>=100000{
-                    let index = push_index!(100000,new_sql,index);
-                    let index = push_index!(10000,new_sql,index);
-                    let index = push_index!(1000,new_sql,index);
-                    let index = push_index!(100,new_sql,index);
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }if index>=10000{
-                    let index = push_index!(10000,new_sql,index);
-                    let index = push_index!(1000,new_sql,index);
-                    let index = push_index!(100,new_sql,index);
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }else if index>=1000{
-                    let index = push_index!(1000,new_sql,index);
-                    let index = push_index!(100,new_sql,index);
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }else if index>=100{
-                    let index = push_index!(100,new_sql,index);
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }else if index>=10{
-                    let index = push_index!(10,new_sql,index);
-                    let index = push_index!(1,new_sql,index);
-                }else {
-                    new_sql.push((index+48)as u8 as char);
-                }
+                push_index!(index,new_sql);
             }else{
                 new_sql.push(x);
             }
