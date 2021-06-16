@@ -73,56 +73,26 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                   }
               };
     ($index:ident,$new_sql:ident) => {
-               if $index >= 100000000{
-                    use std::fmt::Write;
-                    $new_sql.write_fmt(format_args!("{}", $index))
-                    .expect("a Display implementation returned an error unexpectedly");
-                }else if $index>=10000000{
-                    let $index = push_index!(10000000,$new_sql,$index);
-                    let $index = push_index!(1000000,$new_sql,$index);
-                    let $index = push_index!(100000,$new_sql,$index);
-                    let $index = push_index!(10000,$new_sql,$index);
-                    let $index = push_index!(1000,$new_sql,$index);
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=1000000{
-                    let $index = push_index!(1000000,$new_sql,$index);
-                    let $index = push_index!(100000,$new_sql,$index);
-                    let $index = push_index!(10000,$new_sql,$index);
-                    let $index = push_index!(1000,$new_sql,$index);
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=100000{
-                    let $index = push_index!(100000,$new_sql,$index);
-                    let $index = push_index!(10000,$new_sql,$index);
-                    let $index = push_index!(1000,$new_sql,$index);
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=10000{
-                    let $index = push_index!(10000,$new_sql,$index);
-                    let $index = push_index!(1000,$new_sql,$index);
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=1000{
-                    let $index = push_index!(1000,$new_sql,$index);
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=100{
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=10{
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else {
+                if  $index>=0 && $index<10{
                     $new_sql.push(($index+48)as u8 as char);
-                }
-        };
+                }else if $index>=10 && $index<100 {
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=100 && $index<1000{
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else if $index>=1000 && $index<10000{
+                    let $index = push_index!(1000,$new_sql,$index);
+                    let $index = push_index!(100,$new_sql,$index);
+                    let $index = push_index!(10,$new_sql,$index);
+                    let $index = push_index!(1,$new_sql,$index);
+                }else{
+                     use std::fmt::Write;
+                     $new_sql.write_fmt(format_args!("{}", $index))
+                    .expect("a Display implementation returned an error unexpectedly");
+               }
+       };
     }
     let mut new_sql = String::with_capacity(sql.len()+20);
     let mut string_start = false;
@@ -629,7 +599,7 @@ pub fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
         };
     }
     let nodes = NodeType::parse(&data).expect("[rbatis] parse py_sql fail!");
-    let htmls=crate::py_sql::to_html(&nodes,data.starts_with("select") || data.starts_with(" select"),&fn_name);
+    let htmls = crate::py_sql::to_html(&nodes, data.starts_with("select") || data.starts_with(" select"), &fn_name);
     #[cfg(feature = "debug_mode")]
         {
             println!("html:{}", htmls);
