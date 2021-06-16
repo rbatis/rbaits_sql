@@ -551,7 +551,10 @@ fn impl_println(x: &Element, body: &mut proc_macro2::TokenStream) {
 }
 
 fn gen_method_name(test_value: &str) -> (String, Ident) {
-    let method_name_string = encode(&test_value).replace("_", "__").replace("=", "_");
+    let method_name_string = encode(&test_value)
+        .replace("_", "__")
+        .replace("=", "_")
+        .replace("+", "add");
     (method_name_string.clone(), Ident::new(&method_name_string, Span::call_site()))
 }
 
