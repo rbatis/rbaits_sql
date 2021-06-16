@@ -19,6 +19,12 @@ pub struct Value<'a> {
     pub inner: Cow<'a, serde_json::Value>,
 }
 
+impl Default for Value<'_>{
+    fn default() -> Self {
+        serde_json::Value::Null.into_proxy()
+    }
+}
+
 impl<'a> Value<'a> {
     pub fn i64(&self) -> i64 {
         self.inner.as_i64().unwrap_or_default()
