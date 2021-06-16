@@ -12,9 +12,13 @@ use std::collections::HashMap;
 use crate::string_util::find_convert_string;
 use crate::html_loader::{load_html, Element};
 use crate::py_sql::{NodeType, ParsePySql};
+use url::Url;
 
 fn parse_html_str(html: &str, format_char: char, fn_name: &str) -> proc_macro2::TokenStream {
     let mut datas = load_html(html).expect("load_html() fail!");
+    let mut sql_map = HashMap::new();
+    let datas = include_replace(datas, &mut sql_map);
+    drop(sql_map);
     for x in datas {
         if x.tag.eq("mapper") {
             for x in x.childs {
@@ -34,21 +38,85 @@ fn parse_html_str(html: &str, format_char: char, fn_name: &str) -> proc_macro2::
     panic!("html not find fn:{}", fn_name);
 }
 
-fn include_replace(htmls: Vec<Element>) -> Vec<Element> {
-    let mut sql_map = HashMap::new();
+
+fn find_element(id: &str, htmls: &Vec<Element>) -> Option<Element> {
+    for x in htmls {
+        if x.childs.len() != 0 {
+            let find = find_element(id, &x.childs);
+            if find.is_some() {
+                return find;
+            }
+        }
+        match x.attributes.get("id") {
+            None => {}
+            Some(id) => {
+                if id.eq(id) {
+                    return Some(x.clone());
+                }
+            }
+        }
+    }
+    return None;
+}
+
+fn include_replace(htmls: Vec<Element>, sql_map: &mut HashMap<String, Vec<Element>>) -> Vec<Element> {
     let mut results = vec![];
     for mut x in htmls {
         match x.tag.as_str() {
             "sql" => {
-                sql_map.insert(x.attributes.get("id").expect("[rbatis] sql element must have id!").clone(), x.childs);
+                sql_map.insert(x.attributes.get("id").expect("[rbatis] <sql> element must have id!").clone(), x.childs.clone());
             }
             "include" => {
-                let refid = x.attributes.get("refid").expect("[rbatis] include element must have refid!").clone();
-                let elements = sql_map.get(refid.as_str()).expect(&format!("[rbatis] can not find element {} !", refid)).clone();
-                for mut el in elements {
-                    x.childs.push(el);
+                let refid = x.attributes.get("refid").expect("[rbatis] <include> element must have refid!").clone();
+                let data_url = Url::parse(format!("url://{}", refid).as_str()).expect("[rbatis] parse include url fail!");
+                let mut find_file = false;
+                for (k, v) in data_url.query_pairs() {
+                    let v = v.to_string();
+                    match k.to_string().as_str() {
+                        "file" => {
+                            if v.is_empty() {
+                                panic!("[rbatis] <include> element file must be have an value!");
+                            }
+                            let mut html_string = String::new();
+                            let mut f = File::open(v.as_str()).expect(&format!("File:\"{}\" does not exist", v));
+                            f.read_to_string(&mut html_string);
+                            let mut datas = load_html(html_string.as_str()).expect("load_html() fail!");
+                            let find = find_element(refid.as_str(), &datas).expect(&format!("[rbatis] not find html:{} , element id={}", v, refid));
+                            x.childs.push(find);
+                            find_file = true;
+                            break;
+                        }
+                        &_ => {}
+                    }
                 }
-                results.push(x);
+                if !find_file {
+                    let refid_path = data_url.host().unwrap().to_string();
+                    let element = sql_map.get(refid_path.as_str()).expect(&format!("[rbatis] can not find element {} <include refid='{}'> !", refid, refid_path)).clone();
+                    for mut el in element {
+                        x.childs.push(el.clone());
+                    }
+                }
+            }
+            _ => {
+                match x.attributes.get("id") {
+                    None => {}
+                    Some(id) => {
+                        if !id.is_empty() {
+                            sql_map.insert(id.clone(), x.childs.clone());
+                        }
+                    }
+                }
+            }
+        }
+        if x.childs.len() != 0 {
+            x.childs = include_replace(x.childs.clone(), sql_map);
+        }
+
+        match x.tag.as_str() {
+            "include" | "sql" => {
+                for c in x.childs {
+                    results.push(c);
+                }
             }
             _ => {
                 results.push(x);
@@ -59,7 +127,6 @@ fn include_replace(htmls: Vec<Element>) -> Vec<Element> {
 }
 
 fn parse_html_node(htmls: Vec<Element>, format_char: char) -> proc_macro2::TokenStream {
-    let htmls = include_replace(htmls);
     #[cfg(feature = "debug_mode")]
         {
             println!("load html:{:#?}", htmls);
@@ -86,7 +153,6 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
 
 /// gen rust code
 fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char) -> proc_macro2::TokenStream {
-    let empty_string = String::new();
     let mut body = quote! {};
     let fix_sql = quote! {
     macro_rules! push_index {
@@ -151,6 +217,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
         match x.tag.as_str() {
             "mapper" => {
                 return parse(&x.childs, methods, "mapper", format_char);
+            }
+            "sql" => {
+                return parse(&x.childs, methods, "sql", format_char);
             }
             "include" => {
                 return parse(&x.childs, methods, "include", format_char);
