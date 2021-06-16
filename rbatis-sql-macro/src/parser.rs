@@ -34,7 +34,32 @@ fn parse_html_str(html: &str, format_char: char, fn_name: &str) -> proc_macro2::
     panic!("html not find fn:{}", fn_name);
 }
 
+fn include_replace(htmls: Vec<Element>) -> Vec<Element> {
+    let mut sql_map = HashMap::new();
+    let mut results = vec![];
+    for mut x in htmls {
+        match x.tag.as_str() {
+            "sql" => {
+                sql_map.insert(x.attributes.get("id").expect("[rbatis] sql element must have id!").clone(), x.childs);
+            }
+            "include" => {
+                let refid = x.attributes.get("refid").expect("[rbatis] include element must have refid!").clone();
+                let elements = sql_map.get(refid.as_str()).expect(&format!("[rbatis] can not find element {} !", refid)).clone();
+                for mut el in elements {
+                    x.childs.push(el);
+                }
+                results.push(x);
+            }
+            _ => {
+                results.push(x);
+            }
+        }
+    }
+    return results;
+}
+
 fn parse_html_node(htmls: Vec<Element>, format_char: char) -> proc_macro2::TokenStream {
+    let htmls = include_replace(htmls);
     #[cfg(feature = "debug_mode")]
         {
             println!("load html:{:#?}", htmls);
@@ -127,11 +152,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "mapper" => {
                 return parse(&x.childs, methods, "mapper", format_char);
             }
-            "sql" => {
-                //TODO
-            }
             "include" => {
-                //TODO
+                return parse(&x.childs, methods, "include", format_char);
             }
             "println" => {
                 impl_println(x, &mut body);
