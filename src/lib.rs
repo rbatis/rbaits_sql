@@ -1,3 +1,13 @@
+#![allow(unused_imports)]
+#![allow(unreachable_patterns)]
+#![allow(unused_variables)]
+#![allow(unused_assignments)]
+#![allow(unused_must_use)]
+#![allow(dead_code)]
+#![allow(non_snake_case)]
+#![allow(unused_parens)]
+#![allow(unused_mut)]
+
 pub use ops::Value;
 
 pub mod string_util;

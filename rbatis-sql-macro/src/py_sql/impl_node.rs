@@ -140,8 +140,8 @@ impl NodeType {
             //let express = trim_express[Self::name().len()..].trim();
             let in_index = trim_express.find("in ").unwrap();
             let col = trim_express[in_index + "in ".len()..].trim();
-            let mut item = trim_express[..in_index].trim();
-            let mut index = "";
+            let item = trim_express[..in_index].trim();
+            let index = "";
             return Ok(NodeType::NForEach(ForEachNode {
                 childs,
                 collection: col.to_string(),

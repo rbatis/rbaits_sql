@@ -179,7 +179,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
                 return syn::parse_str::<Expr>(&format!("{}", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
             }
         }
-        Expr::Lit(mut b) => {
+        Expr::Lit(b) => {
             match b.lit.clone() {
                 Lit::Str(_) => {}
                 Lit::ByteStr(_) => {}
@@ -205,9 +205,6 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
     }
 }
 
-fn expr_type_box(expr: &Box<Expr>) -> String {
-    expr_type(*expr.clone())
-}
 
 fn expr_type(expr: Expr) -> String {
     match expr {

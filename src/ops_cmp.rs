@@ -75,14 +75,13 @@ impl_numeric_cmp! {
     eq_bool[bool]
 }
 
-
-impl PartialOrd<Value<'static>> for Value<'static> {
+impl <'a,'b>PartialOrd<Value<'a>> for Value<'a> {
     fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
         self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }
 }
 
-impl PartialOrd<Value<'static>> for &Value<'_> {
+impl PartialOrd<Value<'_>> for &Value<'_> {
     fn partial_cmp(&self, other: &Value<'_>) -> Option<Ordering> {
         self.inner.as_f64().unwrap_or_default().partial_cmp(&other.inner.as_f64().unwrap_or_default())
     }

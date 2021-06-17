@@ -1,11 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "https://github.com/rbatis/rbatis_sql/raw/main/mybatis-3-mapper.dtd">
 <mapper>
+    <sql id="select_self">(id,name,age,tag)</sql>
     <insert id="insert">
         insert into biz_activity
         <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
             ${key}
         </foreach>
-         values
+        values
         <foreach collection="arg" index="key" item="item" open="(" close=")" separator=",">
             ${item}
         </foreach>
@@ -35,5 +36,10 @@
         <foreach collection="order_by" index="index" item="item">
             #{item}
         </foreach>
+    </select>
+
+    <select id="test_include">
+        <include refid="select_self"></include>
+        <include refid="page_sql?file=example/example_include.html"></include>
     </select>
 </mapper>

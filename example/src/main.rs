@@ -37,6 +37,7 @@ pub fn select_by_condition(arg: &serde_json::Value) {}
                     and name=#{name}",'$')]
 pub fn py_select_by_condition(arg: &serde_json::Value) {}
 
+
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 fn main() {
@@ -129,7 +130,7 @@ mod test {
         // let v = gen(&arg);
         // println!("{}", v);
         // xml(&arg);
-        let (sql, args) = example::select_by_condition(&arg);
+        let (sql, args) = select_by_condition(&arg);
         async_std::task::block_on(async {
             b.exec_prepare("", &sql, &args).await.unwrap();
         });
@@ -223,5 +224,17 @@ mod test {
         bench!(100000,{
        gen(&arg);
     });
+    }
+
+    #[rb_html("example/example.html",'$')]
+    pub fn test_include(arg: &serde_json::Value) {}
+
+    #[test]
+    fn test_include_file(){
+        let arg = serde_json::json!({
+        });
+        let (sql, args) = test_include(&arg);
+        println!("py->sql: {}", sql);
+        println!("py->args: {}", serde_json::to_string(&args).unwrap());
     }
 }
