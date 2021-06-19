@@ -62,12 +62,12 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool) -> Expr {
                 if context.contains(&format!("let {} =", param)) {
                     return syn::parse_str::<Expr>(&format!("{}.as_proxy()", param)).unwrap();
                 }
-                return syn::parse_str::<Expr>(&format!("(&arg)[\"{}\"].as_proxy()", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!("arg[\"{}\"].as_proxy()", param)).unwrap();
             } else {
                 if context.contains(&format!("let {} =", param)) {
                     return syn::parse_str::<Expr>(&format!("{}", param)).unwrap();
                 }
-                return syn::parse_str::<Expr>(&format!("(&arg)[\"{}\"].as_proxy()", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!("arg[\"{}\"].as_proxy()", param)).unwrap();
             }
         }
         Expr::MethodCall(mut b) => {

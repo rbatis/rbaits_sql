@@ -1,8 +1,9 @@
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
+use std::ops::Deref;
 
 use serde::{Deserializer, Serializer};
-use std::borrow::Cow;
 
 /// convert serde_json::Value to Value
 pub trait AsProxy {
@@ -19,9 +20,17 @@ pub struct Value<'a> {
     pub inner: Cow<'a, serde_json::Value>,
 }
 
-impl Default for Value<'_>{
+impl Default for Value<'_> {
     fn default() -> Self {
         serde_json::Value::Null.into_proxy()
+    }
+}
+
+impl<'a> Deref for Value<'a> {
+    type Target = serde_json::Value;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner.as_ref()
     }
 }
 
