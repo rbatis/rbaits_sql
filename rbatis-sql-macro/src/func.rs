@@ -289,7 +289,6 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     if func_name_ident.is_empty() || func_name_ident.eq("\"\""){
         return quote! {
          {
-           use rbatis_sql::ops::AsProxy;
            let result={#t};
            #result_impl
         }
@@ -298,7 +297,6 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
         let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
         return quote! {
         pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
-           use rbatis_sql::ops::AsProxy;
            let result={#t};
            #result_impl
         }
