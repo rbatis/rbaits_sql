@@ -158,7 +158,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
     macro_rules! push_index {
      ($n:expr,$new_sql:ident,$index:expr) => {
                   {
-                     let mut num=$index/$n;
+                     let num=$index/$n;
                      $new_sql.push((num+48) as u8 as char);
                      $index % $n
                   }
