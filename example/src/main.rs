@@ -80,9 +80,9 @@ fn main() {
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());
 
-    // bench!(1000000,{
-    //     select_by_condition(&arg);
-    // });
+    bench!(1000000,{
+        select_by_condition(&arg);
+    });
 }
 
 
