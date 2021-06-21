@@ -238,7 +238,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, k));
                     let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true, ignore);
                     let mut method_string = method_impl.to_string();
-                    method_string = method_string.replace("& arg", "arg");
                     let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
                     let method_impl = parse_expr(&method_impl);
                     //check append value
