@@ -57,7 +57,7 @@
                 >
         <!-- Dynamic -->
 
-        <!ELEMENT include (property+)?>
+        <!ELEMENT include ()?>
         <!ATTLIST include
                 refid CDATA #REQUIRED
                 >
