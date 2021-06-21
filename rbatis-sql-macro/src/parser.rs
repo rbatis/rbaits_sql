@@ -1,20 +1,21 @@
-use quote::{quote, ToTokens};
-use syn::{AttributeArgs, ItemFn, Expr, ItemMod, Path, ItemStruct};
-use crate::proc_macro::TokenStream;
-use proc_macro2::{Ident, Span};
-
-use xml::EventReader;
-use xml::reader::XmlEvent;
-use base64::{encode, decode};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::collections::HashMap;
-use crate::string_util::find_convert_string;
-use crate::html_loader::{load_html, Element};
-use crate::py_sql::{NodeType, ParsePySql};
-use url::Url;
 
-fn parse_html_str(html: &str, format_char: char, fn_name: &str,ignore:&[&str]) -> proc_macro2::TokenStream {
+use base64::{decode, encode};
+use proc_macro2::{Ident, Span};
+use quote::{quote, ToTokens};
+use syn::{AttributeArgs, Expr, ItemFn, ItemMod, ItemStruct, Path};
+use url::Url;
+use xml::EventReader;
+use xml::reader::XmlEvent;
+
+use crate::html_loader::{Element, load_html};
+use crate::proc_macro::TokenStream;
+use crate::py_sql::{NodeType, ParsePySql};
+use crate::string_util::find_convert_string;
+
+fn parse_html_str(html: &str, format_char: char, fn_name: &str, ignore: &[&str]) -> proc_macro2::TokenStream {
     let datas = load_html(html).expect("load_html() fail!");
     let mut sql_map = HashMap::new();
     let datas = include_replace(datas, &mut sql_map);
@@ -25,7 +26,7 @@ fn parse_html_str(html: &str, format_char: char, fn_name: &str,ignore:&[&str]) -
                 match x.attributes.get("id") {
                     Some(id) => {
                         if id.eq(fn_name) {
-                            return parse_html_node(vec![x], format_char,ignore);
+                            return parse_html_node(vec![x], format_char, ignore);
                         }
                     }
                     _ => {}
@@ -126,13 +127,13 @@ fn include_replace(htmls: Vec<Element>, sql_map: &mut HashMap<String, Vec<Elemen
     return results;
 }
 
-fn parse_html_node(htmls: Vec<Element>, format_char: char,ignore:&[&str]) -> proc_macro2::TokenStream {
+fn parse_html_node(htmls: Vec<Element>, format_char: char, ignore: &[&str]) -> proc_macro2::TokenStream {
     #[cfg(feature = "debug_mode")]
         {
             println!("load html:{:#?}", htmls);
         }
     let mut methods = quote!();
-    let fn_impl = parse(&htmls, &mut methods, "", format_char,ignore);
+    let fn_impl = parse(&htmls, &mut methods, "", format_char, ignore);
     let token = quote! {
         #methods
         #fn_impl
@@ -152,7 +153,7 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
 
 
 /// gen rust code
-fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char,ignore:&[&str]) -> proc_macro2::TokenStream {
+fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &[&str]) -> proc_macro2::TokenStream {
     let mut body = quote! {};
     let fix_sql = quote! {
     macro_rules! push_index {
@@ -216,16 +217,16 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
     for x in arg {
         match x.tag.as_str() {
             "mapper" => {
-                return parse(&x.childs, methods, "mapper", format_char,ignore);
+                return parse(&x.childs, methods, "mapper", format_char, ignore);
             }
             "sql" => {
-                return parse(&x.childs, methods, "sql", format_char,ignore);
+                return parse(&x.childs, methods, "sql", format_char, ignore);
             }
             "include" => {
-                return parse(&x.childs, methods, "include", format_char,ignore);
+                return parse(&x.childs, methods, "include", format_char, ignore);
             }
             "println" => {
-                impl_println(x, &mut body,ignore);
+                impl_println(x, &mut body, ignore);
             }
             "" => {
                 let mut string_data = x.data.trim().to_string();
@@ -235,7 +236,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let mut replaced = HashMap::<String, bool>::new();
                 for (k, v) in convert_list {
                     let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, k));
-                    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true,ignore);
+                    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true, ignore);
                     let mut method_string = method_impl.to_string();
                     method_string = method_string.replace("& arg", "arg");
                     let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
@@ -273,7 +274,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
             }
             "if" => {
-                impl_if(x, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char,ignore);
+                impl_if(x, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char, ignore);
             }
             "trim" => {
                 let empty_string = String::new();
@@ -282,9 +283,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 if suffix.is_empty() {
                     suffix = " ".to_string();
                 }
-                let  prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
-                let  suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
-                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"), format_char,ignore);
+                let prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
+                let suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
+                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"), format_char, ignore);
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
@@ -292,7 +293,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let name_expr = parse_expr(&name);
 
-                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false, true,ignore);
+                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false, true, ignore);
 
                 let method_string = method_impl.to_string();
                 let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
@@ -306,7 +307,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "where" => {
-                impl_trim("", " ", "and |or ", " and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"), format_char,ignore);
+                impl_trim("", " ", "and |or ", " and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"), format_char, ignore);
             }
 
             "choose" => {
@@ -316,10 +317,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         panic!("choose node's childs must be when node and otherwise node!");
                     }
                     if x.tag.eq("when") {
-                        impl_if(x, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char,ignore);
+                        impl_if(x, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char, ignore);
                     }
                     if x.tag.eq("otherwise") {
-                        impl_otherwise(x, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"), format_char,ignore);
+                        impl_otherwise(x, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"), format_char, ignore);
                     }
                 }
                 body = quote! {
@@ -349,14 +350,14 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
-                let impl_body = parse(&x.childs, methods, "foreach", format_char,&[findex.as_str(),item.as_str()]);
+                let impl_body = parse(&x.childs, methods, "foreach", format_char, &[findex.as_str(), item.as_str()]);
                 //do replace arg get index and item
                 let mut body_strings = impl_body.to_string().replace("\n", " ").replace("  ", " ");
                 let s = syn::parse::<syn::LitStr>(body_strings.to_token_stream().into()).unwrap();
                 let impl_body = syn::parse_str::<proc_macro2::TokenStream>(&s.value()).unwrap();
 
                 let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, collection));
-                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false,ignore);
+                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false, ignore);
                 let method_string = method_impl.to_string();
                 let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
 
@@ -439,13 +440,13 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "set" => {
-                impl_trim(" set ", " ", ",", ",", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"), format_char,ignore);
+                impl_trim(" set ", " ", ",", ",", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"), format_char, ignore);
             }
 
             "select" => {
                 let id = x.attributes.get("id").expect("<select> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char,ignore);
+                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
@@ -464,7 +465,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "update" => {
                 let id = x.attributes.get("id").expect("<update> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char,ignore);
+                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
@@ -483,7 +484,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "insert" => {
                 let id = x.attributes.get("id").expect("<insert> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char,ignore);
+                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
@@ -502,7 +503,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "delete" => {
                 let id = x.attributes.get("id").expect("<delete> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char,ignore);
+                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
                             pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
@@ -527,9 +528,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 }
 
 
-fn impl_println(x: &Element, body: &mut proc_macro2::TokenStream,ignore:&[&str]) {
+fn impl_println(x: &Element, body: &mut proc_macro2::TokenStream, ignore: &[&str]) {
     let value = x.attributes.get("value").expect(&format!("{} element must be have value field!", x.tag));
-    let method_name = impl_method(value, body,ignore);
+    let method_name = impl_method(value, body, ignore);
     let mut format = String::new();
     if let Some(s) = x.attributes.get("format") {
         format = s.to_string();
@@ -557,9 +558,9 @@ fn gen_method_name(test_value: &str) -> (String, Ident) {
 }
 
 
-fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream,ignore:&[&str]) -> Ident {
+fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &[&str]) -> Ident {
     let (_, method_name) = gen_method_name(&test_value);
-    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true,ignore);
+    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true, ignore);
     let method_string = method_impl.to_string();
     let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
     let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
@@ -574,11 +575,11 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream,ignore:&[&s
     return method_name;
 }
 
-fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char,ignore:&[&str]) {
+fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &[&str]) {
     let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
-    let method_name = impl_method(test_value, body,ignore);
+    let method_name = impl_method(test_value, body, ignore);
     if x.childs.len() != 0 {
-        let if_tag_body = parse(&x.childs, methods, block_name, format_char,ignore);
+        let if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
         *body = quote! {
                               #body
                               if #method_name {
@@ -591,8 +592,8 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
     }
 }
 
-fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char,ignore:&[&str]) {
-    let child_body = parse(&x.childs, methods, block_name, format_char,ignore);
+fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &[&str]) {
+    let child_body = parse(&x.childs, methods, block_name, format_char, ignore);
     *body = quote!(
                         #body
                         sql.push_str(" ");
@@ -602,8 +603,8 @@ fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mu
 }
 
 
-fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char,ignore:&[&str]) {
-    let trim_body = parse(&x.childs, methods, block_name, format_char,ignore);
+fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &[&str]) {
+    let trim_body = parse(&x.childs, methods, block_name, format_char, ignore);
     let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
     let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
     let have_trim = prefixs.len() != 0 && suffixs.len() != 0;
@@ -666,7 +667,7 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
             }
         };
     }
-    t = parse_html_str(&data, format_char, &fn_name,&[]);
+    t = parse_html_str(&data, format_char, &fn_name, &[]);
     return t.into();
 }
 
@@ -696,7 +697,7 @@ pub fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
         {
             println!("html:{}", htmls);
         }
-    t = parse_html_str(&htmls, format_char, &fn_name,&[]);
+    t = parse_html_str(&htmls, format_char, &fn_name, &[]);
     return t.into();
 }
 
