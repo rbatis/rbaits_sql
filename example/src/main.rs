@@ -28,21 +28,21 @@ pub struct BizActivity {
     pub delete_flag: Option<i32>,
 }
 
-#[rb_html("example/example.html",'$')]
-pub fn select_by_condition(arg: &serde_json::Value) {}
 
+#[rb_html("example/example.html",'$')]
+pub fn select_by_condition(arg: &mut serde_json::Value) {}
 
 #[rb_py("select * from biz_activity where delete_flag = 0
                   if name != '':
                     and name=#{name}",'$')]
-pub fn py_select_by_condition(arg: &serde_json::Value) {}
+pub fn py_select_by_condition(arg: &mut serde_json::Value) {}
 
 
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 fn main() {
-    let arg = serde_json::json!({
+    let mut arg = serde_json::json!({
         "id":1,
         "order_by":["id","name"],
         "ids":[1,2,3],
@@ -63,25 +63,14 @@ fn main() {
         delete_flag: None,
     };
 
-    //
-    // let (sql, args) = example::insert(&arg);
-    // println!("sql: {}", sql);
-    // println!("args: {:?}", args);
-
-    // let v = gen(&arg);
-    // println!("{}", v);
-    // xml(&arg);
-
-    let (sql, args) = py_select_by_condition(&arg);
+    let (sql, args) = py_select_by_condition(&mut arg);
     println!("py->sql: {}", sql);
     println!("py->args: {}", serde_json::to_string(&args).unwrap());
-
-    let (sql, args) = select_by_condition(&arg);
+    let (sql, args) = select_by_condition(&mut arg);
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());
-
     bench!(1000000,{
-        select_by_condition(&arg);
+        select_by_condition(&mut arg);
     });
 }
 

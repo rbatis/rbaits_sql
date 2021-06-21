@@ -29,6 +29,8 @@ pub mod ops_bit_and;
 pub mod ops_bit_or;
 pub mod from_bool;
 
+#[macro_use]
+pub mod sql_replace;
 
 #[macro_use]
 extern crate rbatis_sql_macro;

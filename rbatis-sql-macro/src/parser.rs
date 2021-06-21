@@ -156,63 +156,7 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
 fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &[&str]) -> proc_macro2::TokenStream {
     let mut body = quote! {};
     let fix_sql = quote! {
-    macro_rules! push_index {
-     ($n:expr,$new_sql:ident,$index:expr) => {
-                  {
-                     let num=$index/$n;
-                     $new_sql.push((num+48) as u8 as char);
-                     $index % $n
-                  }
-              };
-    ($index:ident,$new_sql:ident) => {
-                if  $index>=0 && $index<10{
-                    $new_sql.push(($index+48)as u8 as char);
-                }else if $index>=10 && $index<100 {
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=100 && $index<1000{
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else if $index>=1000 && $index<10000{
-                    let $index = push_index!(1000,$new_sql,$index);
-                    let $index = push_index!(100,$new_sql,$index);
-                    let $index = push_index!(10,$new_sql,$index);
-                    let $index = push_index!(1,$new_sql,$index);
-                }else{
-                     use std::fmt::Write;
-                     $new_sql.write_fmt(format_args!("{}", $index))
-                    .expect("a Display implementation returned an error unexpectedly");
-               }
-       };
-    }
-    let mut new_sql = String::with_capacity(sql.len()+20);
-    let mut string_start = false;
-    let mut index:i32 = 0;
-    for x in sql.chars() {
-        if x == '\'' || x == '"' {
-            if string_start == true {
-                string_start = false;
-                new_sql.push(x);
-                continue;
-            }
-            string_start = true;
-            new_sql.push(x);
-            continue;
-        }
-        if string_start {
-            new_sql.push(x);
-        } else {
-            if x=='?' && #format_char != '?' {
-                index+=1;
-                new_sql.push(#format_char);
-                push_index!(index,new_sql);
-            }else{
-                new_sql.push(x);
-            }
-        }
-    }
-       sql=new_sql;
+        rbatis_sql::sql_index!(sql,#format_char);
     };
     for x in arg {
         match x.tag.as_str() {
@@ -296,14 +240,23 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let method_string = method_impl.to_string();
                 let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
-
                 let method_impl = parse_expr(&method_impl);
 
                 body = quote! {
                             #body
-                            let mut arg = arg.clone();
                             arg[#name] = serde_json::Value::from(#method_impl);
                         };
+                //re gen new ident get method!
+                let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, name));
+                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", name), false, true, ignore);
+                let mut method_string = method_impl.to_string();
+                let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
+                let method_impl = parse_expr(&method_impl);
+                body = quote! {
+                            #body
+                            let #method_name = #method_impl;
+                        };
+
             }
 
             "where" => {
@@ -443,7 +396,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                            pub fn #method_name (arg:&mut serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
@@ -462,7 +415,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                            pub fn #method_name (arg:&mut serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
@@ -481,7 +434,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                            pub fn #method_name (arg:&mut serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
@@ -500,7 +453,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&serde_json::Value) -> (String,Vec<serde_json::Value>) {
+                            pub fn #method_name (arg:&mut serde_json::Value) -> (String,Vec<serde_json::Value>) {
                                use rbatis_sql::ops::AsProxy;
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
