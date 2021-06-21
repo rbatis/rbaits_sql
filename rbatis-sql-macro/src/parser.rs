@@ -350,11 +350,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
                 let impl_body = parse(&x.childs, methods, "foreach", format_char, &[findex.as_str(), item.as_str()]);
-                //do replace arg get index and item
-                let mut body_strings = impl_body.to_string().replace("\n", " ").replace("  ", " ");
-                let s = syn::parse::<syn::LitStr>(body_strings.to_token_stream().into()).unwrap();
-                let impl_body = syn::parse_str::<proc_macro2::TokenStream>(&s.value()).unwrap();
-
                 let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, collection));
                 let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false, ignore);
                 let method_string = method_impl.to_string();
