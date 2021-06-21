@@ -290,18 +290,19 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
                 let value = x.attributes.get("value").expect("<bind> element must be have value!").to_string();
 
+                let name_expr = parse_expr(&name);
+
                 let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false, true, ignore);
+
                 let method_string = method_impl.to_string();
                 let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
 
                 let method_impl = parse_expr(&method_impl);
 
-
-                let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, name));
-
                 body = quote! {
                             #body
-                            let #method_name=#method_impl;
+                            let mut arg = arg.clone();
+                            arg[#name] = serde_json::Value::from(#method_impl);
                         };
             }
 
