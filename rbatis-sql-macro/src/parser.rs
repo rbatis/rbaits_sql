@@ -199,7 +199,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                           };
                     } else {
                         if replaced.get(&v).is_none() {
-                            replaces = quote! {#replaces.replacen(#v, &#method_name.to_string(), 1)};
+                            replaces = quote! {#replaces.replacen(#v, &#method_name.as_sql(), 1)};
                             replaced.insert(v.to_string(), true);
                         }
                     }

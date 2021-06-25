@@ -9,6 +9,7 @@ use serde::{Deserializer, Serializer};
 pub trait AsProxy {
     fn into_proxy(self) -> Value<'static>;
     fn as_proxy(&self) -> Value<'_>;
+    fn as_sql(&self) -> String;
 }
 
 
@@ -130,6 +131,8 @@ impl<'a> Value<'a> {
             }
         };
     }
+
+
 }
 
 impl<'a> Value<'a> {
@@ -160,6 +163,16 @@ impl AsProxy for serde_json::Value {
             inner: Cow::Borrowed(self)
         }
     }
+    fn as_sql(&self) -> String {
+        match self {
+            serde_json::Value::String(s) => {
+                return self.as_str().unwrap().to_string();
+            }
+            _ => {
+                return self.to_string();
+            }
+        }
+    }
 }
 
 impl AsProxy for &serde_json::Value {
@@ -172,6 +185,16 @@ impl AsProxy for &serde_json::Value {
     fn as_proxy(&self) -> Value<'_> {
         Value {
             inner: Cow::Borrowed(self)
+        }
+    }
+    fn as_sql(&self) -> String {
+        match self {
+            serde_json::Value::String(s) => {
+                return self.as_str().unwrap().to_string();
+            }
+            _ => {
+                return self.to_string();
+            }
         }
     }
 }
@@ -230,6 +253,10 @@ impl AsProxy for &str {
             inner: Cow::Owned(serde_json::Value::String(self.to_string()))
         }
     }
+
+    fn as_sql(&self) -> String {
+        return self.to_string();
+    }
 }
 
 macro_rules! impl_into_proxy {
@@ -245,7 +272,11 @@ macro_rules! impl_into_proxy {
         Value {
             inner: Cow::Owned(serde_json::json!(self))
         }
-    }}
+    }
+    fn as_sql(&self) -> String {
+        self.to_string()
+    }
+ }
       )*
     };
 }
