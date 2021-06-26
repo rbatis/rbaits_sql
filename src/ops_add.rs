@@ -357,38 +357,6 @@ impl Add<&str> for &Value<'_> {
 }
 
 
-// #[cfg(feature = "fast_mode")]
-// impl Add<Value<'_>> for String {
-//     type Output = String;
-//     fn add(self, rhs: Value) -> Self::Output {
-//         return match rhs.inner.as_ref() {
-//             serde_json::Value::String(s) => {
-//                 self + s.as_str()
-//             }
-//             _ => {
-//                 String::new()
-//             }
-//         };
-//     }
-// }
-//
-// #[cfg(feature = "fast_mode")]
-// impl Add<&Value<'_>> for String {
-//     type Output = String;
-//     #[must_use]
-//     fn add(self, rhs: &Value) -> Self::Output {
-//         return match rhs.inner.as_ref() {
-//             serde_json::Value::String(s) => {
-//                 self + s.as_str()
-//             }
-//             _ => {
-//                 String::new()
-//             }
-//         };
-//     }
-// }
-
-
 impl From<Value<'_>> for String {
     fn from(arg: Value<'_>) -> Self {
         arg.string()
