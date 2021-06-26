@@ -95,7 +95,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                 BinOp::Add(_) => {
                     let left_token = b.left.to_token_stream().to_string();
                     if left_token.trim().ends_with("\"") && left_token.trim().starts_with("\"") {
-                        b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
+                        b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({}).into_proxy()", b.left.to_token_stream().to_string().trim())).unwrap());
                     }
                 }
                 _ => {}

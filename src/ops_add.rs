@@ -356,37 +356,39 @@ impl Add<&str> for &Value<'_> {
     }
 }
 
-//string
-impl Add<Value<'_>> for String {
-    type Output = String;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner.as_ref() {
-            serde_json::Value::String(s) => {
-                self + s.as_str()
-            }
-            _ => {
-                String::new()
-            }
-        };
-    }
-}
-
-impl Add<&Value<'_>> for String {
-    type Output = String;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match rhs.inner.as_ref() {
-            serde_json::Value::String(s) => {
-                self + s.as_str()
-            }
-            _ => {
-                String::new()
-            }
-        };
-    }
-}
+// TODO better way impl Add,This currently affects String+&String
+// impl Add<Value<'_>> for String {
+//     type Output = String;
+//     fn add(self, rhs: Value) -> Self::Output {
+//         return match rhs.inner.as_ref() {
+//             serde_json::Value::String(s) => {
+//                 self + s.as_str()
+//             }
+//             _ => {
+//                 String::new()
+//             }
+//         };
+//     }
+// }
+//
+// impl Add<&Value<'_>> for String {
+//     type Output = String;
+//     #[must_use]
+//     fn add(self, rhs: &Value) -> Self::Output {
+//         return match rhs.inner.as_ref() {
+//             serde_json::Value::String(s) => {
+//                 self + s.as_str()
+//             }
+//             _ => {
+//                 String::new()
+//             }
+//         };
+//     }
+// }
 
 impl Add<String> for Value<'_> {
     type Output = String;
+    #[must_use]
     fn add(self, rhs: String) -> Self::Output {
         let inner = match self.inner {
             Cow::Borrowed(b) => {
