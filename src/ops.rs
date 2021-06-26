@@ -136,7 +136,7 @@ impl<'a> Value<'a> {
 }
 
 impl<'a> Value<'a> {
-    fn into_proxy(self) -> Value<'a> {
+    pub fn into_proxy(self) -> Value<'a> {
         self
     }
     pub fn as_proxy(self) -> Value<'a> {
@@ -248,7 +248,7 @@ impl AsProxy for &str {
         }
     }
 
-    fn as_proxy(&self) -> Value<'static> {
+    fn as_proxy(&self) -> Value<'_> {
         Value {
             inner: Cow::Owned(serde_json::Value::String(self.to_string()))
         }
@@ -268,7 +268,7 @@ macro_rules! impl_into_proxy {
             inner: Cow::Owned(serde_json::json!(self))
         }
     }
-    fn as_proxy(&self) -> Value<'static> {
+    fn as_proxy(&self) -> Value<'_> {
         Value {
             inner: Cow::Owned(serde_json::json!(self))
         }
