@@ -106,7 +106,7 @@ mod test {
     #[test]
     fn test_backend() {
         let b = B {};
-        let arg = serde_json::json!({
+        let mut arg = serde_json::json!({
         "id":1,
         "order_by":["id","name"],
         "ids":[1,2,3],
@@ -118,7 +118,7 @@ mod test {
         // let v = gen(&arg);
         // println!("{}", v);
         // xml(&arg);
-        let (sql, args) = select_by_condition(&arg);
+        let (sql, args) = select_by_condition(&mut arg);
         async_std::task::block_on(async {
             b.exec_prepare("", &sql, &args).await.unwrap();
         });
@@ -219,9 +219,9 @@ mod test {
 
     #[test]
     fn test_include_file(){
-        let arg = serde_json::json!({
+        let mut arg = serde_json::json!({
         });
-        let (sql, args) = test_include(&arg);
+        let (sql, args) = test_include(&mut arg);
         println!("py->sql: {}", sql);
         println!("py->args: {}", serde_json::to_string(&args).unwrap());
     }
