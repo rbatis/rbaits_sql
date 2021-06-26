@@ -290,17 +290,11 @@ impl<'a> From<&'a Value<'_>> for &'a str {
     }
 }
 
-impl From<Value<'_>> for &'static str {
-    fn from(arg: Value) -> &'static str {
+impl<'a> From<Value<'a>> for &'a str {
+    fn from(arg: Value) -> &'a str {
         unsafe {
             let s = arg.str();
-            let vptr = change_lifetime_const(s);
-            return vptr;
+            return &*(s as *const str);
         }
     }
-}
-
-///this is safe,only change lifetime
-pub unsafe fn change_lifetime_const<'a, 'b, T>(x: &'a T) -> &'b T where T: ?Sized {
-    &*(x as *const T)
 }
