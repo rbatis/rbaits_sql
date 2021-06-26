@@ -73,10 +73,18 @@ impl_numeric_add! {
 impl Add<&Value<'_>> for Value<'_> {
     type Output = Value<'static>;
     fn add(self, rhs: &Value) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
                 Value {
-                    inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or("")))
+                    inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or("")))
                 }
             }
             serde_json::Value::Number(s) => {
@@ -98,9 +106,17 @@ impl Add<&Value<'_>> for Value<'_> {
 impl Add<Value<'_>> for Value<'_> {
     type Output = Value<'static>;
     fn add(self, rhs: Value) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
+                Value { inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or(""))) }
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
@@ -169,9 +185,17 @@ impl Add<Value<'_>> for &Value<'_> {
 impl Add<&serde_json::Value> for Value<'_> {
     type Output = Value<'static>;
     fn add(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
+                Value { inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or(""))) }
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
@@ -192,9 +216,17 @@ impl Add<&serde_json::Value> for Value<'_> {
 impl Add<serde_json::Value> for Value<'_> {
     type Output = Value<'static>;
     fn add(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
+                Value { inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or(""))) }
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
@@ -291,9 +323,17 @@ impl Add<&Value<'_>> for &str {
 impl Add<&str> for Value<'_> {
     type Output = String;
     fn add(self, rhs: &str) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
-                s.to_string() + rhs
+                s + rhs
             }
             _ => {
                 String::new()
@@ -348,9 +388,17 @@ impl Add<&Value<'_>> for String {
 impl Add<String> for Value<'_> {
     type Output = String;
     fn add(self, rhs: String) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
-                s.to_string() + rhs.as_str()
+                s + rhs.as_str()
             }
             _ => {
                 String::new()
@@ -405,9 +453,17 @@ impl Add<&Value<'_>> for &String {
 impl Add<&String> for Value<'_> {
     type Output = String;
     fn add(self, rhs: &String) -> Self::Output {
-        return match self.inner.as_ref() {
+        let inner = match self.inner {
+            Cow::Borrowed(b) => {
+                b.to_owned()
+            }
+            Cow::Owned(o) => {
+                o.to_owned()
+            }
+        };
+        return match inner {
             serde_json::Value::String(s) => {
-                s.to_string() + rhs.as_str()
+                s + rhs.as_str()
             }
             _ => {
                 String::new()
