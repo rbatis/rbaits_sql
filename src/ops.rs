@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::borrow::{Cow, Borrow};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
@@ -131,8 +131,6 @@ impl<'a> Value<'a> {
             }
         };
     }
-
-
 }
 
 impl<'a> Value<'a> {
@@ -285,3 +283,15 @@ impl_into_proxy!(i8 i16 i32 i64 isize);
 impl_into_proxy!(u8 u16 u32 u64 usize);
 impl_into_proxy!(f32 f64);
 impl_into_proxy!(String);
+
+impl<'a> From<&'a Value<'_>> for &'a str {
+    fn from(arg: &'a Value) -> &'a str {
+        arg.str()
+    }
+}
+
+impl From<Value<'_>> for &'static str {
+    fn from(arg: Value) -> &'static str {
+        Box::leak(arg.str().into())
+    }
+}

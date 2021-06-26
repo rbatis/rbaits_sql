@@ -18,12 +18,8 @@ license = "Apache-2.0"
 
 [features]
 #default is fast_mode
-default = ["fast_mode"]
+default = []
 debug_mode = ["rbatis_sql_macro/debug_mode"]
-
-fast_mode = []
-#compatible_mode will allow string+&string.
-compatible_mode = []
 
 [dependencies]
 #serde

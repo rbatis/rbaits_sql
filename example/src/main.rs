@@ -192,6 +192,8 @@ mod test {
         call!(fn49,"null >= 0", json!(true));
         call!(fn50,"null <= a", json!(true));
         call!(fn51,"a == 1 && g", json!(true));
+        call!(fn52,"1+2", json!(3));
+        call!(fn53,"1+a", json!(2));
     }
 
     #[expr("a+b*(e[0]+b)/2")]

@@ -94,14 +94,10 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                 }
                 BinOp::Add(_) => {
                     let left_token = b.left.to_token_stream().to_string();
+                    let right_token = b.right.to_token_stream().to_string();
                     if left_token.trim().ends_with("\"") && left_token.trim().starts_with("\"") {
-                        if cfg!(feature="fast_mode") {
-                            b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
-                        } else if cfg!(feature="compatible_mode") {
-                            b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({}).into_proxy()", b.left.to_token_stream().to_string().trim())).unwrap());
-                        } else {
-                            panic!("[rbatis_sql] must have one future for fast_mode or compatible_mode!");
-                        }
+                        b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
+                        b.right = Box::new(syn::parse_str::<Expr>(&format!("({}).into()", b.right.to_token_stream().to_string().trim())).unwrap());
                     }
                 }
                 _ => {}
