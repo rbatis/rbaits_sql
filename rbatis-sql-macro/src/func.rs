@@ -118,8 +118,6 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                 BinOp::Rem(_)=> {
                     return syn::parse_str::<Expr>(&format!("({}).op_rem(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
                 }
-                /// The `^` operator (bitwise xor)
-                BinOp:: BitXor(_)=> {}
                 /// The `&` operator (bitwise and)
                 BinOp::BitAnd(_)=> {
                     return syn::parse_str::<Expr>(&format!("({}).op_bitand(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
@@ -128,10 +126,6 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                 BinOp:: BitOr(_)=> {
                     return syn::parse_str::<Expr>(&format!("({}).op_bitor(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
                 }
-                /// The `<<` operator (shift left)
-                BinOp::  Shl(_)=> {}
-                /// The `>>` operator (shift right)
-                BinOp:: Shr(_)=> {}
                 /// The `==` operator (equality)
                 BinOp:: Eq(_)=> {
                     return syn::parse_str::<Expr>(&format!("({}).op_eq(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
@@ -156,26 +150,32 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                 BinOp:: Gt(_)=> {
                     return syn::parse_str::<Expr>(&format!("({}).op_gt(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
                 }
+                /// The `^` operator (bitwise xor)
+                BinOp:: BitXor(_)=> {panic!("unsupported token ^ ")}
+                /// The `<<` operator (shift left)
+                BinOp::  Shl(_)=> {panic!("unsupported token << ")}
+                /// The `>>` operator (shift right)
+                BinOp:: Shr(_)=> {panic!("unsupported token >> ")}
                 /// The `+=` operator
-                BinOp:: AddEq(_)=> {}
+                BinOp:: AddEq(_)=> {panic!("unsupported token += ")}
                 /// The `-=` operator
-                BinOp:: SubEq(_)=> {}
+                BinOp:: SubEq(_)=> {panic!("unsupported token -= ")}
                 /// The `*=` operator
-                BinOp:: MulEq(_)=> {}
+                BinOp:: MulEq(_)=> {panic!("unsupported token *= ")}
                 /// The `/=` operator
-                BinOp:: DivEq(_)=> {}
+                BinOp:: DivEq(_)=> {panic!("unsupported token /= ")}
                 /// The `%=` operator
-                BinOp:: RemEq(_)=> {}
+                BinOp:: RemEq(_)=> {panic!("unsupported token %= ")}
                 /// The `^=` operator
-                BinOp:: BitXorEq(_)=> {}
+                BinOp:: BitXorEq(_)=> {panic!("unsupported token ^= ")}
                 /// The `&=` operator
-                BinOp:: BitAndEq(_)=> {}
+                BinOp:: BitAndEq(_)=> {panic!("unsupported token &= ")}
                 /// The `|=` operator
-                BinOp::BitOrEq(_)=> {}
+                BinOp::BitOrEq(_)=> {panic!("unsupported token |= ")}
                 /// The `<<=` operator
-                BinOp:: ShlEq(_)=> {}
+                BinOp:: ShlEq(_)=> {panic!("unsupported token <<= ")}
                 /// The `>>=` operator
-                BinOp:: ShrEq(_)=> {}
+                BinOp:: ShrEq(_)=> {panic!("unsupported token >>= ")}
             }
             return Expr::Binary(b);
         }
