@@ -24,6 +24,26 @@ impl Sub<&Value> for Value {
     }
 }
 
+impl Sub<&&Value> for Value {
+    type Output = Value;
+    fn op_sub(self, rhs: &&Value) -> Self::Output {
+        return match self {
+            serde_json::Value::Number(s) => {
+                if s.is_i64() {
+                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default())
+                } else if s.is_f64() {
+                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default())
+                } else {
+                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default())
+                }
+            }
+            _ => {
+                return serde_json::Value::Null;
+            }
+        };
+    }
+}
+
 impl Sub<Value> for Value {
     type Output = Value;
     fn op_sub(self, rhs: Value) -> Self::Output {

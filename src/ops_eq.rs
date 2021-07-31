@@ -9,6 +9,18 @@ impl PartialEq<Value> for &'_ Value {
     }
 }
 
+impl PartialEq<&Value> for &'_ Value {
+    fn op_eq(&self, other: &&Value) -> bool {
+        self.eq(&*other)
+    }
+}
+
+impl PartialEq<&&Value> for &'_ Value {
+    fn op_eq(&self, other: &&&Value) -> bool {
+        self.eq(&**other)
+    }
+}
+
 impl PartialEq<Value> for &&'_ Value {
     fn op_eq(&self, other: &Value) -> bool {
         (*self).eq(&other)
@@ -117,6 +129,12 @@ macro_rules! impl_numeric_eq {
             impl PartialEq<&Value> for $ty {
                fn op_eq(&self, other: &&Value)  -> bool {
                     $eq(*other, *self as _)
+                }
+            }
+
+            impl PartialEq<&&Value> for $ty {
+               fn op_eq(&self, other: &&&Value)  -> bool {
+                    $eq(**other, *self as _)
                 }
             }
 

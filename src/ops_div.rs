@@ -158,6 +158,38 @@ impl Div<&Value> for Value {
     }
 }
 
+impl Div<&&Value> for Value {
+    type Output = Value;
+    fn op_div(self, rhs: &&Value) -> Self::Output {
+        return match self {
+            serde_json::Value::Number(s) => {
+                if s.is_i64() {
+                    let rhs = rhs.as_i64().unwrap_or_default();
+                    if rhs == 0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
+                } else if s.is_f64() {
+                    let rhs = rhs.as_f64().unwrap_or_default();
+                    if rhs == 0.0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
+                } else {
+                    let rhs = rhs.as_u64().unwrap_or_default();
+                    if rhs == 0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+                }
+            }
+            _ => {
+                return serde_json::Value::Null;
+            }
+        };
+    }
+}
+
 impl Div<Value> for Value {
     type Output = Value;
     fn op_div(self, rhs: Value) -> Self::Output {
@@ -254,6 +286,37 @@ impl Div<&Value> for &Value {
     }
 }
 
+impl Div<&&Value> for &Value {
+    type Output = Value;
+    fn op_div(self, rhs: &&Value) -> Self::Output {
+        return match self {
+            serde_json::Value::Number(s) => {
+                if s.is_i64() {
+                    let rhs = rhs.as_i64().unwrap_or_default();
+                    if rhs == 0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
+                } else if s.is_f64() {
+                    let rhs = rhs.as_f64().unwrap_or_default();
+                    if rhs == 0.0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
+                } else {
+                    let rhs = rhs.as_u64().unwrap_or_default();
+                    if rhs == 0 {
+                        return serde_json::json!(rhs);
+                    }
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+                }
+            }
+            _ => {
+                return serde_json::Value::Null;
+            }
+        };
+    }
+}
 
 
 macro_rules! div_self {

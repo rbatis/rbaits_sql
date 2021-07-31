@@ -2,6 +2,8 @@ use std::cmp::{Ordering, PartialOrd as P};
 use crate::ops::{Value, AsProxy};
 use crate::ops::PartialOrd;
 
+
+
 #[inline]
 fn cmp_i64(value: i64, other: i64) -> Option<Ordering> {
     Some(value.cmp(&other))
@@ -95,8 +97,47 @@ impl PartialOrd<Value> for &Value {
     }
 }
 
+impl PartialOrd<&Value> for &Value {
+    fn op_partial_cmp(&self, other: &&Value) -> Option<Ordering> {
+        match self {
+            Value::Null => { Some(Ordering::Equal) }
+            Value::Bool(b) => { cmp_bool(*b, other.bool()) }
+            Value::Number(n) => { cmp_f64(n.as_f64().unwrap_or_default(), other.f64()) }
+            Value::String(s) => { Some(s.cmp(&other.string())) }
+            Value::Array(_) => { None }
+            Value::Object(_) => { None }
+        }
+    }
+}
+
+impl PartialOrd<&&Value> for &Value {
+    fn op_partial_cmp(&self, other: &&&Value) -> Option<Ordering> {
+        match self {
+            Value::Null => { Some(Ordering::Equal) }
+            Value::Bool(b) => { cmp_bool(*b, other.bool()) }
+            Value::Number(n) => { cmp_f64(n.as_f64().unwrap_or_default(), other.f64()) }
+            Value::String(s) => { Some(s.cmp(&other.string())) }
+            Value::Array(_) => { None }
+            Value::Object(_) => { None }
+        }
+    }
+}
+
 impl PartialOrd<&Value> for Value {
     fn op_partial_cmp(&self, other: &&Value) -> Option<Ordering> {
+        match self {
+            Value::Null => { Some(Ordering::Equal) }
+            Value::Bool(b) => { cmp_bool(*b, other.bool()) }
+            Value::Number(n) => { cmp_f64(n.as_f64().unwrap_or_default(), other.f64()) }
+            Value::String(s) => { Some(s.cmp(&other.string())) }
+            Value::Array(_) => { None }
+            Value::Object(_) => { None }
+        }
+    }
+}
+
+impl PartialOrd<&&Value> for Value {
+    fn op_partial_cmp(&self, other: &&&Value) -> Option<Ordering> {
         match self {
             Value::Null => { Some(Ordering::Equal) }
             Value::Bool(b) => { cmp_bool(*b, other.bool()) }
