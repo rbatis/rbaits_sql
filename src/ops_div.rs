@@ -1,23 +1,23 @@
-use std::ops::Div;
+use crate::ops::Div;
 
-use crate::Value;
+use crate::ops::Value;
 use crate::ops::AsProxy;
 
-fn div_i64(value: &Value, other: i64) -> i64 {
+fn op_div_i64(value: &Value, other: i64) -> i64 {
     if other == 0 {
         return 0;
     }
     (value.as_i64().unwrap_or_default() / other)
 }
 
-fn div_u64(value: &Value, other: u64) -> u64 {
+fn op_div_u64(value: &Value, other: u64) -> u64 {
     if other == 0 {
         return 0;
     }
     (value.as_u64().unwrap_or_default() / other)
 }
 
-fn div_f64(value: &Value, other: f64) -> f64 {
+fn op_div_f64(value: &Value, other: f64) -> f64 {
     if other == 0.0 {
         return 0.0;
     }
@@ -25,7 +25,7 @@ fn div_f64(value: &Value, other: f64) -> f64 {
 }
 
 
-fn div_i64_value(value: &Value, other: i64) -> i64 {
+fn op_div_i64_value(value: &Value, other: i64) -> i64 {
     let v = value.as_i64().unwrap_or_default();
     if v == 0 {
         return 0;
@@ -33,7 +33,7 @@ fn div_i64_value(value: &Value, other: i64) -> i64 {
     (other / v)
 }
 
-fn div_u64_value(value: &Value, other: u64) -> u64 {
+fn op_div_u64_value(value: &Value, other: u64) -> u64 {
     let v = value.as_u64().unwrap_or_default();
     if v == 0 {
         return 0;
@@ -41,7 +41,7 @@ fn div_u64_value(value: &Value, other: u64) -> u64 {
     (other / v)
 }
 
-fn div_f64_value(value: &Value, other: f64) -> f64 {
+fn op_div_f64_value(value: &Value, other: f64) -> f64 {
     let v = value.as_f64().unwrap_or_default();
     if v == 0.0 {
         return 0.0;
@@ -52,45 +52,65 @@ fn div_f64_value(value: &Value, other: f64) -> f64 {
 macro_rules! impl_numeric_div {
     ($($div:ident,$div_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
-            impl Div<$ty> for Value<'_> {
+            impl Div<$ty> for Value {
                 type Output = $return_ty;
-                fn div(self, other: $ty) -> Self::Output {
+                fn op_div(self, other: $ty) -> Self::Output {
                     $div(&self, other as _)
                 }
             }
 
-            impl Div<Value<'_>> for $ty {
+            impl Div<&$ty> for Value {
                 type Output = $return_ty;
-                fn div(self, other: Value) -> Self::Output {
+                fn op_div(self, other: &$ty) -> Self::Output {
+                    $div(&self, *other as _)
+                }
+            }
+
+            impl Div<&&$ty> for Value {
+                type Output = $return_ty;
+                fn op_div(self, other: &&$ty) -> Self::Output {
+                    $div(&self, **other as _)
+                }
+            }
+
+            impl Div<Value> for $ty {
+                type Output = $return_ty;
+                fn op_div(self, other: Value) -> Self::Output {
                     $div_value(&other, self as _)
                 }
             }
 
-            impl Div<&Value<'_>> for $ty {
+            impl Div<&Value> for $ty {
                 type Output = $return_ty;
-                fn div(self, other: &Value) -> Self::Output {
+                fn op_div(self, other: &Value) -> Self::Output {
                     $div_value(other, self as _)
                 }
             }
 
-            impl Div<&mut Value<'_>> for $ty {
+            impl Div<&&Value> for $ty {
                 type Output = $return_ty;
-                fn div(self, other: &mut Value) -> Self::Output {
-                    $div_value(other, self as _)
+                fn op_div(self, other: &&Value) -> Self::Output {
+                    $div_value(*other, self as _)
                 }
             }
 
-            impl<'a> Div<$ty> for &'a Value<'_> {
+            impl<'a> Div<$ty> for &'a Value {
                 type Output = $return_ty;
-                fn div(self, other: $ty) -> Self::Output {
+                fn op_div(self, other: $ty) -> Self::Output {
                     $div(self, other as _)
                 }
             }
 
-            impl<'a> Div<$ty> for &'a mut Value<'_> {
+            impl<'a> Div<&$ty> for &'a Value {
                 type Output = $return_ty;
-                fn div(self, other: $ty) -> Self::Output {
-                    $div(self, other as _)
+                fn op_div(self, other: &$ty) -> Self::Output {
+                    $div(self, *other as _)
+                }
+            }
+            impl<'a> Div<&&$ty> for &'a Value {
+                type Output = $return_ty;
+                fn op_div(self, other: &&$ty) -> Self::Output {
+                    $div(self, **other as _)
                 }
             }
         )*)*
@@ -99,268 +119,174 @@ macro_rules! impl_numeric_div {
 
 
 impl_numeric_div! {
-    div_i64,div_i64_value[i8 i16 i32 i64 isize] -> i64
-    div_u64,div_u64_value[u8 u16 u32 u64 usize] -> u64
-    div_f64,div_f64_value[f32 f64] -> f64
+    op_div_i64,op_div_i64_value[i8 i16 i32 i64 isize] -> i64
+    op_div_u64,op_div_u64_value[u8 u16 u32 u64 usize] -> u64
+    op_div_f64,op_div_f64_value[f32 f64] -> f64
 }
-
-//serde json value
-
-impl Div<&serde_json::Value> for Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
-impl Div<serde_json::Value> for Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
-impl Div<serde_json::Value> for &Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
-impl Div<&serde_json::Value> for &Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
 
 //value
 
-impl Div<&Value<'_>> for Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: &Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Div<&Value> for Value {
+    type Output = Value;
+    fn op_div(self, rhs: &Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Div<Value<'_>> for Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Div<Value> for Value {
+    type Output = Value;
+    fn op_div(self, rhs: Value) -> Self::Output {
+        return match self{
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Div<Value<'_>> for &Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Div<Value> for &Value {
+    type Output = Value;
+    fn op_div(self, rhs: Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Div<&Value<'_>> for &Value<'_> {
-    type Output = Value<'static>;
-    fn div(self, rhs: &Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Div<&Value> for &Value {
+    type Output = Value;
+    fn op_div(self, rhs: &Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
                     let rhs = rhs.as_i64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
                 } else if s.is_f64() {
                     let rhs = rhs.as_f64().unwrap_or_default();
                     if rhs == 0.0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
                 } else {
                     let rhs = rhs.as_u64().unwrap_or_default();
                     if rhs == 0 {
-                        return serde_json::json!(rhs).into_proxy();
+                        return serde_json::json!(rhs);
                     }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
+
+
+
+macro_rules! div_self {
+    ([$($ty:ty)*]) => {
+        $(
+impl Div<$ty> for $ty{
+         type Output = $ty;
+      fn op_div(self, rhs: $ty) -> Self::Output {
+        self / rhs
+      }
+    }
+impl Div<&$ty> for $ty{
+         type Output = $ty;
+      fn op_div(self, rhs: &$ty) -> Self::Output {
+        self / *rhs
+      }
+    }
+impl Div<$ty> for &$ty{
+         type Output = $ty;
+      fn op_div(self, rhs: $ty) -> Self::Output {
+        *self / rhs
+      }
+    }
+impl Div<&$ty> for &$ty{
+         type Output = $ty;
+      fn op_div(self, rhs: &$ty) -> Self::Output {
+        *self / *rhs
+      }
+    }
+        )*
+    };
+}
+
+div_self!([i8 i16 i32 i64 isize]);
+div_self!([u8 u16 u32 u64 usize]);
+div_self!([f32 f64]);

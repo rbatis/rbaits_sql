@@ -1,164 +1,104 @@
-use crate::Value;
-use std::ops::Sub;
+use crate::ops::Value;
+use crate::ops::Sub;
 use crate::ops::AsProxy;
 
-//serde
-impl Sub<&serde_json::Value> for Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
-                } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
-impl Sub<serde_json::Value> for Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
-                } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
-impl Sub<&serde_json::Value> for &Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
-                } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
-
-impl Sub<serde_json::Value> for &Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
-                } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
-                }
-            }
-            _ => {
-                return serde_json::Value::Null.into_proxy();
-            }
-        };
-    }
-}
 
 //value
-impl Sub<&Value<'_>> for Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: &Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Sub<&Value> for Value {
+    type Output = Value;
+    fn op_sub(self, rhs: &Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Sub<Value<'_>> for Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Sub<Value> for Value {
+    type Output = Value;
+    fn op_sub(self, rhs: Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Sub<&Value<'_>> for &Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: &Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Sub<&Value> for &Value {
+    type Output = Value;
+    fn op_sub(self, rhs: &Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Sub<Value<'_>> for &Value<'_> {
-    type Output = Value<'static>;
-    fn sub(self, rhs: Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Sub<&&Value> for &Value {
+    type Output = Value;
+    fn op_sub(self, rhs: &&Value) -> Self::Output {
+        return match self {
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default())
                 } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default()).into_proxy()
+                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return serde_json::Value::Null.into_proxy();
+                return serde_json::Value::Null;
+            }
+        };
+    }
+}
+
+impl Sub<Value> for &Value {
+    type Output = Value;
+    fn op_sub(self, rhs: Value) -> Self::Output {
+        return match self {
+            serde_json::Value::Number(s) => {
+                if s.is_i64() {
+                    serde_json::json!(s.as_i64().unwrap_or_default() - rhs.as_i64().unwrap_or_default())
+                } else if s.is_f64() {
+                    serde_json::json!(s.as_f64().unwrap_or_default() - rhs.as_f64().unwrap_or_default())
+                } else {
+                    serde_json::json!(s.as_u64().unwrap_or_default() - rhs.as_u64().unwrap_or_default())
+                }
+            }
+            _ => {
+                return serde_json::Value::Null;
             }
         };
     }
@@ -167,28 +107,28 @@ impl Sub<Value<'_>> for &Value<'_> {
 
 
 
-fn sub_i64(value: &Value, other: i64) -> i64 {
+fn op_sub_i64(value: &Value, other: i64) -> i64 {
     value.as_i64().unwrap_or_default() - other
 }
 
-fn sub_u64(value: &Value, other: u64) -> u64 {
+fn op_sub_u64(value: &Value, other: u64) -> u64 {
     value.as_u64().unwrap_or_default() - other
 }
 
-fn sub_f64(value: &Value, other: f64) -> f64 {
+fn op_sub_f64(value: &Value, other: f64) -> f64 {
     value.as_f64().unwrap_or_default() - other
 }
 
 
-fn sub_i64_value(value: &Value, other: i64) -> i64 {
+fn op_sub_i64_value(value: &Value, other: i64) -> i64 {
     other - value.as_i64().unwrap_or_default()
 }
 
-fn sub_u64_value(value: &Value, other: u64) -> u64 {
+fn op_sub_u64_value(value: &Value, other: u64) -> u64 {
     other - value.as_u64().unwrap_or_default()
 }
 
-fn sub_f64_value(value: &Value, other: f64) -> f64 {
+fn op_sub_f64_value(value: &Value, other: f64) -> f64 {
     other - value.as_f64().unwrap_or_default()
 }
 
@@ -196,44 +136,36 @@ fn sub_f64_value(value: &Value, other: f64) -> f64 {
 macro_rules! impl_numeric_sub {
     ($($sub:ident,$sub_value:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
-            impl Sub<$ty> for Value<'_> {
+            impl Sub<$ty> for Value {
                 type Output = $return_ty;
-                fn sub(self, other: $ty) -> Self::Output {
+                fn op_sub(self, other: $ty) -> Self::Output {
                     $sub(&self, other as _)
                 }
             }
 
-            impl Sub<Value<'_>> for $ty {
+            impl Sub<Value> for $ty {
                 type Output = $return_ty;
-                fn sub(self, other: Value) -> Self::Output {
+                fn op_sub(self, other: Value) -> Self::Output {
                     $sub_value(&other, self as _)
                 }
             }
 
-            impl Sub<&Value<'_>> for $ty {
+            impl Sub<&Value> for $ty {
                 type Output = $return_ty;
-                fn sub(self, other: &Value) -> Self::Output {
+                fn op_sub(self, other: &Value) -> Self::Output {
                     $sub_value(other, self as _)
                 }
             }
-
-            impl Sub<&mut Value<'_>> for $ty {
+            impl Sub<&&Value> for $ty {
                 type Output = $return_ty;
-                fn sub(self, other: &mut Value) -> Self::Output {
-                    $sub_value(other, self as _)
+                fn op_sub(self, other: &&Value) -> Self::Output {
+                    $sub_value(*other, self as _)
                 }
             }
 
-            impl<'a> Sub<$ty> for &'a Value<'_> {
+            impl<'a> Sub<$ty> for &'a Value {
                 type Output = $return_ty;
-                fn sub(self, other: $ty) -> Self::Output {
-                    $sub(self, other as _)
-                }
-            }
-
-            impl<'a> Sub<$ty> for &'a mut Value<'_> {
-                type Output = $return_ty;
-                fn sub(self, other: $ty) -> Self::Output {
+                fn op_sub(self, other: $ty) -> Self::Output {
                     $sub(self, other as _)
                 }
             }
@@ -243,10 +175,44 @@ macro_rules! impl_numeric_sub {
 
 
 impl_numeric_sub! {
-    sub_i64,sub_i64_value[i8 i16 i32 i64 isize] -> i64
-    sub_u64,sub_u64_value[u8 u16 u32 u64 usize] -> u64
-    sub_f64,sub_f64_value[f32 f64] -> f64
+    op_sub_i64,op_sub_i64_value[i8 i16 i32 i64 isize] -> i64
+    op_sub_u64,op_sub_u64_value[u8 u16 u32 u64 usize] -> u64
+    op_sub_f64,op_sub_f64_value[f32 f64] -> f64
 }
 
 
 
+macro_rules! sub_self {
+    ([$($ty:ty)*]) => {
+        $(
+impl Sub<$ty> for $ty{
+         type Output = $ty;
+      fn op_sub(self, rhs: $ty) -> Self::Output {
+        self-rhs
+      }
+    }
+impl Sub<&$ty> for $ty{
+         type Output = $ty;
+      fn op_sub(self, rhs: &$ty) -> Self::Output {
+        self-*rhs
+      }
+    }
+impl Sub<$ty> for &$ty{
+         type Output = $ty;
+      fn op_sub(self, rhs: $ty) -> Self::Output {
+        *self-rhs
+      }
+    }
+impl Sub<&$ty> for &$ty{
+         type Output = $ty;
+      fn op_sub(self, rhs: &$ty) -> Self::Output {
+        *self-*rhs
+      }
+    }
+        )*
+    };
+}
+
+sub_self!([i8 i16 i32 i64 isize]);
+sub_self!([u8 u16 u32 u64 usize]);
+sub_self!([f32 f64]);

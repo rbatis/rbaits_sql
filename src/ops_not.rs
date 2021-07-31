@@ -1,32 +1,32 @@
-use std::ops::Not;
+use crate::ops::Not;
 
-use crate::Value;
+use crate::ops::Value;
 
-impl Not for Value<'_> {
+impl Not for Value {
     type Output = bool;
 
-    fn not(self) -> Self::Output {
-        match self.inner.as_ref() {
+    fn op_not(self) -> Self::Output {
+        match self {
+            serde_json::Value::Bool(b) => { !b }
+            _ => { true }
+        }
+    }
+}
+
+impl Not for &Value {
+    type Output = bool;
+    fn op_not(self) -> Self::Output {
+        match self {
             serde_json::Value::Bool(b) => { !*b }
             _ => { true }
         }
     }
 }
 
-impl Not for &Value<'_> {
+impl Not for &mut Value {
     type Output = bool;
-    fn not(self) -> Self::Output {
-        match self.inner.as_ref() {
-            serde_json::Value::Bool(b) => { !*b }
-            _ => { true }
-        }
-    }
-}
-
-impl Not for &mut Value<'_> {
-    type Output = bool;
-    fn not(self) -> Self::Output {
-        match self.inner.as_ref() {
+    fn op_not(self) -> Self::Output {
+        match self {
             serde_json::Value::Bool(b) => { !*b }
             _ => { true }
         }

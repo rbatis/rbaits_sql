@@ -1,62 +1,62 @@
-use std::ops::Add;
+use crate::ops::{Add, AsProxy, Value};
 
-use crate::Value;
 use std::borrow::Cow;
 
-fn add_i64(value: &Value, other: i64) -> i64 {
+
+fn op_add_i64(value: &Value, other: i64) -> i64 {
     value.as_i64().unwrap_or_default() + other
 }
 
-fn add_u64(value: &Value, other: u64) -> u64 {
+fn op_add_u64(value: &Value, other: u64) -> u64 {
     value.as_u64().unwrap_or_default() + other
 }
 
-fn add_f64(value: &Value, other: f64) -> f64 {
+fn op_add_f64(value: &Value, other: f64) -> f64 {
     value.as_f64().unwrap_or_default() + other
 }
 
 macro_rules! impl_numeric_add {
     ($($eq:ident [$($ty:ty)*]-> $return_ty:ty)*) => {
         $($(
-            impl Add<$ty> for Value<'_> {
+            impl Add<$ty> for Value {
                 type Output = $return_ty;
-                fn add(self, other: $ty) -> Self::Output {
+                fn op_add(self, other: $ty) -> Self::Output {
                     $eq(&self, other as _)
                 }
             }
 
-            impl Add<Value<'_>> for $ty {
+            impl Add<Value> for $ty {
                 type Output = $return_ty;
-                fn add(self, other: Value) -> Self::Output {
+                fn op_add(self, other: Value) -> Self::Output {
                     $eq(&other, self as _)
                 }
             }
 
-            impl Add<&Value<'_>> for $ty {
+            impl Add<&Value> for $ty {
                 type Output = $return_ty;
-                fn add(self, other: &Value) -> Self::Output {
+                fn op_add(self, other: &Value) -> Self::Output {
                     $eq(other, self as _)
                 }
             }
 
-            impl Add<&mut Value<'_>> for $ty {
+            impl Add<&&Value> for $ty {
                 type Output = $return_ty;
-                fn add(self, other: &mut Value) -> Self::Output {
-                    $eq(other, self as _)
+                fn op_add(self, other: &&Value) -> Self::Output {
+                    $eq(*other, self as _)
                 }
             }
 
-            impl<'a> Add<$ty> for &'a Value<'_> {
+            impl<'a> Add<$ty> for &'a Value {
                 type Output = $return_ty;
-                fn add(self, other: $ty) -> Self::Output {
+                fn op_add(self, other: $ty) -> Self::Output {
                     $eq(self, other as _)
                 }
             }
 
-            impl<'a> Add<$ty> for &'a mut Value<'_> {
+            impl<'a> Add<&$ty> for &'a Value {
                 type Output = $return_ty;
-                fn add(self, other: $ty) -> Self::Output {
-                    $eq(self, other as _)
+                fn op_add(self, other: &$ty) -> Self::Output {
+                    $eq(self, *other as _)
                 }
             }
         )*)*
@@ -64,238 +64,132 @@ macro_rules! impl_numeric_add {
 }
 
 impl_numeric_add! {
-    add_i64[i8 i16 i32 i64 isize] -> i64
-    add_u64[u8 u16 u32 u64 usize] -> u64
-    add_f64[f32 f64] -> f64
+    op_add_i64[i8 i16 i32 i64 isize] -> i64
+    op_add_u64[u8 u16 u32 u64 usize] -> u64
+    op_add_f64[f32 f64] -> f64
 }
 
 //value
-impl Add<&Value<'_>> for Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: &Value) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
-            }
-            Cow::Owned(o) => {
-                o.to_owned()
-            }
-        };
-        return match inner {
+impl Add<&Value> for Value {
+    type Output = Value;
+    fn op_add(self, rhs: &Value) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
-                Value {
-                    inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or("")))
-                }
+                serde_json::Value::String(s + rhs.as_str().unwrap_or(""))
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
+                   serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
+                   serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Add<Value<'_>> for Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: Value) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
-            }
-            Cow::Owned(o) => {
-                o.to_owned()
-            }
-        };
-        return match inner {
+impl Add<Value> for Value {
+    type Output = Value;
+    fn op_add(self, rhs: Value) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or(""))) }
+                serde_json::Value::String(s + rhs.as_str().unwrap_or(""))
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Add<&Value<'_>> for &Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Add<&Value> for &Value {
+    type Output = Value;
+    fn op_add(self, rhs: &Value) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
+                serde_json::Value::String(s.to_owned() + rhs.as_str().unwrap_or(""))
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-impl Add<Value<'_>> for &Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match self.inner.as_ref() {
+impl Add<&&Value> for &Value {
+    type Output = Value;
+    fn op_add(self, rhs: &&Value) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
+                serde_json::Value::String(s.to_owned() + rhs.as_str().unwrap_or(""))
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
+                return serde_json::Value::Null;
             }
         };
     }
 }
 
-
-//serde_json value
-impl Add<&serde_json::Value> for Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: &serde_json::Value) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
-            }
-            Cow::Owned(o) => {
-                o.to_owned()
-            }
-        };
-        return match inner {
+impl Add<Value> for &Value {
+    type Output = Value;
+    fn op_add(self, rhs: Value) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or(""))) }
+                serde_json::Value::String(s.to_owned() + rhs.str())
             }
             serde_json::Value::Number(s) => {
                 if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
+                    serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())
                 } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
+                    serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())
                 } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
+                    serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())
                 }
             }
             _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
+                return serde_json::Value::Null;
             }
         };
     }
 }
-
-impl Add<serde_json::Value> for Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: serde_json::Value) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
-            }
-            Cow::Owned(o) => {
-                o.to_owned()
-            }
-        };
-        return match inner {
-            serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s + rhs.as_str().unwrap_or(""))) }
-            }
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
-                } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
-                } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
-                }
-            }
-            _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
-            }
-        };
-    }
-}
-
-impl Add<&serde_json::Value> for &Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: &serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
-            }
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
-                } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
-                } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
-                }
-            }
-            _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
-            }
-        };
-    }
-}
-
-impl Add<serde_json::Value> for &Value<'_> {
-    type Output = Value<'static>;
-    fn add(self, rhs: serde_json::Value) -> Self::Output {
-        return match self.inner.as_ref() {
-            serde_json::Value::String(s) => {
-                Value { inner: Cow::Owned(serde_json::Value::String(s.to_string() + rhs.as_str().unwrap_or(""))) }
-            }
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_i64().unwrap_or_default() + rhs.as_i64().unwrap_or_default())) }
-                } else if s.is_f64() {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_f64().unwrap_or_default() + rhs.as_f64().unwrap_or_default())) }
-                } else {
-                    Value { inner: Cow::Owned(serde_json::json!(s.as_u64().unwrap_or_default() + rhs.as_u64().unwrap_or_default())) }
-                }
-            }
-            _ => {
-                return Value { inner: Cow::Owned(serde_json::Value::Null) };
-            }
-        };
-    }
-}
-
 
 //str
-impl Add<Value<'_>> for &str {
+impl Add<Value> for &str {
     type Output = String;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner.as_ref() {
+    fn op_add(self, rhs: Value) -> Self::Output {
+        return match rhs {
             serde_json::Value::String(s) => {
                 self.to_string() + s.as_str()
             }
@@ -306,10 +200,10 @@ impl Add<Value<'_>> for &str {
     }
 }
 
-impl Add<&Value<'_>> for &str {
+impl Add<&Value> for &str {
     type Output = String;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match rhs.inner.as_ref() {
+    fn op_add(self, rhs: &Value) -> Self::Output {
+        return match rhs {
             serde_json::Value::String(s) => {
                 self.to_string() + s.as_str()
             }
@@ -320,18 +214,10 @@ impl Add<&Value<'_>> for &str {
     }
 }
 
-impl Add<&str> for Value<'_> {
+impl Add<&str> for Value {
     type Output = String;
-    fn add(self, rhs: &str) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
-            }
-            Cow::Owned(o) => {
-                o.to_owned()
-            }
-        };
-        return match inner {
+    fn op_add(self, rhs: &str) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
                 s + rhs
             }
@@ -342,10 +228,10 @@ impl Add<&str> for Value<'_> {
     }
 }
 
-impl Add<&str> for &Value<'_> {
+impl Add<&str> for &Value {
     type Output = String;
-    fn add(self, rhs: &str) -> Self::Output {
-        return match self.inner.as_ref() {
+    fn op_add(self, rhs: &str) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
                 s.to_string() + rhs
             }
@@ -356,26 +242,39 @@ impl Add<&str> for &Value<'_> {
     }
 }
 
-
-impl From<Value<'_>> for String {
-    fn from(arg: Value<'_>) -> Self {
-        arg.string()
+impl Add<&&str> for Value {
+    type Output = String;
+    fn op_add(self, rhs: &&str) -> Self::Output {
+        return match self {
+            serde_json::Value::String(s) => {
+                s + *rhs
+            }
+            _ => {
+                String::new()
+            }
+        };
     }
 }
 
-impl Add<String> for Value<'_> {
+impl Add<&&str> for &Value {
     type Output = String;
-    #[must_use]
-    fn add(self, rhs: String) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
+    fn op_add(self, rhs: &&str) -> Self::Output {
+        return match self {
+            serde_json::Value::String(s) => {
+                s.to_string() + *rhs
             }
-            Cow::Owned(o) => {
-                o.to_owned()
+            _ => {
+                String::new()
             }
         };
-        return match inner {
+    }
+}
+
+impl Add<String> for Value {
+    type Output = String;
+    #[must_use]
+    fn op_add(self, rhs: String) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
                 s + rhs.as_str()
             }
@@ -386,10 +285,10 @@ impl Add<String> for Value<'_> {
     }
 }
 
-impl Add<String> for &Value<'_> {
+impl Add<String> for &Value {
     type Output = String;
-    fn add(self, rhs: String) -> Self::Output {
-        return match self.inner.as_ref() {
+    fn op_add(self, rhs: String) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
                 s.to_string() + rhs.as_str()
             }
@@ -401,10 +300,10 @@ impl Add<String> for &Value<'_> {
 }
 
 //string ref
-impl Add<Value<'_>> for &String {
+impl Add<Value> for &String {
     type Output = String;
-    fn add(self, rhs: Value) -> Self::Output {
-        return match rhs.inner.as_ref() {
+    fn op_add(self, rhs: Value) -> Self::Output {
+        return match rhs {
             serde_json::Value::String(s) => {
                 self.to_string() + s.as_str()
             }
@@ -415,10 +314,10 @@ impl Add<Value<'_>> for &String {
     }
 }
 
-impl Add<&Value<'_>> for &String {
+impl Add<&Value> for &String {
     type Output = String;
-    fn add(self, rhs: &Value) -> Self::Output {
-        return match rhs.inner.as_ref() {
+    fn op_add(self, rhs: &Value) -> Self::Output {
+        return match rhs {
             serde_json::Value::String(s) => {
                 self.to_string() + s.as_str()
             }
@@ -429,18 +328,10 @@ impl Add<&Value<'_>> for &String {
     }
 }
 
-impl Add<&String> for Value<'_> {
+impl Add<&String> for Value {
     type Output = String;
-    fn add(self, rhs: &String) -> Self::Output {
-        let inner = match self.inner {
-            Cow::Borrowed(b) => {
-                b.to_owned()
-            }
-            Cow::Owned(o) => {
-                o.to_owned()
-            }
-        };
-        return match inner {
+    fn op_add(self, rhs: &String) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
                 s + rhs.as_str()
             }
@@ -451,10 +342,10 @@ impl Add<&String> for Value<'_> {
     }
 }
 
-impl Add<&String> for &Value<'_> {
+impl Add<&String> for &Value {
     type Output = String;
-    fn add(self, rhs: &String) -> Self::Output {
-        return match self.inner.as_ref() {
+    fn op_add(self, rhs: &String) -> Self::Output {
+        return match self {
             serde_json::Value::String(s) => {
                 s.to_string() + rhs.as_str()
             }
@@ -464,3 +355,118 @@ impl Add<&String> for &Value<'_> {
         };
     }
 }
+
+impl Add<Value> for String {
+    type Output = String;
+    fn op_add(self, rhs: Value) -> Self::Output {
+        return match rhs {
+            serde_json::Value::String(s) => {
+                self + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+impl Add<&Value> for String {
+    type Output = String;
+    fn op_add(self, rhs: &Value) -> Self::Output {
+        return match rhs {
+            serde_json::Value::String(s) => {
+                self + s.as_str()
+            }
+            _ => {
+                String::new()
+            }
+        };
+    }
+}
+
+
+macro_rules! add_self {
+    ([$($ty:ty)*]) => {
+        $(
+impl Add<$ty> for $ty{
+         type Output = $ty;
+      fn op_add(self, rhs: $ty) -> Self::Output {
+        self+rhs
+      }
+    }
+impl Add<&$ty> for $ty{
+         type Output = $ty;
+      fn op_add(self, rhs: &$ty) -> Self::Output {
+        self+*rhs
+      }
+    }
+impl Add<$ty> for &$ty{
+         type Output = $ty;
+      fn op_add(self, rhs: $ty) -> Self::Output {
+        *self+rhs
+      }
+    }
+impl Add<&$ty> for &$ty{
+         type Output = $ty;
+      fn op_add(self, rhs: &$ty) -> Self::Output {
+        *self+*rhs
+      }
+    }
+        )*
+    };
+}
+
+add_self!([i8 i16 i32 i64 isize]);
+add_self!([u8 u16 u32 u64 usize]);
+add_self!([f32 f64]);
+
+impl Add<String> for String{
+    type Output = String;
+
+    fn op_add(self, rhs: String) -> Self::Output {
+        self+&rhs
+    }
+}
+
+impl Add<&str> for String{
+    type Output = String;
+
+    fn op_add(self, rhs: &str) -> Self::Output {
+        self+rhs
+    }
+}
+
+impl Add<&&str> for String{
+    type Output = String;
+
+    fn op_add(self, rhs: &&str) -> Self::Output {
+        self+*rhs
+    }
+}
+
+impl Add<String> for &str{
+    type Output = String;
+
+    fn op_add(self, rhs: String) -> Self::Output {
+        self.to_string()+&rhs
+    }
+}
+
+impl Add<&String> for &str{
+    type Output = String;
+
+    fn op_add(self, rhs: &String) -> Self::Output {
+        self.to_string() + rhs.as_str()
+    }
+}
+
+impl Add<&&String> for &str{
+    type Output = String;
+
+    fn op_add(self, rhs: &&String) -> Self::Output {
+        self.to_string() + rhs.as_str()
+    }
+}
+
+
+

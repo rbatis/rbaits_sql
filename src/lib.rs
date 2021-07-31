@@ -8,8 +8,6 @@
 #![allow(unused_parens)]
 #![allow(unused_mut)]
 
-pub use ops::Value;
-
 pub mod string_util;
 pub mod error;
 #[macro_use]
@@ -28,6 +26,7 @@ pub mod ops_not;
 pub mod ops_bit_and;
 pub mod ops_bit_or;
 pub mod from_bool;
+pub mod from_sql;
 
 #[macro_use]
 pub mod sql_replace;

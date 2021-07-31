@@ -1,74 +1,100 @@
-use crate::Value;
+use crate::ops::Value;
+use crate::ops::PartialEq;
+use std::cmp::PartialEq as PE;
 
 
-impl PartialEq<Value<'_>> for &'_ Value<'_> {
-    fn eq(&self, other: &Value) -> bool {
-        self.inner.eq(&other.inner)
+impl PartialEq<Value> for &'_ Value {
+   fn op_eq(&self, other: &Value) -> bool {
+        self.eq(&other)
     }
 }
 
-impl PartialEq<&Value<'_>> for Value<'_>{
-    fn eq(&self, other: &&Value) -> bool {
-        self.inner.eq(&other.inner)
+impl PartialEq<Value> for &&'_ Value {
+    fn op_eq(&self, other: &Value) -> bool {
+        (*self).eq(&other)
+    }
+}
+
+impl PartialEq<&Value> for Value{
+   fn op_eq(&self, other: &&Value) -> bool {
+        self.eq(&**other)
+    }
+}
+impl PartialEq<&&Value> for Value{
+    fn op_eq(&self, other: &&&Value) -> bool {
+        self.eq(&***other)
+    }
+}
+
+impl PartialEq<Value> for Value{
+    fn op_eq(&self, other: &Value) -> bool {
+        self.eq(other)
     }
 }
 
 /**
 eq base
 **/
-
 fn eq_i64(value: &Value, other: i64) -> bool {
-    value.as_i64().map_or(false, |i| i == other)
+    value.as_i64().unwrap_or_default().eq(&other)
 }
 
 fn eq_u64(value: &Value, other: u64) -> bool {
-    value.as_u64().map_or(false, |i| i == other)
+    value.as_u64().unwrap_or_default().eq(&other)
 }
 
 fn eq_f64(value: &Value, other: f64) -> bool {
-    value.as_f64().map_or(false, |i| i == other)
+    value.as_f64().unwrap_or_default().eq(&other)
 }
 
 fn eq_bool(value: &Value, other: bool) -> bool {
-    value.as_bool().map_or(false, |i| i == other)
+    value.as_bool().unwrap_or_default().eq(&other)
 }
 
 fn eq_str(value: &Value, other: &str) -> bool {
-    value.as_str().map_or(false, |i| i == other)
+    value.as_str().unwrap_or_default().eq(other)
 }
 
-impl PartialEq<str> for Value<'_> {
-    fn eq(&self, other: &str) -> bool {
+impl PartialEq<str> for Value {
+   fn op_eq(&self, other: &str) -> bool {
         eq_str(self, other)
     }
 }
 
-impl<'a> PartialEq<&'a str> for Value<'_> {
-    fn eq(&self, other: &&str) -> bool {
+impl<'a> PartialEq<&'a str> for Value {
+   fn op_eq(&self, other: &&str) -> bool {
         eq_str(self, *other)
     }
 }
 
-impl PartialEq<Value<'_>> for str {
-    fn eq(&self, other: &Value) -> bool {
+impl PartialEq<Value> for str {
+   fn op_eq(&self, other: &Value) -> bool {
         eq_str(other, self)
     }
 }
 
-impl<'a> PartialEq<Value<'_>> for &'a str {
-    fn eq(&self, other: &Value) -> bool {
+impl<'a> PartialEq<Value> for &'a str {
+   fn op_eq(&self, other: &Value) -> bool {
         eq_str(other, *self)
     }
 }
 
-impl PartialEq<String> for Value<'_> {
-    fn eq(&self, other: &String) -> bool {
+impl PartialEq<&str> for str {
+    fn op_eq(&self, other: &&str) -> bool {
+        self.eq(*other)
+    }
+}
+
+
+
+impl PartialEq<String> for Value {
+   fn op_eq(&self, other: &String) -> bool {
         eq_str(self, other.as_str())
     }
 }
 
-impl PartialEq<Value<'_>> for String {
-    fn eq(&self, other: &Value) -> bool {
+impl PartialEq<Value> for String {
+   fn op_eq(&self, other: &Value) -> bool {
         eq_str(other, self.as_str())
     }
 }
@@ -76,38 +102,26 @@ impl PartialEq<Value<'_>> for String {
 macro_rules! impl_numeric_eq {
     ($($eq:ident [$($ty:ty)*])*) => {
         $($(
-            impl PartialEq<$ty> for Value<'_> {
-                fn eq(&self, other: &$ty) -> bool {
+            impl PartialEq<$ty> for Value {
+               fn op_eq(&self, other: &$ty) -> bool {
                     $eq(self, *other as _)
                 }
             }
 
-            impl PartialEq<Value<'_>> for $ty {
-                fn eq(&self, other: &Value) -> bool {
+            impl PartialEq<Value> for $ty {
+               fn op_eq(&self, other: &Value) -> bool {
                     $eq(other, *self as _)
                 }
             }
 
-            impl PartialEq<&Value<'_>> for $ty {
-                fn eq(&self, other: &&Value)  -> bool {
+            impl PartialEq<&Value> for $ty {
+               fn op_eq(&self, other: &&Value)  -> bool {
                     $eq(*other, *self as _)
                 }
             }
 
-            impl PartialEq<&mut Value<'_>> for $ty {
-                fn eq(&self, other: &&mut Value)  -> bool {
-                    $eq(*other, *self as _)
-                }
-            }
-
-            impl<'a> PartialEq<$ty> for &'a Value<'_> {
-                fn eq(&self, other: &$ty) -> bool {
-                    $eq(*self, *other as _)
-                }
-            }
-
-            impl<'a> PartialEq<$ty> for &'a mut Value<'_> {
-                fn eq(&self, other: &$ty) -> bool {
+            impl<'a> PartialEq<$ty> for &'a Value {
+               fn op_eq(&self, other: &$ty) -> bool {
                     $eq(*self, *other as _)
                 }
             }
@@ -121,3 +135,36 @@ impl_numeric_eq! {
     eq_f64[f32 f64]
     eq_bool[bool]
 }
+
+
+macro_rules! eq_self {
+    ([$($ty:ty)*]) => {
+        $(
+impl PartialEq<$ty> for $ty{
+      fn op_eq(&self, rhs: &$ty) -> bool {
+          self.eq(rhs)
+      }
+    }
+impl PartialEq<&$ty> for $ty{
+      fn op_eq(&self, rhs: &&$ty) -> bool {
+         self.eq(*rhs)
+      }
+    }
+impl PartialEq<$ty> for &$ty{
+      fn op_eq(&self, rhs: &$ty) -> bool {
+          self.eq(&rhs)
+      }
+    }
+impl PartialEq<&$ty> for &$ty{
+      fn op_eq(&self, rhs: &&$ty) -> bool {
+          self.eq(rhs)
+      }
+    }
+        )*
+    };
+}
+
+eq_self!([i8 i16 i32 i64 isize]);
+eq_self!([u8 u16 u32 u64 usize]);
+eq_self!([f32 f64]);
+eq_self!([String &str]);

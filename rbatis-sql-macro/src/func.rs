@@ -44,7 +44,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
         Expr::Path(b) => {
             let token = b.to_token_stream().to_string();
             if token == "null" {
-                return syn::parse_str::<Expr>("serde_json::Value::Null.into_proxy()").unwrap();
+                return syn::parse_str::<Expr>("serde_json::Value::Null").unwrap();
             }
             if token == "sql" {
                 return Expr::Path(b);
@@ -63,9 +63,9 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                 }
             }
             if fetch_from_arg {
-                return syn::parse_str::<Expr>(&format!("arg[\"{}\"].as_proxy()", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!(" &arg[\"{}\"]", param)).unwrap();
             } else {
-                return syn::parse_str::<Expr>(&format!("{}.as_proxy()", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!("{}", param)).unwrap();
             }
         }
         Expr::MethodCall(mut b) => {
@@ -84,30 +84,105 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
             b.left = Box::new(convert_to_arg_access(context, *b.left.clone(), as_proxy, ignore));
             b.right = Box::new(convert_to_arg_access(context, *b.right.clone(), as_proxy, ignore));
             match b.op {
-                BinOp::And(_) => {
-                    b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
-                    b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.right.to_token_stream().to_string().trim())).unwrap());
-                }
-                BinOp::Or(_) => {
-                    b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
-                    b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::from({})", b.right.to_token_stream().to_string().trim())).unwrap());
-                }
                 BinOp::Add(_) => {
                     let left_token = b.left.to_token_stream().to_string();
                     let right_token = b.right.to_token_stream().to_string();
                     if left_token.trim().ends_with("\"") && left_token.trim().starts_with("\"") {
-                        b.left = Box::new(syn::parse_str::<Expr>(&format!("String::from({})", b.left.to_token_stream().to_string().trim())).unwrap());
-                        b.right = Box::new(syn::parse_str::<Expr>(&format!("{}.into()", b.right.to_token_stream().to_string().trim())).unwrap());
+                        return syn::parse_str::<Expr>(&format!("(String::from({})).op_add({})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                    }else{
+                        return syn::parse_str::<Expr>(&format!("({}).op_add(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
                     }
                 }
-                _ => {}
+                BinOp::And(_) => {
+                    b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::op_from({})", b.left.to_token_stream().to_string().trim())).unwrap());
+                    b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::op_from({})", b.right.to_token_stream().to_string().trim())).unwrap());
+                }
+                BinOp::Or(_) => {
+                    b.left = Box::new(syn::parse_str::<Expr>(&format!("bool::op_from({})", b.left.to_token_stream().to_string().trim())).unwrap());
+                    b.right = Box::new(syn::parse_str::<Expr>(&format!("bool::op_from({})", b.right.to_token_stream().to_string().trim())).unwrap());
+                }
+                
+                /// The `-` operator (subtraction)
+                BinOp::Sub(_) => {
+                  return syn::parse_str::<Expr>(&format!("({}).op_sub(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `*` operator (multiplication)
+                BinOp::Mul(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_mul(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `/` operator (division)
+                BinOp::Div(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_div(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `%` operator (modulus)
+                BinOp::Rem(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_rem(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `^` operator (bitwise xor)
+                BinOp:: BitXor(_)=> {}
+                /// The `&` operator (bitwise and)
+                BinOp::BitAnd(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_bitand(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `|` operator (bitwise or)
+                BinOp:: BitOr(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_bitor(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `<<` operator (shift left)
+                BinOp::  Shl(_)=> {}
+                /// The `>>` operator (shift right)
+                BinOp:: Shr(_)=> {}
+                /// The `==` operator (equality)
+                BinOp:: Eq(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_eq(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `<` operator (less than)
+                BinOp:: Lt(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_lt(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `<=` operator (less than or equal to)
+                BinOp:: Le(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_le(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `!=` operator (not equal to)
+                BinOp:: Ne(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_ne(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `>=` operator (greater than or equal to)
+                BinOp:: Ge(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_ge(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `>` operator (greater than)
+                BinOp:: Gt(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_gt(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
+                /// The `+=` operator
+                BinOp:: AddEq(_)=> {}
+                /// The `-=` operator
+                BinOp:: SubEq(_)=> {}
+                /// The `*=` operator
+                BinOp:: MulEq(_)=> {}
+                /// The `/=` operator
+                BinOp:: DivEq(_)=> {}
+                /// The `%=` operator
+                BinOp:: RemEq(_)=> {}
+                /// The `^=` operator
+                BinOp:: BitXorEq(_)=> {}
+                /// The `&=` operator
+                BinOp:: BitAndEq(_)=> {}
+                /// The `|=` operator
+                BinOp::BitOrEq(_)=> {}
+                /// The `<<=` operator
+                BinOp:: ShlEq(_)=> {}
+                /// The `>>=` operator
+                BinOp:: ShrEq(_)=> {}
             }
             return Expr::Binary(b);
         }
         Expr::Unary(mut b) => {
             b.expr = Box::new(convert_to_arg_access(context, *b.expr, as_proxy, ignore));
             if b.op.to_token_stream().to_string().trim() == "-" {
-                return syn::parse_str::<Expr>(&format!(" (0 {})", b.to_token_stream().to_string().trim())).unwrap();
+                return syn::parse_str::<Expr>(&format!(" (0.op_sub(&{}))", b.expr.to_token_stream().to_string().trim())).unwrap();
             }
             return Expr::Unary(b);
         }
@@ -117,7 +192,6 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
         }
         Expr::Field(mut b) => {
             b.base = Box::new(convert_to_arg_access(context, *b.base.clone(), as_proxy, ignore));
-            b.base = Box::new(syn::parse_str::<Expr>(&b.base.to_token_stream().to_string().trim().trim_end_matches(" . as_proxy()")).unwrap());
             return match b.member.clone() {
                 Member::Named(n) => {
                     let s = b.member.to_token_stream().to_string();
@@ -151,11 +225,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                             }
                         }
                     }
-                    if as_proxy {
-                        syn::parse_str::<Expr>(&format!("{}{}.as_proxy()", b.base.to_token_stream(), token)).unwrap()
-                    } else {
-                        syn::parse_str::<Expr>(&format!("{}{}", b.base.to_token_stream(), token)).unwrap()
-                    }
+                    syn::parse_str::<Expr>(&format!("{}{}", b.base.to_token_stream(), token)).unwrap()
                 }
                 Member::Unnamed(unamed) => {
                     Expr::Field(b)
@@ -170,11 +240,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
         Expr::Index(mut b) => {
             b.expr = Box::new(convert_to_arg_access(context, *b.expr, as_proxy, ignore));
             let result = Expr::Index(b);
-            if as_proxy {
-                return syn::parse_str::<Expr>(&format!("{}.as_proxy()", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
-            } else {
-                return syn::parse_str::<Expr>(&format!("{}", result.to_token_stream().to_string().replace(". as_proxy()", ""))).unwrap();
-            }
+            return syn::parse_str::<Expr>(&format!("{}", result.to_token_stream().to_string())).unwrap();
         }
         Expr::Let(mut let_expr) => {
             let_expr.expr = Box::new(convert_to_arg_access(context, *let_expr.expr, as_proxy, ignore));

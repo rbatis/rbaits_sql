@@ -1,13 +1,38 @@
-pub use crate::Value;
 
-impl From<&Value<'_>> for bool{
-    fn from(arg: &Value) -> Self {
-        arg.inner.as_bool().unwrap_or_default()
+
+use crate::ops::{Value, From, AsProxy};
+
+impl From<bool> for bool{
+    fn op_from(arg: bool) -> Self {
+        arg
+    }
+}
+impl From<&bool> for bool{
+    fn op_from(arg: &bool) -> Self {
+        *arg
+    }
+}
+impl From<&&bool> for bool{
+    fn op_from(arg: &&bool) -> Self {
+        **arg
     }
 }
 
-impl From<Value<'_>> for bool{
-    fn from(arg: Value) -> Self {
-        arg.inner.as_bool().unwrap_or_default()
+
+impl From<&Value> for bool{
+    fn op_from(arg: &Value) -> Self {
+        arg.bool()
+    }
+}
+
+impl From<&&Value> for bool{
+    fn op_from(arg: &&Value) -> Self {
+        arg.bool()
+    }
+}
+
+impl From<Value> for bool{
+    fn op_from(arg: Value) -> Self {
+        arg.bool()
     }
 }

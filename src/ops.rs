@@ -4,113 +4,48 @@ use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 
 use serde::{Deserializer, Serializer};
+use std::cmp::Ordering::Less;
+
 
 /// convert serde_json::Value to Value
 pub trait AsProxy {
-    fn into_proxy(self) -> Value<'static>;
-    fn as_proxy(&self) -> Value<'_>;
-    fn as_sql(&self) -> String;
+    fn i64(&self) -> i64;
+    fn f64(&self) -> f64;
+    fn u64(&self) -> u64;
+    fn str(&self) -> &str;
+    fn string(&self) -> String;
+    fn bool(&self) -> bool;
+    fn is_empty(&self) -> bool;
 }
+
 
 
 /// proxy serde_json::Value struct,support Deserializer, Serializer
 /// use Cow Optimize unnecessary clones
 /// This structure has a certain amount of computing power
-#[derive(Eq, PartialEq, Clone, Debug)]
-pub struct Value<'a> {
-    pub inner: Cow<'a, serde_json::Value>,
-}
+pub(crate) type Value = serde_json::Value;
 
-impl Default for Value<'_> {
-    fn default() -> Self {
-        serde_json::Value::Null.into_proxy()
+impl AsProxy for Value{
+    fn i64(&self) -> i64 {
+        self.as_i64().unwrap_or_default()
     }
-}
-
-impl<'a> Deref for Value<'a> {
-    type Target = serde_json::Value;
-
-    fn deref(&self) -> &Self::Target {
-        self.inner.as_ref()
+    fn f64(&self) -> f64 {
+        self.as_f64().unwrap_or_default()
     }
-}
-
-impl<'a> Value<'a> {
-    pub fn i64(&self) -> i64 {
-        self.inner.as_i64().unwrap_or_default()
+    fn u64(&self) -> u64 {
+        self.as_u64().unwrap_or_default()
     }
-    pub fn f64(&self) -> f64 {
-        self.inner.as_f64().unwrap_or_default()
+    fn str(&self) -> &str {
+        self.as_str().unwrap_or_default()
     }
-    pub fn u64(&self) -> u64 {
-        self.inner.as_u64().unwrap_or_default()
+    fn string(&self) -> String {
+        self.as_str().unwrap_or_default().to_string()
     }
-    pub fn str(&self) -> &str {
-        self.inner.as_str().unwrap_or_default()
+    fn bool(&self) -> bool {
+        self.as_bool().unwrap_or_default()
     }
-    pub fn string(&self) -> String {
-        self.inner.as_str().unwrap_or_default().to_string()
-    }
-    pub fn bool(&self) -> bool {
-        self.inner.as_bool().unwrap_or_default()
-    }
-    pub fn null(&self) -> () {
-        self.inner.as_null().unwrap_or_default()
-    }
-
-
-    pub fn as_i64(&self) -> Option<i64> {
-        self.inner.as_i64()
-    }
-    pub fn as_f64(&self) -> Option<f64> {
-        self.inner.as_f64()
-    }
-    pub fn as_u64(&self) -> Option<u64> {
-        self.inner.as_u64()
-    }
-    pub fn as_str(&self) -> Option<&str> {
-        self.inner.as_str()
-    }
-    pub fn as_bool(&self) -> Option<bool> {
-        self.inner.as_bool()
-    }
-    pub fn as_null(&self) -> Option<()> {
-        self.inner.as_null()
-    }
-    pub fn as_object(&self) -> Option<&serde_json::Map<String, serde_json::Value>> {
-        self.inner.as_object()
-    }
-    pub fn as_array(&self) -> Option<&Vec<serde_json::Value>> {
-        self.inner.as_array()
-    }
-
-
-    pub fn is_null(&self) -> bool {
-        self.inner.is_null()
-    }
-    pub fn is_string(&self) -> bool {
-        self.inner.is_string()
-    }
-    pub fn is_f64(&self) -> bool {
-        self.inner.is_f64()
-    }
-    pub fn is_i64(&self) -> bool {
-        self.inner.is_i64()
-    }
-    pub fn is_u64(&self) -> bool {
-        self.inner.is_u64()
-    }
-    pub fn is_bool(&self) -> bool {
-        self.inner.is_boolean()
-    }
-    pub fn is_object(&self) -> bool {
-        self.inner.is_object()
-    }
-    pub fn is_array(&self) -> bool {
-        self.inner.is_array()
-    }
-    pub fn is_empty(&self) -> bool {
-        return match self.inner.as_ref() {
+    fn is_empty(&self) -> bool {
+        return match self {
             serde_json::Value::Null => {
                 true
             }
@@ -133,168 +68,313 @@ impl<'a> Value<'a> {
     }
 }
 
-impl<'a> Value<'a> {
-    pub fn into_proxy(self) -> Value<'a> {
-        self
+impl AsProxy for &Value{
+    fn i64(&self) -> i64 {
+        self.as_i64().unwrap_or_default()
     }
-    pub fn as_proxy(self) -> Value<'a> {
-        self
+    fn f64(&self) -> f64 {
+        self.as_f64().unwrap_or_default()
     }
-}
-
-impl<'a> std::fmt::Display for Value<'a> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.inner, f)
+    fn u64(&self) -> u64 {
+        self.as_u64().unwrap_or_default()
     }
-}
-
-
-impl AsProxy for serde_json::Value {
-    fn into_proxy(self) -> Value<'static> {
-        Value {
-            inner: Cow::Owned(self)
-        }
+    fn str(&self) -> &str {
+        self.as_str().unwrap_or_default()
     }
-
-    fn as_proxy(&self) -> Value<'_> {
-        Value {
-            inner: Cow::Borrowed(self)
-        }
+    fn string(&self) -> String {
+        self.as_str().unwrap_or_default().to_string()
     }
-    fn as_sql(&self) -> String {
-        match self {
+    fn bool(&self) -> bool {
+        self.as_bool().unwrap_or_default()
+    }
+    fn is_empty(&self) -> bool {
+        return match self {
+            serde_json::Value::Null => {
+                true
+            }
+            serde_json::Value::Bool(_) => {
+                false
+            }
+            serde_json::Value::Number(_) => {
+                false
+            }
             serde_json::Value::String(s) => {
-                return self.as_str().unwrap().to_string();
+                s.is_empty()
             }
-            _ => {
-                return self.to_string();
+            serde_json::Value::Array(arr) => {
+                arr.is_empty()
             }
-        }
-    }
-}
-
-impl AsProxy for &serde_json::Value {
-    fn into_proxy(self) -> Value<'static> {
-        Value {
-            inner: Cow::Owned(self.clone())
-        }
-    }
-
-    fn as_proxy(&self) -> Value<'_> {
-        Value {
-            inner: Cow::Borrowed(self)
-        }
-    }
-    fn as_sql(&self) -> String {
-        match self {
-            serde_json::Value::String(s) => {
-                return self.as_str().unwrap().to_string();
+            serde_json::Value::Object(m) => {
+                m.is_empty()
             }
-            _ => {
-                return self.to_string();
-            }
-        }
+        };
     }
 }
 
 
-impl<'a> From<serde_json::Value> for Value<'a> {
-    fn from(arg: serde_json::Value) -> Self {
-        Value {
-            inner: Cow::Owned(arg)
-        }
+
+pub trait PartialEq<Rhs: ?Sized = Self> {
+    /// This method tests for `self` and `other` values to be equal, and is used
+    /// by `==`.
+    #[must_use]
+    //#[stable(feature = "rust1", since = "1.0.0")]
+    fn op_eq(&self, other: &Rhs) -> bool;
+
+    /// This method tests for `!=`.
+    #[inline]
+    #[must_use]
+    //#[stable(feature = "rust1", since = "1.0.0")]
+    fn op_ne(&self, other: &Rhs) -> bool {
+        !self.op_eq(other)
     }
 }
 
-impl<'a> From<&'a serde_json::Value> for Value<'a> {
-    fn from(arg: &'a serde_json::Value) -> Self {
-        Value {
-            inner: Cow::Borrowed(arg)
-        }
+pub trait PartialOrd<Rhs: ?Sized = Self>{
+    /// This method returns an ordering between `self` and `other` values if one exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::cmp::Ordering;
+    ///
+    /// let result = 1.0.op_partial_cmp(&2.0);
+    /// assert_eq!(result, Some(Ordering::Less));
+    ///
+    /// let result = 1.0.op_partial_cmp(&1.0);
+    /// assert_eq!(result, Some(Ordering::Equal));
+    ///
+    /// let result = 2.0.op_partial_cmp(&1.0);
+    /// assert_eq!(result, Some(Ordering::Greater));
+    /// ```
+    ///
+    /// When comparison is impossible:
+    ///
+    /// ```
+    /// let result = f64::NAN.op_partial_cmp(&1.0);
+    /// assert_eq!(result, None);
+    /// ```
+    #[must_use]
+   // #[stable(feature = "rust1", since = "1.0.0")]
+    fn op_partial_cmp(&self, other: &Rhs) -> Option<Ordering>;
+
+    /// This method tests less than (for `self` and `other`) and is used by the `<` operator.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let result = 1.0 < 2.0;
+    /// assert_eq!(result, true);
+    ///
+    /// let result = 2.0 < 1.0;
+    /// assert_eq!(result, false);
+    /// ```
+    #[inline]
+    #[must_use]
+   // #[stable(feature = "rust1", since = "1.0.0")]
+    fn op_lt(&self, other: &Rhs) -> bool {
+        self.op_partial_cmp(other).eq(&Some(Less))
+    }
+
+    /// This method tests less than or equal to (for `self` and `other`) and is used by the `<=`
+    /// operator.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let result = 1.0 <= 2.0;
+    /// assert_eq!(result, true);
+    ///
+    /// let result = 2.0 <= 2.0;
+    /// assert_eq!(result, true);
+    /// ```
+    #[inline]
+    #[must_use]
+   // #[stable(feature = "rust1", since = "1.0.0")]
+    fn op_le(&self, other: &Rhs) -> bool {
+        // Pattern `Some(Less | Eq)` optimizes worse than negating `None | Some(Greater)`.
+        // FIXME: The root cause was fixed upstream in LLVM with:
+        // https://github.com/llvm/llvm-project/commit/9bad7de9a3fb844f1ca2965f35d0c2a3d1e11775
+        // Revert this workaround once support for LLVM 12 gets dropped.
+        let v=self.op_partial_cmp(other);
+        !v.eq(&None) | v.eq(&Some(Ordering::Greater))
+    }
+
+    /// This method tests greater than (for `self` and `other`) and is used by the `>` operator.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let result = 1.0 > 2.0;
+    /// assert_eq!(result, false);
+    ///
+    /// let result = 2.0 > 2.0;
+    /// assert_eq!(result, false);
+    /// ```
+    #[inline]
+   // #[stable(feature = "rust1", since = "1.0.0")]
+    fn op_gt(&self, other: &Rhs) -> bool {
+        self.op_partial_cmp(other).eq(&Some(Ordering::Greater))
+    }
+
+    /// This method tests greater than or equal to (for `self` and `other`) and is used by the `>=`
+    /// operator.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let result = 2.0 >= 1.0;
+    /// assert_eq!(result, true);
+    ///
+    /// let result = 2.0 >= 2.0;
+    /// assert_eq!(result, true);
+    /// ```
+    #[inline]
+    #[must_use]
+   // #[stable(feature = "rust1", since = "1.0.0")]
+    fn op_ge(&self, other: &Rhs) -> bool {
+        let v=self.op_partial_cmp(other);
+        v.eq(&Some(Ordering::Greater)) | v.eq(&Some(Ordering::Equal))
     }
 }
 
-impl<'a> serde::Serialize for Value<'a> {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> where
-        S: Serializer {
-        self.inner.serialize(serializer)
-    }
-}
+pub trait Add<Rhs = Self> {
+    /// The resulting type after applying the `+` operator.
+    //#[stable(feature = "rust1", since = "1.0.0")]
+    type Output;
 
-impl<'a, 'de> serde::Deserialize<'de> for Value<'a> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error> where
-        D: Deserializer<'de> {
-        let r = serde_json::Value::deserialize(deserializer);
-        match r {
-            Ok(o) => {
-                return Ok(Value {
-                    inner: Cow::Owned(o)
-                });
-            }
-            Err(e) => {
-                return Err(e);
-            }
-        }
-    }
+    /// Performs the `+` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// assert_eq!(12 + 1, 13);
+    /// ```
+    #[must_use]
+    //#[stable(feature = "rust1", since = "1.0.0")]
+    fn op_add(self, rhs: Rhs) -> Self::Output;
 }
 
 
-impl AsProxy for &str {
-    fn into_proxy(self) -> Value<'static> {
-        Value {
-            inner: Cow::Owned(serde_json::Value::String(self.to_string()))
-        }
-    }
+pub trait Sub<Rhs = Self> {
+    /// The resulting type after applying the `-` operator.
+    type Output;
 
-    fn as_proxy(&self) -> Value<'_> {
-        Value {
-            inner: Cow::Owned(serde_json::Value::String(self.to_string()))
-        }
-    }
-
-    fn as_sql(&self) -> String {
-        return self.to_string();
-    }
+    /// Performs the `-` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// assert_eq!(12 - 1, 11);
+    /// ```
+    #[must_use]
+    fn op_sub(self, rhs: Rhs) -> Self::Output;
 }
 
-macro_rules! impl_into_proxy {
-    ($($ty:ty)*) => {
-        $(
- impl AsProxy for $ty {
-    fn into_proxy(self) -> Value<'static> {
-        Value {
-            inner: Cow::Owned(serde_json::json!(self))
-        }
-    }
-    fn as_proxy(&self) -> Value<'_> {
-        Value {
-            inner: Cow::Owned(serde_json::json!(self))
-        }
-    }
-    fn as_sql(&self) -> String {
-        self.to_string()
-    }
- }
-      )*
-    };
+pub trait Mul<Rhs = Self> {
+    /// The resulting type after applying the `*` operator.
+    type Output;
+
+    /// Performs the `*` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// assert_eq!(12 * 2, 24);
+    /// ```
+    #[must_use]
+    fn op_mul(self, rhs: Rhs) -> Self::Output;
 }
 
-impl_into_proxy!(i8 i16 i32 i64 isize);
-impl_into_proxy!(u8 u16 u32 u64 usize);
-impl_into_proxy!(f32 f64);
-impl_into_proxy!(String);
+pub trait Div<Rhs = Self> {
+    /// The resulting type after applying the `/` operator.
+    type Output;
 
-impl<'a> From<&'a Value<'_>> for &'a str {
-    fn from(arg: &'a Value) -> &'a str {
-        arg.str()
-    }
+    /// Performs the `/` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// assert_eq!(12 / 2, 6);
+    /// ```
+    #[must_use]
+    fn op_div(self, rhs: Rhs) -> Self::Output;
 }
 
-impl<'a> From<Value<'a>> for &'a str {
-    fn from(arg: Value) -> &'a str {
-        unsafe {
-            let s = arg.str();
-            return &*(s as *const str);
-        }
-    }
+pub trait Rem<Rhs = Self> {
+    /// The resulting type after applying the `%` operator.
+    type Output;
+
+    /// Performs the `%` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// assert_eq!(12 % 10, 2);
+    /// ```
+    #[must_use]
+    fn op_rem(self, rhs: Rhs) -> Self::Output;
+}
+
+pub trait Not {
+    /// The resulting type after applying the `!` operator.
+    type Output;
+
+    /// Performs the unary `!` operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(!true, false);
+    /// assert_eq!(!false, true);
+    /// assert_eq!(!1u8, 254);
+    /// assert_eq!(!0u8, 255);
+    /// ```
+    #[must_use]
+    fn op_not(self) -> Self::Output;
+}
+
+pub trait BitAnd<Rhs = Self> {
+    /// The resulting type after applying the `&` operator.
+    type Output;
+
+    /// Performs the `&` operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(true & false, false);
+    /// assert_eq!(true & true, true);
+    /// assert_eq!(5u8 & 1u8, 1);
+    /// assert_eq!(5u8 & 2u8, 0);
+    /// ```
+    #[must_use]
+    fn op_bitand(self, rhs: Rhs) -> Self::Output;
+}
+
+pub trait BitOr<Rhs = Self> {
+    /// The resulting type after applying the `|` operator.
+    type Output;
+
+    /// Performs the `|` operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(true | false, true);
+    /// assert_eq!(false | false, false);
+    /// assert_eq!(5u8 | 1u8, 5);
+    /// assert_eq!(5u8 | 2u8, 7);
+    /// ```
+    #[must_use]
+    fn op_bitor(self, rhs: Rhs) -> Self::Output;
+}
+
+pub trait From<T>: Sized {
+    /// Performs the conversion.
+    fn op_from(_: T) -> Self;
+}
+
+pub trait AsSql {
+    /// Performs the conversion.
+    fn as_sql(&self) -> String;
 }

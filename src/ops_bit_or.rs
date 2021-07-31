@@ -1,98 +1,82 @@
-use std::ops::BitOr;
-use crate::Value;
+use crate::ops::BitOr;
+use crate::ops::Value;
 
-impl BitOr for Value<'_>{
+impl BitOr for Value{
     type Output = bool;
 
-    fn bitor(self, rhs: Self) -> Self::Output {
+    fn op_bitor(self, rhs: Self) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
 
-impl BitOr<Value<'_>> for bool{
+impl BitOr<Value> for bool{
     type Output = bool;
 
-    fn bitor(self, rhs: Value) -> Self::Output {
+    fn op_bitor(self, rhs: Value) -> Self::Output {
         self | rhs.as_bool().unwrap_or(false)
     }
 }
 
 //ref
-impl BitOr<Value<'_>> for &Value<'_>{
+impl BitOr<Value> for &Value{
     type Output = bool;
 
-    fn bitor(self, rhs: Value) -> Self::Output {
+    fn op_bitor(self, rhs: Value) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
-impl BitOr<&Value<'_>> for &Value<'_>{
+impl BitOr<&Value> for &Value{
     type Output = bool;
 
-    fn bitor(self, rhs: &Value) -> Self::Output {
+    fn op_bitor(self, rhs: &Value) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
-
-impl BitOr<bool> for &Value<'_>{
+impl BitOr<&&Value> for &Value{
     type Output = bool;
 
-    fn bitor(self, rhs: bool) -> Self::Output {
-        self.as_bool().unwrap_or(false) | rhs
-    }
-}
-
-//refmut
-impl BitOr<Value<'_>> for &mut Value<'_>{
-    type Output = bool;
-
-    fn bitor(self, rhs: Value) -> Self::Output {
-        self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
-    }
-}
-impl BitOr<&Value<'_>> for &mut Value<'_>{
-    type Output = bool;
-
-    fn bitor(self, rhs: &Value) -> Self::Output {
+    fn op_bitor(self, rhs: &&Value) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
 
-impl BitOr<bool> for &mut Value<'_>{
+impl BitOr<bool> for &Value{
     type Output = bool;
 
-    fn bitor(self, rhs: bool) -> Self::Output {
+    fn op_bitor(self, rhs: bool) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs
     }
 }
 
 //rhs ref
-impl BitOr<&Value<'_>> for Value<'_>{
+impl BitOr<&Value> for Value{
     type Output = bool;
 
-    fn bitor(self, rhs: &Value) -> Self::Output {
+    fn op_bitor(self, rhs: &Value) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
-impl BitOr<&Value<'_>> for bool{
+
+impl BitOr<&Value> for bool{
     type Output = bool;
 
-    fn bitor(self, rhs: &Value) -> Self::Output {
+    fn op_bitor(self, rhs: &Value) -> Self::Output {
         self | rhs.as_bool().unwrap_or(false)
     }
 }
 
-//rhs ref mut
-impl BitOr<&mut Value<'_>> for Value<'_>{
+impl BitOr<&&Value> for Value{
     type Output = bool;
 
-    fn bitor(self, rhs: &mut Value) -> Self::Output {
+    fn op_bitor(self, rhs: &&Value) -> Self::Output {
         self.as_bool().unwrap_or(false) | rhs.as_bool().unwrap_or(false)
     }
 }
-impl BitOr<&mut Value<'_>> for bool{
+
+impl BitOr<&&Value> for bool{
     type Output = bool;
 
-    fn bitor(self, rhs: &mut Value) -> Self::Output {
+    fn op_bitor(self, rhs: &&Value) -> Self::Output {
         self | rhs.as_bool().unwrap_or(false)
     }
 }
