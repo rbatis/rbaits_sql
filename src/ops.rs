@@ -369,6 +369,24 @@ pub trait BitOr<Rhs = Self> {
     fn op_bitor(self, rhs: Rhs) -> Self::Output;
 }
 
+pub trait BitXor<Rhs = Self> {
+    /// The resulting type after applying the `^` operator.
+    type Output;
+
+    /// Performs the `^` operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert_eq!(true ^ false, true);
+    /// assert_eq!(true ^ true, false);
+    /// assert_eq!(5u8 ^ 1u8, 4);
+    /// assert_eq!(5u8 ^ 2u8, 7);
+    /// ```
+    #[must_use]
+    fn op_bitxor(self, rhs: Rhs) -> Self::Output;
+}
+
 pub trait From<T>: Sized {
     /// Performs the conversion.
     fn op_from(_: T) -> Self;

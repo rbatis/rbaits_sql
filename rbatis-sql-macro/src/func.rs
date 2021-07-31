@@ -151,7 +151,9 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&st
                     return syn::parse_str::<Expr>(&format!("({}).op_gt(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
                 }
                 /// The `^` operator (bitwise xor)
-                BinOp:: BitXor(_)=> {panic!("unsupported token ^ ")}
+                BinOp:: BitXor(_)=> {
+                    return syn::parse_str::<Expr>(&format!("({}).op_bitxor(&{})",b.left.to_token_stream(),b.right.to_token_stream())).unwrap();
+                }
                 /// The `<<` operator (shift left)
                 BinOp::  Shl(_)=> {panic!("unsupported token << ")}
                 /// The `>>` operator (shift right)
