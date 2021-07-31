@@ -3,19 +3,28 @@ use crate::ops::{AsSql, Value, AsProxy};
 
 impl AsSql for Value{
     fn as_sql(&self) -> String {
-        self.string()
+        match self{
+            Value::String(s) => { s.to_owned() }
+            _ => {self.to_string()}
+        }
     }
 }
 
 impl AsSql for &Value{
     fn as_sql(&self) -> String {
-        self.string()
+        match self{
+            Value::String(s) => { s.to_owned() }
+            _ => {self.to_string()}
+        }
     }
 }
 
 impl AsSql for &&Value{
     fn as_sql(&self) -> String {
-        self.string()
+        match self{
+            Value::String(s) => { s.to_owned() }
+            _ => {self.to_string()}
+        }
     }
 }
 
