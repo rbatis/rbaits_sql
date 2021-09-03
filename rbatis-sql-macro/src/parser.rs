@@ -193,7 +193,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                           };
                     }
                     if v.starts_with("#") {
-                        string_data = string_data.replacen(&v, &" ? ", 1);
+                        string_data = string_data.replacen(&v, &"?", 1);
                         body = quote! {
                               #body
                               args.push(serde_json::json!(#method_name));
