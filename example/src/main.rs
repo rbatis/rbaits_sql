@@ -69,6 +69,33 @@ fn main() {
     let (sql, args) = select_by_condition(&mut arg);
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());
+}
+
+#[test]
+fn bench() {
+    let mut arg = serde_json::json!({
+        "id":1,
+        "order_by":["id","name"],
+        "ids":[1,2,3],
+        "name":"asdf",
+        "map":{"a":1},
+        "create_time":"2020-23-23"
+    });
+    let act = BizActivity {
+        id: None,
+        name: None,
+        pc_link: None,
+        h5_link: None,
+        remark: None,
+        sort: None,
+        status: None,
+        version: None,
+        create_time: None,
+        delete_flag: None,
+    };
+    let (sql, args) = select_by_condition(&mut arg);
+    println!("sql: {}", sql);
+    println!("args: {}", serde_json::to_string(&args).unwrap());
     bench!(1000000,{
         select_by_condition(&mut arg);
     });
