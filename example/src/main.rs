@@ -34,7 +34,7 @@ pub fn select_by_condition(arg: &mut serde_json::Value) {}
 
 #[rb_py("select * from biz_activity where delete_flag = 0
                   if name != '':
-                    and name=#{name}",'$')]
+                    and name like %#{name}%",'$')]
 pub fn py_select_by_condition(arg: &mut serde_json::Value) {}
 
 
