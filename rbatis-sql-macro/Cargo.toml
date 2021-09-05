@@ -16,7 +16,7 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.26"
 quote = "1.0.9"
-syn = {version="1.0.68",features=["full"]}
+syn = {version="1.0.76",features=["full"]}
 
 base64 = "0.13"
 xml-rs = "0.8"
