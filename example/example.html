@@ -29,11 +29,11 @@
         name not like #{name}
         create_time between #{create_time} and #{create_time}
         group by
-        <foreach collection="ids" index="index" item="item">
+        <foreach collection="ids" index="index" item="item" separator=",">
             #{item}
         </foreach>
         order by
-        <foreach collection="order_by" index="index" item="item">
+        <foreach collection="order_by" index="index" item="item" separator=",">
             #{item}
         </foreach>
     </select>

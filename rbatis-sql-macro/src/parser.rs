@@ -319,6 +319,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                           };
                 }
 
+                body = quote! {
+                    #body
+                    sql.push_str(" ");
+                };
                 let mut open_impl = quote! {};
                 if !open.is_empty() {
                     open_impl = quote! {
@@ -385,6 +389,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         }
                         #close_impl
                     }
+                };
+                body = quote! {
+                    #body
+                    sql.push_str(" ");
                 };
             }
 

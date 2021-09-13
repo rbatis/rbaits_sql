@@ -1,6 +1,6 @@
 [package]
 name = "rbatis_sql_macro"
-version = "2.0.15"
+version = "2.0.16"
 authors = ["zxj_pc <zhuxiujia@qq.com>"]
 edition = "2018"
 license = "Apache-2.0"
@@ -16,7 +16,7 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.26"
 quote = "1.0.9"
-syn = {version="1.0.68",features=["full"]}
+syn = {version="1.0.76",features=["full"]}
 
 base64 = "0.13"
 xml-rs = "0.8"
