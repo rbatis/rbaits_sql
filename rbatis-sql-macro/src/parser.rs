@@ -186,12 +186,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
                     let method_impl = parse_expr(&method_impl);
                     //check append value
-                    if !body.to_string().contains(&format!("{} ", method_name)) {
                         body = quote! {
                               #body
                               let #method_name = #method_impl;
                           };
-                    }
                     if v.starts_with("#") {
                         string_data = string_data.replacen(&v, &"?", 1);
                         body = quote! {
@@ -312,13 +310,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let method_impl = parse_expr(&method_impl);
                 //check append value
-                if !body.to_string().contains(&format!("{} ", method_name)) {
                     body = quote! {
                               #body
                               let #method_name = #method_impl;
                           };
-                }
-
                 body = quote! {
                     #body
                     sql.push_str(" ");
@@ -526,12 +521,10 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &[
     let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
     let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
     //check append value
-    if !body.to_string().contains(&format!("{} ", method_name)) {
         *body = quote! {
                               #body
                               let #method_name = #method_impl;
-                          };
-    }
+        };
     return method_name;
 }
 
