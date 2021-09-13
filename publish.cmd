@@ -1,4 +1,4 @@
 cd rbatis-sql-macro/
 cargo publish
 cd ..
-cargo publish
+cargo publish --allow-dirty
