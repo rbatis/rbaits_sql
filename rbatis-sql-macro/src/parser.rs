@@ -259,7 +259,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "where" => {
-                impl_trim(" where ", " ", "and |or ", " and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"), format_char, ignore);
+                impl_trim(" where ", " ", " |and |or ", " | and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"), format_char, ignore);
             }
 
             "choose" => {
@@ -392,7 +392,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "set" => {
-                impl_trim(" set ", " ", ",", ",", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"), format_char, ignore);
+                impl_trim(" set ", " ", " |,", " |,", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"), format_char, ignore);
             }
 
             "select" => {
