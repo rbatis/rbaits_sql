@@ -27,6 +27,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
 dashmap = { version = "4" }
 
-rbatis_sql_macro = { version = "2.0.16", path = "rbatis-sql-macro" }
+rbatis_sql_macro = { version = "2.0.17", path = "rbatis-sql-macro" }
 base64 = "0.13"
 async-trait = "0.1"
