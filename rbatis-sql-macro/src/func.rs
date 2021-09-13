@@ -39,7 +39,7 @@ fn token_steam_string(arg: proc_macro2::TokenStream) -> String {
 }
 
 
-fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[&str]) -> Expr {
+fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[String]) -> Expr {
     match arg {
         Expr::Path(b) => {
             let token = b.to_token_stream().to_string();
@@ -322,7 +322,7 @@ fn expr_type(expr: Expr) -> String {
 }
 
 
-pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool, as_proxy: bool, ignore: &[&str]) -> proc_macro2::TokenStream {
+pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool, as_proxy: bool, ignore: &[String]) -> proc_macro2::TokenStream {
     let mut string_data = args.to_string();
     string_data = string_data[1..string_data.len() - 1].to_string();
     string_data = string_data.replace(".string()", ".to_string()");
