@@ -186,7 +186,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
                     let method_impl = parse_expr(&method_impl);
                     //check append value
-                        body = quote! {
+                    body = quote! {
                               #body
                               let #method_name = #method_impl;
                           };
@@ -217,7 +217,11 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
             "if" => {
                 let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
-                impl_if(test_value, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char, ignore);
+                let mut if_tag_body = quote! {};
+                if x.childs.len() != 0 {
+                    if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
+                }
+                impl_if(test_value, if_tag_body, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char, ignore);
             }
             "trim" => {
                 let empty_string = String::new();
@@ -259,7 +263,11 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     }
                     if x.tag.eq("when") {
                         let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
-                        impl_if(test_value, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char, ignore);
+                        let mut if_tag_body = quote! {};
+                        if x.childs.len() != 0 {
+                            if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
+                        }
+                        impl_if(test_value, if_tag_body, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char, ignore);
                     }
                     if x.tag.eq("otherwise") {
                         let child_body = parse(&x.childs, methods, block_name, format_char, ignore);
@@ -306,7 +314,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let method_impl = parse_expr(&method_impl);
                 //check append value
-                    body = quote! {
+                body = quote! {
                               #body
                               let #method_name = #method_impl;
                           };
@@ -517,18 +525,16 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &m
     let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
     let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
     //check append value
-        *body = quote! {
+    *body = quote! {
                               #body
                               let #method_name = #method_impl;
         };
     return method_name;
 }
 
-fn impl_if(test_value: &str, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
+fn impl_if(test_value: &str, if_tag_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
     let method_name = impl_method(test_value, body, ignore);
-    if x.childs.len() != 0 {
-        let if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
-        *body = quote! {
+    *body = quote! {
                               #body
                               if #method_name {
                                    sql.push_str(" ");
@@ -537,7 +543,6 @@ fn impl_if(test_value: &str, body: &mut proc_macro2::TokenStream, methods: &mut 
                                    #appends
                               }
                           };
-    }
 }
 
 fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
