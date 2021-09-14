@@ -216,7 +216,8 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
             }
             "if" => {
-                impl_if(x, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char, ignore);
+                let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+                impl_if(test_value, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char, ignore);
             }
             "trim" => {
                 let empty_string = String::new();
@@ -257,10 +258,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         panic!("choose node's childs must be when node and otherwise node!");
                     }
                     if x.tag.eq("when") {
-                        impl_if(x, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char, ignore);
+                        let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+                        impl_if(test_value, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char, ignore);
                     }
                     if x.tag.eq("otherwise") {
-                        impl_otherwise(x, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"), format_char, ignore);
+                        let child_body = parse(&x.childs, methods, block_name, format_char, ignore);
+                        impl_otherwise(child_body, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"), format_char, ignore);
                     }
                 }
                 body = quote! {
@@ -521,8 +524,7 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &m
     return method_name;
 }
 
-fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
-    let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+fn impl_if(test_value: &str, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
     let method_name = impl_method(test_value, body, ignore);
     if x.childs.len() != 0 {
         let if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
@@ -538,8 +540,7 @@ fn impl_if(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_
     }
 }
 
-fn impl_otherwise(x: &Element, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
-    let child_body = parse(&x.childs, methods, block_name, format_char, ignore);
+fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
     *body = quote!(
                         #body
                         sql.push_str(" ");
