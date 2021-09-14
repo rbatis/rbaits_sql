@@ -321,7 +321,7 @@ fn expr_type(expr: Expr) -> String {
     }
 }
 
-
+/// gen method or body(if func_name_ident is empty)
 pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_result: bool, as_proxy: bool, ignore: &[String]) -> proc_macro2::TokenStream {
     let mut string_data = args.to_string();
     string_data = string_data[1..string_data.len() - 1].to_string();

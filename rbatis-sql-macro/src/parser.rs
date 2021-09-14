@@ -181,10 +181,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let mut replaced = HashMap::<String, bool>::new();
                 for (k, v) in convert_list {
                     let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, k));
-                    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", k), false, true, ignore);
-                    let mut method_string = method_impl.to_string();
-                    let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
-                    let method_impl = parse_expr(&method_impl);
+                    let method_impl = crate::func::impl_fn(&body.to_string(), "", &format!("\"{}\"", k), false, true, ignore);
                     //check append value
                     body = quote! {
                               #body
@@ -239,10 +236,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let value = x.attributes.get("value").expect("<bind> element must be have value!").to_string();
 
                 let name_expr = parse_expr(&name);
-                let method_impl = crate::func::impl_fn(&body.to_string(), "this_is_gen", &format!("\"{}\"", value), false, true, ignore);
-                let method_string = method_impl.to_string();
-                let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
-                let method_impl = parse_expr(&method_impl);
+                let method_impl = crate::func::impl_fn(&body.to_string(), "", &format!("\"{}\"", value), false, true, ignore);
                 body = quote! {
                             #body
                             //bind
@@ -308,11 +302,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
                 let impl_body = parse(&x.childs, methods, "foreach", format_char, &mut ignores);
                 let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, collection));
-                let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", collection), false, false, ignore);
-                let method_string = method_impl.to_string();
-                let method_impl = method_string[method_string.find("{").unwrap()..method_string.len()].to_string();
-
-                let method_impl = parse_expr(&method_impl);
+                let method_impl = crate::func::impl_fn(&body.to_string(), "", &format!("\"{}\"", collection), false, false, ignore);
                 //check append value
                 body = quote! {
                               #body
@@ -519,16 +509,12 @@ fn gen_method_name(test_value: &str) -> (String, Ident) {
 
 fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &mut Vec<String>) -> Ident {
     let (_, method_name) = gen_method_name(&test_value);
-    let method_impl = crate::func::impl_fn(&body.to_string(), &method_name.to_string(), &format!("\"{}\"", test_value), false, true, ignore);
-    let method_string = method_impl.to_string();
-    let method_impl = &method_string[method_string.find("{").unwrap()..method_string.len()];
-    let s = syn::parse::<syn::LitStr>(method_impl.to_token_stream().into()).unwrap();
-    let method_impl = syn::parse_str::<Expr>(&s.value()).unwrap();
+    let method_impl = crate::func::impl_fn(&body.to_string(), "", &format!("\"{}\"", test_value), false, true, ignore);
     //check append value
     *body = quote! {
-                              #body
-                              let #method_name = #method_impl;
-        };
+                 #body
+               let #method_name = #method_impl;
+    };
     return method_name;
 }
 
