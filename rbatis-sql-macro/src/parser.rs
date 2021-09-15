@@ -174,7 +174,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 impl_println(x, &mut body, ignore);
             }
             "" => {
-                let mut string_data = x.data.trim().to_string();
+                let mut string_data = x.data.to_string();
                 let convert_list = find_convert_string(&string_data);
                 let mut replaces = quote! {};
 
