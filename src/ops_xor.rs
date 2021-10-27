@@ -9,17 +9,20 @@ impl BitXor<&Value> for Value {
     type Output = Value;
     fn op_bitxor(self, rhs: &Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() ^ rhs.as_i64().unwrap_or_default())
-                } else if s.is_f64() {
-                    return serde_json::Value::Null;
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() ^ rhs.as_u64().unwrap_or_default())
-                }
+            Value::Int32(s) => {
+                let rhs = rhs.i32();
+                return Value::Int32(s ^ rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.i64();
+                return Value::Int64(s ^ rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                return Value::Null;
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -29,17 +32,20 @@ impl BitXor<&&Value> for Value {
     type Output = Value;
     fn op_bitxor(self, rhs: &&Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() ^ rhs.as_i64().unwrap_or_default())
-                } else if s.is_f64() {
-                    return serde_json::Value::Null;
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() ^ rhs.as_u64().unwrap_or_default())
-                }
+            Value::Int32(s) => {
+                let rhs = rhs.i32();
+                return Value::Int32(s ^ rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.i64();
+                return Value::Int64(s ^ rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                return Value::Null;
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -49,17 +55,20 @@ impl BitXor<Value> for Value {
     type Output = Value;
     fn op_bitxor(self, rhs: Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() ^ rhs.as_i64().unwrap_or_default())
-                } else if s.is_f64() {
-                    return serde_json::Value::Null;
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() ^ rhs.as_u64().unwrap_or_default())
-                }
+            Value::Int32(s) => {
+                let rhs = rhs.i32();
+                return Value::Int32(s ^ rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.i64();
+                return Value::Int64(s ^ rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                return Value::Null;
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -69,17 +78,20 @@ impl BitXor<&Value> for &Value {
     type Output = Value;
     fn op_bitxor(self, rhs: &Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() ^ rhs.as_i64().unwrap_or_default())
-                } else if s.is_f64() {
-                    return serde_json::Value::Null;
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() ^ rhs.as_u64().unwrap_or_default())
-                }
+            Value::Int32(s) => {
+                let rhs = rhs.i32();
+                return Value::Int32(s ^ rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.i64();
+                return Value::Int64(s ^ rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                return Value::Null;
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -89,17 +101,20 @@ impl BitXor<&&Value> for &Value {
     type Output = Value;
     fn op_bitxor(self, rhs: &&Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() ^ rhs.as_i64().unwrap_or_default())
-                } else if s.is_f64() {
-                    return serde_json::Value::Null;
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() ^ rhs.as_u64().unwrap_or_default())
-                }
+            Value::Int32(s) => {
+                let rhs = rhs.i32();
+                return Value::Int32(s ^ rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.i64();
+                return Value::Int64(s ^ rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                return Value::Null;
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -109,17 +124,20 @@ impl BitXor<Value> for &Value {
     type Output = Value;
     fn op_bitxor(self, rhs: Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    serde_json::json!(s.as_i64().unwrap_or_default() ^ rhs.as_i64().unwrap_or_default())
-                } else if s.is_f64() {
-                    return serde_json::Value::Null;
-                } else {
-                    serde_json::json!(s.as_u64().unwrap_or_default() ^ rhs.as_u64().unwrap_or_default())
-                }
+            Value::Int32(s) => {
+                let rhs = rhs.i32();
+                return Value::Int32(s ^ rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.i64();
+                return Value::Int64(s ^ rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                return Value::Null;
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -129,11 +147,7 @@ impl BitXor<Value> for &Value {
 
 
 fn op_bitxor_i64(value: &Value, other: i64) -> i64 {
-    value.as_i64().unwrap_or_default() ^ other
-}
-
-fn op_bitxor_u64(value: &Value, other: u64) -> u64 {
-    value.as_u64().unwrap_or_default() ^ other
+    value.i64() ^ other
 }
 
 fn op_bitxor_f64(value: &Value, other: f64) -> f64 {
@@ -142,11 +156,7 @@ fn op_bitxor_f64(value: &Value, other: f64) -> f64 {
 
 
 fn op_bitxor_i64_value(value: &Value, other: i64) -> i64 {
-    other ^ value.as_i64().unwrap_or_default()
-}
-
-fn op_bitxor_u64_value(value: &Value, other: u64) -> u64 {
-    other ^ value.as_u64().unwrap_or_default()
+    other ^ value.i64()
 }
 
 fn op_bitxor_f64_value(value: &Value, other: f64) -> f64 {
@@ -197,7 +207,6 @@ macro_rules! impl_numeric_sub {
 
 impl_numeric_sub! {
     op_bitxor_i64,op_bitxor_i64_value[i8 i16 i32 i64 isize] -> i64
-    op_bitxor_u64,op_bitxor_u64_value[u8 u16 u32 u64 usize] -> u64
     op_bitxor_f64,op_bitxor_f64_value[f32 f64] -> f64
 }
 
@@ -235,5 +244,4 @@ impl BitXor<&$ty> for &$ty{
 }
 
 xor_self!([i8 i16 i32 i64 isize]);
-xor_self!([u8 u16 u32 u64 usize]);
 // unsupport! xor_self!([f32 f64]);

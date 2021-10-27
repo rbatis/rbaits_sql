@@ -1,4 +1,4 @@
-use crate::ops::Value;
+use crate::ops::{AsProxy, Value};
 use crate::ops::PartialEq;
 use std::cmp::PartialEq as PE;
 
@@ -48,11 +48,7 @@ impl PartialEq<Value> for Value{
 eq base
 **/
 fn eq_i64(value: &Value, other: i64) -> bool {
-    value.as_i64().unwrap_or_default().eq(&other)
-}
-
-fn eq_u64(value: &Value, other: u64) -> bool {
-    value.as_u64().unwrap_or_default().eq(&other)
+    value.i64().eq(&other)
 }
 
 fn eq_f64(value: &Value, other: f64) -> bool {
@@ -149,7 +145,6 @@ macro_rules! impl_numeric_eq {
 
 impl_numeric_eq! {
     eq_i64[i8 i16 i32 i64 isize]
-    eq_u64[u8 u16 u32 u64 usize]
     eq_f64[f32 f64]
     eq_bool[bool]
 }
@@ -183,6 +178,5 @@ impl PartialEq<&$ty> for &$ty{
 }
 
 eq_self!([i8 i16 i32 i64 isize]);
-eq_self!([u8 u16 u32 u64 usize]);
 eq_self!([f32 f64]);
 eq_self!([String &str]);

@@ -1,3 +1,4 @@
+use bson::Bson;
 use crate::ops::Div;
 
 use crate::ops::Value;
@@ -7,15 +8,9 @@ fn op_div_i64(value: &Value, other: i64) -> i64 {
     if other == 0 {
         return 0;
     }
-    (value.as_i64().unwrap_or_default() / other)
+    (value.i64() / other)
 }
 
-fn op_div_u64(value: &Value, other: u64) -> u64 {
-    if other == 0 {
-        return 0;
-    }
-    (value.as_u64().unwrap_or_default() / other)
-}
 
 fn op_div_f64(value: &Value, other: f64) -> f64 {
     if other == 0.0 {
@@ -26,20 +21,13 @@ fn op_div_f64(value: &Value, other: f64) -> f64 {
 
 
 fn op_div_i64_value(value: &Value, other: i64) -> i64 {
-    let v = value.as_i64().unwrap_or_default();
+    let v = value.i64();
     if v == 0 {
         return 0;
     }
     (other / v)
 }
 
-fn op_div_u64_value(value: &Value, other: u64) -> u64 {
-    let v = value.as_u64().unwrap_or_default();
-    if v == 0 {
-        return 0;
-    }
-    (other / v)
-}
 
 fn op_div_f64_value(value: &Value, other: f64) -> f64 {
     let v = value.as_f64().unwrap_or_default();
@@ -120,7 +108,6 @@ macro_rules! impl_numeric_div {
 
 impl_numeric_div! {
     op_div_i64,op_div_i64_value[i8 i16 i32 i64 isize] -> i64
-    op_div_u64,op_div_u64_value[u8 u16 u32 u64 usize] -> u64
     op_div_f64,op_div_f64_value[f32 f64] -> f64
 }
 
@@ -130,29 +117,29 @@ impl Div<&Value> for Value {
     type Output = Value;
     fn op_div(self, rhs: &Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+            Value::Int32(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int32(0);
                 }
+                return Value::Double(s as f64 / rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int64(0);
+                }
+                return Value::Double(s as f64 / rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Double(0.0);
+                }
+                return Value::Double(s / rhs);
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -162,29 +149,29 @@ impl Div<&&Value> for Value {
     type Output = Value;
     fn op_div(self, rhs: &&Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+            Value::Int32(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int32(0);
                 }
+                return Value::Double(s as f64 / rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int64(0);
+                }
+                return Value::Double(s as f64 / rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Double(0.0);
+                }
+                return Value::Double(s / rhs);
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -193,30 +180,30 @@ impl Div<&&Value> for Value {
 impl Div<Value> for Value {
     type Output = Value;
     fn op_div(self, rhs: Value) -> Self::Output {
-        return match self{
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+        return match self {
+            Value::Int32(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int32(0);
                 }
+                return Value::Double(s as f64 / rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int64(0);
+                }
+                return Value::Double(s as f64 / rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Double(0.0);
+                }
+                return Value::Double(s / rhs);
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -226,29 +213,29 @@ impl Div<Value> for &Value {
     type Output = Value;
     fn op_div(self, rhs: Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+            Value::Int32(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int32(0);
                 }
+                return Value::Double(*s as f64 / rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int64(0);
+                }
+                return Value::Double(*s as f64 / rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Double(0.0);
+                }
+                return Value::Double(s / rhs);
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -258,29 +245,29 @@ impl Div<&Value> for &Value {
     type Output = Value;
     fn op_div(self, rhs: &Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+            Value::Int32(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int32(0);
                 }
+                return Value::Double(*s as f64 / rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int64(0);
+                }
+                return Value::Double(*s as f64 / rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Double(0.0);
+                }
+                return Value::Double(s / rhs);
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -290,29 +277,29 @@ impl Div<&&Value> for &Value {
     type Output = Value;
     fn op_div(self, rhs: &&Value) -> Self::Output {
         return match self {
-            serde_json::Value::Number(s) => {
-                if s.is_i64() {
-                    let rhs = rhs.as_i64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_i64().unwrap_or_default() / rhs)
-                } else if s.is_f64() {
-                    let rhs = rhs.as_f64().unwrap_or_default();
-                    if rhs == 0.0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_f64().unwrap_or_default() / rhs)
-                } else {
-                    let rhs = rhs.as_u64().unwrap_or_default();
-                    if rhs == 0 {
-                        return serde_json::json!(rhs);
-                    }
-                    serde_json::json!(s.as_u64().unwrap_or_default() / rhs)
+            Value::Int32(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int32(0);
                 }
+                return Value::Double(*s as f64 / rhs);
+            }
+            Value::Int64(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Int64(0);
+                }
+                return Value::Double(*s as f64 / rhs);
+            }
+            Value::Double(s) => {
+                let rhs = rhs.as_f64().unwrap_or_default();
+                if rhs == 0.0 {
+                    return Value::Double(0.0);
+                }
+                return Value::Double(*s as f64 / rhs);
             }
             _ => {
-                return serde_json::Value::Null;
+                return Value::Null;
             }
         };
     }
@@ -351,5 +338,4 @@ impl Div<&$ty> for &$ty{
 }
 
 div_self!([i8 i16 i32 i64 isize]);
-div_self!([u8 u16 u32 u64 usize]);
 div_self!([f32 f64]);

@@ -7,11 +7,11 @@ use serde::{Deserializer, Serializer};
 use std::cmp::Ordering::Less;
 
 
-/// convert serde_json::Value to Value
+/// convert Value to Value
 pub trait AsProxy {
+    fn i32(&self) -> i32;
     fn i64(&self) -> i64;
     fn f64(&self) -> f64;
-    fn u64(&self) -> u64;
     fn str(&self) -> &str;
     fn string(&self) -> String;
     fn bool(&self) -> bool;
@@ -19,21 +19,35 @@ pub trait AsProxy {
 }
 
 
-
-/// proxy serde_json::Value struct,support Deserializer, Serializer
+/// proxy bson::Document struct,support Deserializer, Serializer
 /// use Cow Optimize unnecessary clones
 /// This structure has a certain amount of computing power
-pub(crate) type Value = serde_json::Value;
+pub type Value = bson::Bson;
 
-impl AsProxy for Value{
+impl AsProxy for Value {
+    fn i32(&self) -> i32 {
+        return match self {
+            Value::Double(v) => { *v as i32 }
+            Value::Int32(v) => { *v}
+            Value::Int64(v) => { *v  as i32}
+            _ => { 0 }
+        };
+    }
     fn i64(&self) -> i64 {
-        self.as_i64().unwrap_or_default()
+        return match self {
+            Value::Double(v) => { *v as i64 }
+            Value::Int32(v) => { *v as i64 }
+            Value::Int64(v) => { *v }
+            _ => { 0 }
+        };
     }
     fn f64(&self) -> f64 {
-        self.as_f64().unwrap_or_default()
-    }
-    fn u64(&self) -> u64 {
-        self.as_u64().unwrap_or_default()
+        return match self {
+            Value::Double(v) => { *v }
+            Value::Int32(v) => { *v as f64 }
+            Value::Int64(v) => { *v as f64 }
+            _ => { 0.0 }
+        };
     }
     fn str(&self) -> &str {
         self.as_str().unwrap_or_default()
@@ -46,37 +60,34 @@ impl AsProxy for Value{
     }
     fn is_empty(&self) -> bool {
         return match self {
-            serde_json::Value::Null => {
+            Value::Null => {
                 true
             }
-            serde_json::Value::Bool(_) => {
-                false
-            }
-            serde_json::Value::Number(_) => {
-                false
-            }
-            serde_json::Value::String(s) => {
+            Value::String(s) => {
                 s.is_empty()
             }
-            serde_json::Value::Array(arr) => {
+            Value::Array(arr) => {
                 arr.is_empty()
             }
-            serde_json::Value::Object(m) => {
+            Value::Document(m) => {
                 m.is_empty()
+            }
+            _ => {
+                return false;
             }
         };
     }
 }
 
-impl AsProxy for &Value{
+impl AsProxy for &Value {
+    fn i32(&self) -> i32 {
+        self.i32()
+    }
     fn i64(&self) -> i64 {
-        self.as_i64().unwrap_or_default()
+        self.i64()
     }
     fn f64(&self) -> f64 {
         self.as_f64().unwrap_or_default()
-    }
-    fn u64(&self) -> u64 {
-        self.as_u64().unwrap_or_default()
     }
     fn str(&self) -> &str {
         self.as_str().unwrap_or_default()
@@ -89,28 +100,24 @@ impl AsProxy for &Value{
     }
     fn is_empty(&self) -> bool {
         return match self {
-            serde_json::Value::Null => {
+            Value::Null => {
                 true
             }
-            serde_json::Value::Bool(_) => {
-                false
-            }
-            serde_json::Value::Number(_) => {
-                false
-            }
-            serde_json::Value::String(s) => {
+            Value::String(s) => {
                 s.is_empty()
             }
-            serde_json::Value::Array(arr) => {
+            Value::Array(arr) => {
                 arr.is_empty()
             }
-            serde_json::Value::Object(m) => {
+            Value::Document(m) => {
                 m.is_empty()
+            }
+            _ => {
+                false
             }
         };
     }
 }
-
 
 
 pub trait PartialEq<Rhs: ?Sized = Self> {
@@ -129,7 +136,7 @@ pub trait PartialEq<Rhs: ?Sized = Self> {
     }
 }
 
-pub trait PartialOrd<Rhs: ?Sized = Self>{
+pub trait PartialOrd<Rhs: ?Sized = Self> {
     /// This method returns an ordering between `self` and `other` values if one exists.
     ///
     /// # Examples
@@ -154,7 +161,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>{
     /// assert_eq!(result, None);
     /// ```
     #[must_use]
-   // #[stable(feature = "rust1", since = "1.0.0")]
+    // #[stable(feature = "rust1", since = "1.0.0")]
     fn op_partial_cmp(&self, other: &Rhs) -> Option<Ordering>;
 
     /// This method tests less than (for `self` and `other`) and is used by the `<` operator.
@@ -170,7 +177,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>{
     /// ```
     #[inline]
     #[must_use]
-   // #[stable(feature = "rust1", since = "1.0.0")]
+    // #[stable(feature = "rust1", since = "1.0.0")]
     fn op_lt(&self, other: &Rhs) -> bool {
         self.op_partial_cmp(other).eq(&Some(Less))
     }
@@ -189,13 +196,13 @@ pub trait PartialOrd<Rhs: ?Sized = Self>{
     /// ```
     #[inline]
     #[must_use]
-   // #[stable(feature = "rust1", since = "1.0.0")]
+    // #[stable(feature = "rust1", since = "1.0.0")]
     fn op_le(&self, other: &Rhs) -> bool {
         // Pattern `Some(Less | Eq)` optimizes worse than negating `None | Some(Greater)`.
         // FIXME: The root cause was fixed upstream in LLVM with:
         // https://github.com/llvm/llvm-project/commit/9bad7de9a3fb844f1ca2965f35d0c2a3d1e11775
         // Revert this workaround once support for LLVM 12 gets dropped.
-        let v=self.op_partial_cmp(other);
+        let v = self.op_partial_cmp(other);
         !v.eq(&None) | v.eq(&Some(Ordering::Greater))
     }
 
@@ -211,7 +218,7 @@ pub trait PartialOrd<Rhs: ?Sized = Self>{
     /// assert_eq!(result, false);
     /// ```
     #[inline]
-   // #[stable(feature = "rust1", since = "1.0.0")]
+    // #[stable(feature = "rust1", since = "1.0.0")]
     fn op_gt(&self, other: &Rhs) -> bool {
         self.op_partial_cmp(other).eq(&Some(Ordering::Greater))
     }
@@ -230,9 +237,9 @@ pub trait PartialOrd<Rhs: ?Sized = Self>{
     /// ```
     #[inline]
     #[must_use]
-   // #[stable(feature = "rust1", since = "1.0.0")]
+    // #[stable(feature = "rust1", since = "1.0.0")]
     fn op_ge(&self, other: &Rhs) -> bool {
-        let v=self.op_partial_cmp(other);
+        let v = self.op_partial_cmp(other);
         v.eq(&Some(Ordering::Greater)) | v.eq(&Some(Ordering::Equal))
     }
 }

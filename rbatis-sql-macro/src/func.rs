@@ -44,7 +44,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[Str
         Expr::Path(b) => {
             let token = b.to_token_stream().to_string();
             if token == "null" {
-                return syn::parse_str::<Expr>("serde_json::Value::Null").unwrap();
+                return syn::parse_str::<Expr>("Null").unwrap();
             }
             if token == "sql" {
                 return Expr::Path(b);
@@ -353,7 +353,7 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     let t = t.unwrap();
     let mut result_impl = quote! { result };
     if serialize_result {
-        result_impl = quote! {serde_json::json!(result)};
+        result_impl = quote! {bson::bson!(result)};
     }
     if func_name_ident.is_empty() || func_name_ident.eq("\"\"") {
         return quote! {
@@ -365,7 +365,8 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     } else {
         let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
         return quote! {
-        pub fn #func_name_ident(arg:&serde_json::Value) -> serde_json::Value {
+        pub fn #func_name_ident(arg:&bson::Document) -> bson::Bson {
+           use bson::Bson::Null;
            let result={#t};
            #result_impl
         }
