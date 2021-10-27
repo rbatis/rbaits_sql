@@ -8,7 +8,7 @@ fn op_add_i64(value: &Value, other: i64) -> i64 {
 }
 
 fn op_add_f64(value: &Value, other: f64) -> f64 {
-    value.as_f64().unwrap_or_default() + other
+    value.f64() + other
 }
 
 macro_rules! impl_numeric_add {

@@ -141,13 +141,16 @@ impl Mul<Value> for &Value {
 }
 
 
+fn op_mul_i32(value: &Value, other: i32) -> i32 {
+    value.i32() * other
+}
 
 fn op_mul_i64(value: &Value, other: i64) -> i64 {
     value.i64() * other
 }
 
 fn op_mul_f64(value: &Value, other: f64) -> f64 {
-    value.as_f64().unwrap_or_default() * other
+    value.f64() * other
 }
 
 macro_rules! impl_numeric_mul {

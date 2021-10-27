@@ -155,7 +155,7 @@ mod test {
 
     #[test]
     fn test_node_run() {
-        let arg = bson::doc! {
+        let arg = bson::bson!({
         "a":1,
         "b":2,
         "c":"c",
@@ -163,67 +163,67 @@ mod test {
         "e":[1],
         "f":[{"field":1}],
         "g":true
-        };
+        });
         macro_rules! call {
             ($func_name:ident,$s:expr,$value:expr) => {
                 #[expr($s)]
-                pub fn $func_name(arg: &bson::Document) -> bson::Bson{}
+                pub fn $func_name(arg: &bson::Bson) -> bson::Bson{}
                 assert_eq!($func_name(&arg), $value);
                 };
         }
         call!(fn1,"-1 == -a", Value::Boolean(true));
-        //call!(fn2,"d.a.is_null()", Value::Boolean(true));
-        // call!(fn3,"1.0 == 1.0", Value::Boolean(true));
-        // call!(fn4,"'2019-02-26' == '2019-02-26'", Value::Boolean(true));
-        // call!(fn5,"'f\'uc'+'k'", Value::String("f'uck".to_string()));
-        // call!(fn6,"'f'+'s'",Value::String("fs".to_string()));
-        // call!(fn7,"a +1 > b * 8",Value::Boolean(false));
-        // call!(fn8,"a >= 0",Value::Boolean(true));
-        // call!(fn9,"'a'+c",Value::String("ac".to_string()));
-        // call!(fn10,"'a'+c", Value::String("ac".to_string()));
-        // call!(fn11,"b", Value::Int32(2));
-        // call!(fn12,"a < 1", Value::Boolean(false));
-        // call!(fn13,"a +1 > b*8", Value::Boolean(false));
-        // call!(fn14,"a * b == 2", Value::Boolean(true));
-        // call!(fn15,"a - b == 0", Value::Boolean(false));
-        // call!(fn16,"a >= 0 && a != 0", Value::Boolean(true));
-        // call!(fn17,"a == 1 && a != 0", Value::Boolean(true));
-        // call!(fn18,"1 > 3 ", Value::Boolean(false));
-        // call!(fn19,"1 + 2 != null", Value::Boolean(true));
-        // call!(fn20,"1 != null", Value::Boolean(true));
-        // call!(fn21,"1 + 2 != null && 1 > 0 ", Value::Boolean(true));
-        // call!(fn22,"1 + 2 != null && 2 < b*8 ", Value::Boolean(true));
-        // call!(fn23,"-1 != null", Value::Boolean(true));
-        // call!(fn24,"-1 != -2 && -1 == 2-3 ", Value::Boolean(true));
-        // call!(fn25,"-3 == b*-1-1 ", Value::Boolean(true));
-        // call!(fn26,"0-1 + a*0-1 ", Value::Int32(-2));
-        // call!(fn28,"0-1 + -1*0-1 ", Value::Int32(-2));
-        // call!(fn29,"1-0", Value::Int32(1));
-        // call!(fn30,"-1", Value::Int32(-1));
-        // call!(fn31,"1- -1", Value::Int32(1 - -1));
-        // call!(fn32,"1-2 -1+0", Value::Int32(1 - 2 - 1));
-        // call!(fn33,"e[1]", Value::Null);
-        // call!(fn34,"e[0]", Value::Int32(1));
-        // call!(fn35,"f[0].field", Value::Int32(1));
-        // call!(fn37,"0.1", Value::Double(0.1));
-        // call!(fn38,"1", Value::Int32(1));
-        // call!(fn39,"(1+1)", Value::Int32(2));
-        // call!(fn40,"(1+5)>5", Value::Boolean((1 + 5) > 5));
-        // call!(fn41,"(18*19)<19*19", Value::Boolean((18 * 19) < 19 * 19));
-        // call!(fn42,"2*(1+1)", Value::Int32(2 * (1 + 1)));
-        // call!(fn43, "2*(1+(1+1)+1)",Value::Int32(2 * (1 + (1 + 1) + 1)));
-        // call!(fn44, "(((34 + 21) / 5) - 12) * 348",Value::Int32((((34 + 21) / 5) - 12) * 348));
-        // call!(fn45,"11 ^ 1", Value::Int32(11 ^ 1));
-        // call!(fn46,"e[0] != null", Value::Boolean(true));
-        // call!(fn47,"null >= 0", Value::Boolean(true));
-        // call!(fn48,"null <= a", Value::Boolean(true));
-        // call!(fn49,"null >= 0", Value::Boolean(true));
-        // call!(fn50,"null <= a", Value::Boolean(true));
-        // call!(fn51,"a == 1 && g", Value::Boolean(true));
-        // call!(fn52,"1+2", Value::Int32(3));
-        // call!(fn53,"1+a", Value::Int32(2));
-        // call!(fn54,"'c'+c", Value::String("cc".to_string()));
-        // call!(fn55,"c+'c'", Value::String("cc".to_string()));
+        call!(fn2,"d.a.is_null()", Value::Boolean(true));
+        call!(fn3,"1.0 == 1.0", Value::Boolean(true));
+        call!(fn4,"'2019-02-26' == '2019-02-26'", Value::Boolean(true));
+        call!(fn5,"'f\'uc'+'k'", Value::String("f'uck".to_string()));
+        call!(fn6,"'f'+'s'",Value::String("fs".to_string()));
+        call!(fn7,"a +1 > b * 8",Value::Boolean(false));
+        call!(fn8,"a >= 0",Value::Boolean(true));
+        call!(fn9,"'a'+c",Value::String("ac".to_string()));
+        call!(fn10,"'a'+c", Value::String("ac".to_string()));
+        call!(fn11,"b", Value::Int32(2));
+        call!(fn12,"a < 1", Value::Boolean(false));
+        call!(fn13,"a +1 > b*8", Value::Boolean(false));
+        call!(fn14,"a * b == 2", Value::Boolean(true));
+        call!(fn15,"a - b == 0", Value::Boolean(false));
+        call!(fn16,"a >= 0 && a != 0", Value::Boolean(true));
+        call!(fn17,"a == 1 && a != 0", Value::Boolean(true));
+        call!(fn18,"1 > 3 ", Value::Boolean(false));
+        call!(fn19,"1 + 2 != null", Value::Boolean(true));
+        call!(fn20,"1 != null", Value::Boolean(true));
+        call!(fn21,"1 + 2 != null && 1 > 0 ", Value::Boolean(true));
+        call!(fn22,"1 + 2 != null && 2 < b*8 ", Value::Boolean(true));
+        call!(fn23,"-1 != null", Value::Boolean(true));
+        call!(fn24,"-1 != -2 && -1 == 2-3 ", Value::Boolean(true));
+        call!(fn25,"-3 == b*-1-1 ", Value::Boolean(true));
+        call!(fn26,"0-1 + a*0-1 ", Value::Int32(-2));
+        call!(fn28,"0-1 + -1*0-1 ", Value::Int32(-2));
+        call!(fn29,"1-0", Value::Int32(1));
+        call!(fn30,"-1", Value::Int32(-1));
+        call!(fn31,"1- -1", Value::Int32(1 - -1));
+        call!(fn32,"1-2 -1+0", Value::Int32(1 - 2 - 1));
+        call!(fn33,"e[1]", Value::Null);
+        call!(fn34,"e[0]", Value::Int32(1));
+        call!(fn35,"f[0].field", Value::Int32(1));
+        call!(fn37,"0.1", Value::Double(0.1));
+        call!(fn38,"1", Value::Int32(1));
+        call!(fn39,"(1+1)", Value::Int32(2));
+        call!(fn40,"(1+5)>5", Value::Boolean((1 + 5) > 5));
+        call!(fn41,"(18*19)<19*19", Value::Boolean((18 * 19) < 19 * 19));
+        call!(fn42,"2*(1+1)", Value::Int32(2 * (1 + 1)));
+        call!(fn43, "2*(1+(1+1)+1)",Value::Int32(2 * (1 + (1 + 1) + 1)));
+        call!(fn44, "(((34 + 21) / 5) - 12) * 348",Value::Int32((((34 + 21) / 5) - 12) * 348));
+        call!(fn45,"11 ^ 1", Value::Int32(11 ^ 1));
+        call!(fn46,"e[0] != null", Value::Boolean(true));
+        call!(fn47,"null >= 0", Value::Boolean(true));
+        call!(fn48,"null <= a", Value::Boolean(true));
+        call!(fn49,"null >= 0", Value::Boolean(true));
+        call!(fn50,"null <= a", Value::Boolean(true));
+        call!(fn51,"a == 1 && g", Value::Boolean(true));
+        call!(fn52,"1+2", Value::Int32(3));
+        call!(fn53,"1+a", Value::Int32(2));
+        call!(fn54,"'c'+c", Value::String("cc".to_string()));
+        call!(fn55,"c+'c'", Value::String("cc".to_string()));
     }
 
     // #[expr("a+b*(e[0]+b)/2")]

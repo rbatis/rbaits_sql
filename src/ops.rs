@@ -6,7 +6,6 @@ use std::ops::Deref;
 use serde::{Deserializer, Serializer};
 use std::cmp::Ordering::Less;
 
-
 /// convert Value to Value
 pub trait AsProxy {
     fn i32(&self) -> i32;
@@ -16,6 +15,7 @@ pub trait AsProxy {
     fn string(&self) -> String;
     fn bool(&self) -> bool;
     fn is_empty(&self) -> bool;
+    fn is_null(&self) -> bool;
 }
 
 
@@ -77,48 +77,14 @@ impl AsProxy for Value {
             }
         };
     }
-}
 
-impl AsProxy for &Value {
-    fn i32(&self) -> i32 {
-        self.i32()
-    }
-    fn i64(&self) -> i64 {
-        self.i64()
-    }
-    fn f64(&self) -> f64 {
-        self.as_f64().unwrap_or_default()
-    }
-    fn str(&self) -> &str {
-        self.as_str().unwrap_or_default()
-    }
-    fn string(&self) -> String {
-        self.as_str().unwrap_or_default().to_string()
-    }
-    fn bool(&self) -> bool {
-        self.as_bool().unwrap_or_default()
-    }
-    fn is_empty(&self) -> bool {
+    fn is_null(&self) -> bool {
         return match self {
-            Value::Null => {
-                true
-            }
-            Value::String(s) => {
-                s.is_empty()
-            }
-            Value::Array(arr) => {
-                arr.is_empty()
-            }
-            Value::Document(m) => {
-                m.is_empty()
-            }
-            _ => {
-                false
-            }
-        };
+            Value::Null => {true}
+            _ => {false}
+        }
     }
 }
-
 
 pub trait PartialEq<Rhs: ?Sized = Self> {
     /// This method tests for `self` and `other` values to be equal, and is used
@@ -394,6 +360,30 @@ pub trait BitXor<Rhs = Self> {
     fn op_bitxor(self, rhs: Rhs) -> Self::Output;
 }
 
+
+pub trait OpsIndex<Idx: ?Sized> {
+    /// The returned type after indexing.
+    type Output: ?Sized;
+
+    /// Performs the indexing (`container[index]`) operation.
+    ///
+    /// # Panics
+    ///
+    /// May panic if the index is out of bounds.
+    #[track_caller]
+    fn index(&self, index: Idx) -> &Self::Output;
+}
+
+pub trait OpsIndexMut<Idx: ?Sized>: OpsIndex<Idx> {
+    /// Performs the mutable indexing (`container[index]`) operation.
+    ///
+    /// # Panics
+    ///
+    /// May panic if the index is out of bounds.
+    #[track_caller]
+    fn index_mut(&mut self, index: Idx) -> &mut Self::Output;
+}
+
 pub trait From<T>: Sized {
     /// Performs the conversion.
     fn op_from(_: T) -> Self;
@@ -403,3 +393,5 @@ pub trait AsSql {
     /// Performs the conversion.
     fn as_sql(&self) -> String;
 }
+
+

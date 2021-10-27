@@ -52,7 +52,7 @@ fn eq_i64(value: &Value, other: i64) -> bool {
 }
 
 fn eq_f64(value: &Value, other: f64) -> bool {
-    value.as_f64().unwrap_or_default().eq(&other)
+    value.f64().eq(&other)
 }
 
 fn eq_bool(value: &Value, other: bool) -> bool {

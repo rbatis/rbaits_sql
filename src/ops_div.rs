@@ -16,7 +16,7 @@ fn op_div_f64(value: &Value, other: f64) -> f64 {
     if other == 0.0 {
         return 0.0;
     }
-    value.as_f64().unwrap_or_default() / other
+    value.f64() / other
 }
 
 
@@ -30,7 +30,7 @@ fn op_div_i64_value(value: &Value, other: i64) -> i64 {
 
 
 fn op_div_f64_value(value: &Value, other: f64) -> f64 {
-    let v = value.as_f64().unwrap_or_default();
+    let v = value.f64();
     if v == 0.0 {
         return 0.0;
     }

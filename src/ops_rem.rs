@@ -148,7 +148,7 @@ fn op_rem_i64(value: &Value, other: i64) -> i64 {
 }
 
 fn op_rem_f64(value: &Value, other: f64) -> f64 {
-    value.as_f64().unwrap_or_default() % other
+    value.f64() % other
 }
 
 
@@ -157,7 +157,7 @@ fn op_rem_i64_value(value: &Value, other: i64) -> i64 {
 }
 
 fn op_rem_f64_value(value: &Value, other: f64) -> f64 {
-    other % value.as_f64().unwrap_or_default()
+    other % value.f64()
 }
 
 

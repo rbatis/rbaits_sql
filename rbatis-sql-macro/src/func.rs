@@ -63,7 +63,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[Str
                 }
             }
             if fetch_from_arg {
-                return syn::parse_str::<Expr>(&format!(" &arg[\"{}\"]", param)).unwrap();
+                return syn::parse_str::<Expr>(&format!(" arg.index(\"{}\")", param)).unwrap();
             } else {
                 return syn::parse_str::<Expr>(&format!("{}", param)).unwrap();
             }
@@ -194,45 +194,55 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[Str
         }
         Expr::Field(mut b) => {
             b.base = Box::new(convert_to_arg_access(context, *b.base.clone(), as_proxy, ignore));
-            return match b.member.clone() {
-                Member::Named(n) => {
-                    let s = b.member.to_token_stream().to_string();
-                    let vs: Vec<&str> = s.split(".").collect();
-                    let mut token = String::new();
-                    for x in vs {
-                        if x.ends_with("()") {
-                            token.push_str(".");
-                            token.push_str(x.trim());
-                        } else {
-                            let x = x.trim();
-                            //format index
-                            let xs: Vec<&str> = x.split("[").collect();
-                            if xs.len() > 1 {
-                                let mut is_first = true;
-                                for x in xs {
-                                    if is_first {
-                                        token.push_str("[\"");
-                                        token.push_str(x.trim());
-                                        token.push_str("\"]");
-                                    } else {
-                                        token.push_str("[");
-                                        token.push_str(x.trim());
-                                    }
-                                    is_first = false;
-                                }
-                            } else {
-                                token.push_str("[\"");
-                                token.push_str(x.trim());
-                                token.push_str("\"]");
-                            }
-                        }
-                    }
-                    syn::parse_str::<Expr>(&format!("{}{}", b.base.to_token_stream(), token)).unwrap()
+            match b.member{
+                Member::Named(named) => {
+                    return syn::parse_str::<Expr>(&format!("{}.index(\"{}\")",b.base.to_token_stream(),named.to_token_stream())).unwrap();
                 }
-                Member::Unnamed(unamed) => {
-                    Expr::Field(b)
-                }
-            };
+                Member::Unnamed(_) => {}
+            }
+            return Expr::Field(b);
+
+
+
+            // return match b.member.clone() {
+            //     // Member::Named(n) => {
+            //     //     let s = b.member.to_token_stream().to_string();
+            //     //     let vs: Vec<&str> = s.split(".").collect();
+            //     //     let mut token = String::new();
+            //     //     for x in vs {
+            //     //         if x.ends_with("()") {
+            //     //             token.push_str(".");
+            //     //             token.push_str(x.trim());
+            //     //         } else {
+            //     //             let x = x.trim();
+            //     //             //format index
+            //     //             let xs: Vec<&str> = x.split("[").collect();
+            //     //             if xs.len() > 1 {
+            //     //                 let mut is_first = true;
+            //     //                 for x in xs {
+            //     //                     if is_first {
+            //     //                         token.push_str("[\"");
+            //     //                         token.push_str(x.trim());
+            //     //                         token.push_str("\"]");
+            //     //                     } else {
+            //     //                         token.push_str("[");
+            //     //                         token.push_str(x.trim());
+            //     //                     }
+            //     //                     is_first = false;
+            //     //                 }
+            //     //             } else {
+            //     //                 token.push_str("[\"");
+            //     //                 token.push_str(x.trim());
+            //     //                 token.push_str("\"]");
+            //     //             }
+            //     //         }
+            //     //     }
+            //     //     syn::parse_str::<Expr>(&format!("{}{}", b.base.to_token_stream(), token)).unwrap()
+            //     // }
+            //     Member::Unnamed(unamed) => {
+            //         Expr::Field(b)
+            //     }
+            // };
         }
         Expr::Reference(mut b) => {
             b.expr = Box::new(convert_to_arg_access(context, *b.expr, as_proxy, ignore));
@@ -241,8 +251,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[Str
         }
         Expr::Index(mut b) => {
             b.expr = Box::new(convert_to_arg_access(context, *b.expr, as_proxy, ignore));
-            let result = Expr::Index(b);
-            return syn::parse_str::<Expr>(&format!("{}", result.to_token_stream().to_string())).unwrap();
+            return syn::parse_str::<Expr>(&format!("{}.index({})",b.expr.to_token_stream(),b.index.to_token_stream())).unwrap();
         }
         Expr::Let(mut let_expr) => {
             let_expr.expr = Box::new(convert_to_arg_access(context, *let_expr.expr, as_proxy, ignore));
@@ -365,7 +374,7 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     } else {
         let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
         return quote! {
-        pub fn #func_name_ident(arg:&bson::Document) -> bson::Bson {
+        pub fn #func_name_ident(arg:&bson::Bson) -> bson::Bson {
            use bson::Bson::Null;
            let result={#t};
            #result_impl
