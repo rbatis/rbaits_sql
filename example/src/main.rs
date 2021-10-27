@@ -9,98 +9,94 @@
 #[macro_use]
 extern crate rbatis_sql;
 
-use rbatis_sql::ops::AsProxy;
-//
-// use std::sync::Arc;
-//
-// use serde_json::json;
-//
-//
-// pub struct BizActivity {
-//     pub id: Option<String>,
-//     pub name: Option<String>,
-//     pub pc_link: Option<String>,
-//     pub h5_link: Option<String>,
-//     pub remark: Option<String>,
-//     pub sort: Option<i32>,
-//     pub status: Option<i32>,
-//     pub version: Option<i32>,
-//     pub create_time: Option<String>,
-//     pub delete_flag: Option<i32>,
-// }
+use rbatis_sql::ops::{AsProxy, OpsIndex};
+use std::sync::Arc;
+
+pub struct BizActivity {
+    pub id: Option<String>,
+    pub name: Option<String>,
+    pub pc_link: Option<String>,
+    pub h5_link: Option<String>,
+    pub remark: Option<String>,
+    pub sort: Option<i32>,
+    pub status: Option<i32>,
+    pub version: Option<i32>,
+    pub create_time: Option<String>,
+    pub delete_flag: Option<i32>,
+}
 //
 //
-// #[rb_html("example/example.html",'$')]
-// pub fn select_by_condition(arg: &mut serde_json::Value) {}
-//
-// #[rb_py("select * from biz_activity where delete_flag = 0
-//                   if name != '':
-//                     and name like %#{name}%",'$')]
-// pub fn py_select_by_condition(arg: &mut serde_json::Value) {}
-//
+#[rb_html("example/example.html",'$')]
+pub fn select_by_condition(arg: &mut bson::Bson) {}
+
+#[rb_py("select * from biz_activity where delete_flag = 0
+                  if name != '':
+                    and name like %#{name}%",'$')]
+pub fn py_select_by_condition(arg: &mut bson::Bson) {}
+
 
 
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 fn main() {
-    // let mut arg = Value::Boolean({
-    //     "id":1,
-    //     "order_by":["id","name"],
-    //     "ids":[1,2,3],
-    //     "name":"asdf",
-    //     "map":{"a":1},
-    //     "create_time":"2020-23-23"
-    // });
-    // let act = BizActivity {
-    //     id: None,
-    //     name: None,
-    //     pc_link: None,
-    //     h5_link: None,
-    //     remark: None,
-    //     sort: None,
-    //     status: None,
-    //     version: None,
-    //     create_time: None,
-    //     delete_flag: None,
-    // };
+    let mut arg = bson::bson!({
+        "id":1,
+        "order_by":["id","name"],
+        "ids":[1,2,3],
+        "name":"asdf",
+        "map":{"a":1},
+        "create_time":"2020-23-23"
+    });
+    let act = BizActivity {
+        id: None,
+        name: None,
+        pc_link: None,
+        h5_link: None,
+        remark: None,
+        sort: None,
+        status: None,
+        version: None,
+        create_time: None,
+        delete_flag: None,
+    };
     //
-    // let (sql, args) = py_select_by_condition(&mut arg);
-    // println!("py->sql: {}", sql);
-    // println!("py->args: {}", serde_json::to_string(&args).unwrap());
-    // let (sql, args) = select_by_condition(&mut arg);
-    // println!("sql: {}", sql);
-    // println!("args: {}", serde_json::to_string(&args).unwrap());
+    let (sql, args) = py_select_by_condition(&mut arg);
+    println!("py->sql: {}", sql);
+    println!("py->args: {}", serde_json::to_string(&args).unwrap());
+    let (sql, args) = select_by_condition(&mut arg);
+    println!("sql: {}", sql);
+    println!("args: {}", serde_json::to_string(&args).unwrap());
 }
 
-// #[test]
-// fn bench() {
-//     let mut arg = Value::Boolean({
-//         "id":1,
-//         "order_by":["id","name"],
-//         "ids":[1,2,3],
-//         "name":"asdf",
-//         "map":{"a":1},
-//         "create_time":"2020-23-23"
-//     });
-//     let act = BizActivity {
-//         id: None,
-//         name: None,
-//         pc_link: None,
-//         h5_link: None,
-//         remark: None,
-//         sort: None,
-//         status: None,
-//         version: None,
-//         create_time: None,
-//         delete_flag: None,
-//     };
-//     let (sql, args) = select_by_condition(&mut arg);
-//     println!("sql: {}", sql);
-//     println!("args: {}", serde_json::to_string(&args).unwrap());
-//     bench!(1000000,{
-//         select_by_condition(&mut arg);
-//     });
-// }
+#[test]
+fn bench() {
+    let mut arg = bson::bson!({
+        "id":1,
+        "order_by":["id","name"],
+        "ids":[1,2,3],
+        "name":"asdf",
+        "map":{"a":1},
+        "create_time":"2020-23-23"
+    });
+    let act = BizActivity {
+        id: None,
+        name: None,
+        pc_link: None,
+        h5_link: None,
+        remark: None,
+        sort: None,
+        status: None,
+        version: None,
+        create_time: None,
+        delete_flag: None,
+    };
+    let (sql, args) = select_by_condition(&mut arg);
+    println!("sql: {}", sql);
+    println!("args: {}", serde_json::to_string(&args).unwrap());
+    bench!(1000000,{
+        select_by_condition(&mut arg);
+    });
+}
 
 
 #[cfg(test)]
@@ -226,26 +222,26 @@ mod test {
         call!(fn55,"c+'c'", Value::String("cc".to_string()));
     }
 
-    // #[expr("a+b*(e[0]+b)/2")]
-    // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
+    #[expr("a+b*(e[0]+b)/2")]
+    pub fn gen(arg: &bson::Bson) -> bson::Bson {}
 
-    // #[test]
-    // fn bench() {
-    //     let arg = Value::Boolean({
-    //     "a":1,
-    //     "b":2,
-    //     "c":"c",
-    //     "d":null,
-    //     "e":[1],
-    //     "f":[{"field":1}],
-    //     "g":true
-    // });
-    //     gen(&arg);
-    //     bench!(100000,{
-    //    gen(&arg);
-    // });
-    // }
-    //
+    #[test]
+    fn bench() {
+        let arg = bson::bson!({
+        "a":1,
+        "b":2,
+        "c":"c",
+        "d":null,
+        "e":[1],
+        "f":[{"field":1}],
+        "g":true
+        });
+        gen(&arg);
+        bench!(100000,{
+          gen(&arg);
+        });
+    }
+
     // #[rb_html("example/example.html",'$')]
     // pub fn test_include(arg: &serde_json::Value) {}
     //

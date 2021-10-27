@@ -5,6 +5,7 @@ use std::ops::Deref;
 
 use serde::{Deserializer, Serializer};
 use std::cmp::Ordering::Less;
+use bson::Document;
 
 /// convert Value to Value
 pub trait AsProxy {
@@ -16,6 +17,10 @@ pub trait AsProxy {
     fn bool(&self) -> bool;
     fn is_empty(&self) -> bool;
     fn is_null(&self) -> bool;
+    fn is_array(&self) -> bool;
+    fn array(&self) -> Option<&bson::Array>;
+    fn is_object(&self) -> bool;
+    fn object(&self) -> Option<&Document>;
 }
 
 
@@ -82,6 +87,34 @@ impl AsProxy for Value {
         return match self {
             Value::Null => {true}
             _ => {false}
+        }
+    }
+
+    fn is_array(&self) -> bool{
+        return match self {
+            Value::Array(_) => {true}
+            _ => {false}
+        }
+    }
+
+    fn array(&self) -> Option<&bson::Array> {
+        return match self {
+            Value::Array(arr) => {Some(arr)}
+            _ => {None}
+        }
+    }
+
+    fn is_object(&self) -> bool{
+        return match self {
+            Value::Document(_) => {true}
+            _ => {false}
+        }
+    }
+
+    fn object(&self) -> Option<&Document> {
+        return match self {
+            Value::Document(d) => {Some(d)}
+            _ => {None}
         }
     }
 }
