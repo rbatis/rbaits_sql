@@ -201,48 +201,6 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[Str
                 Member::Unnamed(_) => {}
             }
             return Expr::Field(b);
-
-
-
-            // return match b.member.clone() {
-            //     // Member::Named(n) => {
-            //     //     let s = b.member.to_token_stream().to_string();
-            //     //     let vs: Vec<&str> = s.split(".").collect();
-            //     //     let mut token = String::new();
-            //     //     for x in vs {
-            //     //         if x.ends_with("()") {
-            //     //             token.push_str(".");
-            //     //             token.push_str(x.trim());
-            //     //         } else {
-            //     //             let x = x.trim();
-            //     //             //format index
-            //     //             let xs: Vec<&str> = x.split("[").collect();
-            //     //             if xs.len() > 1 {
-            //     //                 let mut is_first = true;
-            //     //                 for x in xs {
-            //     //                     if is_first {
-            //     //                         token.push_str("[\"");
-            //     //                         token.push_str(x.trim());
-            //     //                         token.push_str("\"]");
-            //     //                     } else {
-            //     //                         token.push_str("[");
-            //     //                         token.push_str(x.trim());
-            //     //                     }
-            //     //                     is_first = false;
-            //     //                 }
-            //     //             } else {
-            //     //                 token.push_str("[\"");
-            //     //                 token.push_str(x.trim());
-            //     //                 token.push_str("\"]");
-            //     //             }
-            //     //         }
-            //     //     }
-            //     //     syn::parse_str::<Expr>(&format!("{}{}", b.base.to_token_stream(), token)).unwrap()
-            //     // }
-            //     Member::Unnamed(unamed) => {
-            //         Expr::Field(b)
-            //     }
-            // };
         }
         Expr::Reference(mut b) => {
             b.expr = Box::new(convert_to_arg_access(context, *b.expr, as_proxy, ignore));
