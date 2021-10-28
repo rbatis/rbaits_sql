@@ -14,14 +14,14 @@ use crate::ops::{OpsIndex, OpsIndexMut, Value};
 /// [square-bracket indexing operator]: ../enum.Value.html#impl-Index%3CI%3E
 ///
 /// This trait is sealed and cannot be implemented for types outside of
-/// `serde_json`.
+/// `bson`.
 ///
 /// # Examples
 ///
 /// ```
 /// # use rbatis_sql::json;
 /// #
-/// let data = json!({ "inner": [1, 2, 3] });
+/// let data = bson!({ "inner": [1, 2, 3] });
 ///
 /// // Data is a JSON map so it can be indexed with a string.
 /// let inner = &data["inner"];
@@ -201,17 +201,17 @@ where
     /// ```
     /// # use rbatis_sql::json;
     /// #
-    /// let data = json!({
+    /// let data = bson!({
     ///     "x": {
     ///         "y": ["z", "zz"]
     ///     }
     /// });
     ///
-    /// assert_eq!(data["x"]["y"], json!(["z", "zz"]));
-    /// assert_eq!(data["x"]["y"][0], json!("z"));
+    /// assert_eq!(data["x"]["y"], bson!(["z", "zz"]));
+    /// assert_eq!(data["x"]["y"][0], bson!("z"));
     ///
-    /// assert_eq!(data["a"], json!(null)); // returns null for undefined values
-    /// assert_eq!(data["a"]["b"], json!(null)); // does not panic
+    /// assert_eq!(data["a"], bson!(null)); // returns null for undefined values
+    /// assert_eq!(data["a"]["b"], bson!(null)); // does not panic
     /// ```
     fn index(&self, index: I) -> &Value {
         static NULL: Value = Value::Null;
@@ -242,19 +242,19 @@ where
     /// ```
     /// # use rbatis_sql::json;
     /// #
-    /// let mut data = json!({ "x": 0 });
+    /// let mut data = bson!({ "x": 0 });
     ///
     /// // replace an existing key
-    /// data["x"] = json!(1);
+    /// data["x"] = bson!(1);
     ///
     /// // insert a new key
-    /// data["y"] = json!([false, false, false]);
+    /// data["y"] = bson!([false, false, false]);
     ///
     /// // replace an array value
-    /// data["y"][0] = json!(true);
+    /// data["y"][0] = bson!(true);
     ///
     /// // inserted a deeply nested key
-    /// data["a"]["b"]["c"]["d"] = json!(true);
+    /// data["a"]["b"]["c"]["d"] = bson!(true);
     ///
     /// println!("{}", data);
     /// ```
