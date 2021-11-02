@@ -15,12 +15,15 @@ pub trait AsProxy {
     fn str(&self) -> &str;
     fn string(&self) -> String;
     fn bool(&self) -> bool;
+    fn array(&self) -> Option<&bson::Array>;
+    fn object(&self) -> Option<&Document>;
+
+    //is
     fn is_empty(&self) -> bool;
     fn is_null(&self) -> bool;
     fn is_array(&self) -> bool;
-    fn array(&self) -> Option<&bson::Array>;
-    fn is_object(&self) -> bool;
-    fn object(&self) -> Option<&Document>;
+    fn is_document(&self) -> bool;
+    fn is_object(&self) -> bool;// is_document = is_object
 
     //try to any string
     fn cast_string(&self) -> String;
@@ -230,11 +233,15 @@ impl AsProxy for Value {
         };
     }
 
-    fn is_object(&self) -> bool {
+    fn is_document(&self) -> bool {
         return match self {
             Value::Document(_) => { true }
             _ => { false }
         };
+    }
+
+    fn is_object(&self) -> bool {
+        return self.is_document();
     }
 
     fn object(&self) -> Option<&Document> {
