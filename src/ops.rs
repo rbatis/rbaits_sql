@@ -25,8 +25,8 @@ pub trait AsProxy {
     //try to any string
     fn cast_string(&self) -> String;
     fn cast_i64(&self) -> i64;
+    fn cast_f64(&self) -> f64;
 }
-
 
 /// proxy bson::Document struct,support Deserializer, Serializer
 /// use Cow Optimize unnecessary clones
@@ -140,6 +140,49 @@ impl AsProxy for Value {
             Value::MaxKey => { 0 }
             Value::MinKey => { 0 }
             Value::DbPointer(p) => { 0 }
+        }
+    }
+
+    fn cast_f64(&self) -> f64 {
+        match self {
+            Value::Binary(b) => {
+                String::from_utf8(b.bytes.clone()).unwrap_or_default()
+                    .parse().unwrap_or_default()
+            }
+            Value::Double(d) => {
+                *d as f64
+            }
+            Value::String(d) => { d.to_string().parse().unwrap_or_default() }
+            Value::Array(arr) => { 0.0 }
+            Value::Document(d) => { 0.0 }
+            Value::Boolean(d) => {
+                if *d == true{
+                    return 1.0;
+                }else{
+                    return 0.0;
+                }
+            }
+            Value::Null => { 0.0 }
+            Value::RegularExpression(e) => { 0.0 }
+            Value::JavaScriptCode(c) => { 0.0 }
+            Value::JavaScriptCodeWithScope(j) => { 0.0 }
+            Value::Int32(i) => { *i as f64 }
+            Value::Int64(d) => { *d as f64 }
+            Value::Timestamp(d) => {
+                as_timestamp(d) as f64
+            }
+            Value::ObjectId(d) => {
+                0.0
+            }
+            Value::DateTime(d) => {
+                d.timestamp_millis() as f64
+            }
+            Value::Symbol(d) => { 0.0 }
+            Value::Decimal128(d) => { d.to_string().parse().unwrap_or_default() }
+            Value::Undefined => { 0.0 }
+            Value::MaxKey => { 0.0 }
+            Value::MinKey => { 0.0 }
+            Value::DbPointer(p) => { 0.0 }
         }
     }
 
