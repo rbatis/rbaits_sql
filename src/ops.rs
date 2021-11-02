@@ -5,7 +5,7 @@ use std::ops::Deref;
 
 use serde::{Deserializer, Serializer};
 use std::cmp::Ordering::Less;
-use bson::Document;
+use bson::{Document, Timestamp};
 
 /// convert Value to Value
 pub trait AsProxy {
@@ -21,6 +21,10 @@ pub trait AsProxy {
     fn array(&self) -> Option<&bson::Array>;
     fn is_object(&self) -> bool;
     fn object(&self) -> Option<&Document>;
+
+    //try to any string
+    fn cast_string(&self) -> String;
+    fn cast_i64(&self) -> i64;
 }
 
 
@@ -29,12 +33,19 @@ pub trait AsProxy {
 /// This structure has a certain amount of computing power
 pub type Value = bson::Bson;
 
+
+pub fn as_timestamp(arg: &Timestamp) -> i64 {
+    let upper = (arg.time.to_le() as u64) << 32;
+    let lower = arg.increment.to_le() as u64;
+    (upper | lower) as i64
+}
+
 impl AsProxy for Value {
     fn i32(&self) -> i32 {
         return match self {
             Value::Double(v) => { *v as i32 }
-            Value::Int32(v) => { *v}
-            Value::Int64(v) => { *v  as i32}
+            Value::Int32(v) => { *v }
+            Value::Int64(v) => { *v as i32 }
             _ => { 0 }
         };
     }
@@ -54,12 +65,84 @@ impl AsProxy for Value {
             _ => { 0.0 }
         };
     }
+
     fn str(&self) -> &str {
         self.as_str().unwrap_or_default()
     }
+
     fn string(&self) -> String {
-        self.as_str().unwrap_or_default().to_string()
+        self.str().to_string()
     }
+
+    fn cast_string(&self) -> String {
+        match self {
+            Value::Binary(b) => { String::from_utf8(b.bytes.clone()).unwrap_or_default() }
+            Value::Double(d) => { d.to_string() }
+            Value::String(d) => { d.to_string() }
+            Value::Array(arr) => { self.to_string() }
+            Value::Document(d) => { d.to_string() }
+            Value::Boolean(d) => { d.to_string() }
+            Value::Null => { "".to_string() }
+            Value::RegularExpression(e) => { self.to_string() }
+            Value::JavaScriptCode(c) => { self.to_string() }
+            Value::JavaScriptCodeWithScope(j) => { self.to_string() }
+            Value::Int32(i) => { i.to_string() }
+            Value::Int64(d) => { d.to_string() }
+            Value::Timestamp(d) => { as_timestamp(d).to_string() }
+            Value::ObjectId(d) => { d.to_string() }
+            Value::DateTime(d) => { d.to_string() }
+            Value::Symbol(d) => { d.to_string() }
+            Value::Decimal128(d) => { d.to_string() }
+            Value::Undefined => { "Undefined".to_string() }
+            Value::MaxKey => { "MaxKey".to_string() }
+            Value::MinKey => { "MinKey".to_string() }
+            Value::DbPointer(p) => { "DbPointer".to_string() }
+        }
+    }
+
+    fn cast_i64(&self) -> i64 {
+        match self {
+            Value::Binary(b) => {
+                String::from_utf8(b.bytes.clone()).unwrap_or_default()
+                    .parse().unwrap_or_default()
+            }
+            Value::Double(d) => {
+                *d as i64
+            }
+            Value::String(d) => { d.to_string().parse().unwrap_or_default() }
+            Value::Array(arr) => { 0}
+            Value::Document(d) => { 0 }
+            Value::Boolean(d) => {
+                if *d == true{
+                    return 1;
+                }else{
+                    return 0;
+                }
+            }
+            Value::Null => { 0 }
+            Value::RegularExpression(e) => { 0 }
+            Value::JavaScriptCode(c) => { 0 }
+            Value::JavaScriptCodeWithScope(j) => { 0 }
+            Value::Int32(i) => { *i as i64 }
+            Value::Int64(d) => { *d }
+            Value::Timestamp(d) => {
+                as_timestamp(d)
+            }
+            Value::ObjectId(d) => {
+                0
+            }
+            Value::DateTime(d) => {
+                d.timestamp_millis()
+            }
+            Value::Symbol(d) => { 0 }
+            Value::Decimal128(d) => { d.to_string().parse().unwrap_or_default() }
+            Value::Undefined => { 0 }
+            Value::MaxKey => { 0 }
+            Value::MinKey => { 0 }
+            Value::DbPointer(p) => { 0 }
+        }
+    }
+
     fn bool(&self) -> bool {
         self.as_bool().unwrap_or_default()
     }
@@ -85,37 +168,37 @@ impl AsProxy for Value {
 
     fn is_null(&self) -> bool {
         return match self {
-            Value::Null => {true}
-            _ => {false}
-        }
+            Value::Null => { true }
+            _ => { false }
+        };
     }
 
-    fn is_array(&self) -> bool{
+    fn is_array(&self) -> bool {
         return match self {
-            Value::Array(_) => {true}
-            _ => {false}
-        }
+            Value::Array(_) => { true }
+            _ => { false }
+        };
     }
 
     fn array(&self) -> Option<&bson::Array> {
         return match self {
-            Value::Array(arr) => {Some(arr)}
-            _ => {None}
-        }
+            Value::Array(arr) => { Some(arr) }
+            _ => { None }
+        };
     }
 
-    fn is_object(&self) -> bool{
+    fn is_object(&self) -> bool {
         return match self {
-            Value::Document(_) => {true}
-            _ => {false}
-        }
+            Value::Document(_) => { true }
+            _ => { false }
+        };
     }
 
     fn object(&self) -> Option<&Document> {
         return match self {
-            Value::Document(d) => {Some(d)}
-            _ => {None}
-        }
+            Value::Document(d) => { Some(d) }
+            _ => { None }
+        };
     }
 }
 
@@ -427,4 +510,20 @@ pub trait AsSql {
     fn as_sql(&self) -> String;
 }
 
+
+#[cfg(test)]
+mod test {
+    use bson::Bson;
+    use bson::spec::BinarySubtype;
+    use crate::ops::AsProxy;
+
+    #[test]
+    fn test_string() {
+        let b = Bson::Binary(bson::Binary {
+            subtype: BinarySubtype::Generic,
+            bytes: "s".as_bytes().to_owned(),
+        });
+        assert_eq!("s", b.string());
+    }
+}
 
