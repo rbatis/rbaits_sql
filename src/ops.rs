@@ -82,24 +82,17 @@ impl AsProxy for Value {
             Value::Binary(b) => { String::from_utf8(b.bytes.clone()).unwrap_or_default() }
             Value::Double(d) => { d.to_string() }
             Value::String(d) => { d.to_string() }
-            Value::Array(arr) => { self.to_string() }
-            Value::Document(d) => { d.to_string() }
             Value::Boolean(d) => { d.to_string() }
             Value::Null => { "".to_string() }
-            Value::RegularExpression(e) => { self.to_string() }
-            Value::JavaScriptCode(c) => { self.to_string() }
-            Value::JavaScriptCodeWithScope(j) => { self.to_string() }
             Value::Int32(i) => { i.to_string() }
             Value::Int64(d) => { d.to_string() }
             Value::Timestamp(d) => { as_timestamp(d).to_string() }
             Value::ObjectId(d) => { d.to_string() }
             Value::DateTime(d) => { d.to_string() }
-            Value::Symbol(d) => { d.to_string() }
             Value::Decimal128(d) => { d.to_string() }
-            Value::Undefined => { "Undefined".to_string() }
-            Value::MaxKey => { "MaxKey".to_string() }
-            Value::MinKey => { "MinKey".to_string() }
-            Value::DbPointer(p) => { "DbPointer".to_string() }
+            _ => {
+                String::new()
+            }
         }
     }
 
@@ -113,19 +106,14 @@ impl AsProxy for Value {
                 *d as i64
             }
             Value::String(d) => { d.to_string().parse().unwrap_or_default() }
-            Value::Array(arr) => { 0}
-            Value::Document(d) => { 0 }
             Value::Boolean(d) => {
-                if *d == true{
+                if *d == true {
                     return 1;
-                }else{
+                } else {
                     return 0;
                 }
             }
             Value::Null => { 0 }
-            Value::RegularExpression(e) => { 0 }
-            Value::JavaScriptCode(c) => { 0 }
-            Value::JavaScriptCodeWithScope(j) => { 0 }
             Value::Int32(i) => { *i as i64 }
             Value::Int64(d) => { *d }
             Value::Timestamp(d) => {
@@ -137,12 +125,10 @@ impl AsProxy for Value {
             Value::DateTime(d) => {
                 d.timestamp_millis()
             }
-            Value::Symbol(d) => { 0 }
             Value::Decimal128(d) => { d.to_string().parse().unwrap_or_default() }
-            Value::Undefined => { 0 }
-            Value::MaxKey => { 0 }
-            Value::MinKey => { 0 }
-            Value::DbPointer(p) => { 0 }
+            _ => {
+                0
+            }
         }
     }
 
@@ -156,19 +142,14 @@ impl AsProxy for Value {
                 *d as f64
             }
             Value::String(d) => { d.to_string().parse().unwrap_or_default() }
-            Value::Array(arr) => { 0.0 }
-            Value::Document(d) => { 0.0 }
             Value::Boolean(d) => {
-                if *d == true{
+                if *d == true {
                     return 1.0;
-                }else{
+                } else {
                     return 0.0;
                 }
             }
             Value::Null => { 0.0 }
-            Value::RegularExpression(e) => { 0.0 }
-            Value::JavaScriptCode(c) => { 0.0 }
-            Value::JavaScriptCodeWithScope(j) => { 0.0 }
             Value::Int32(i) => { *i as f64 }
             Value::Int64(d) => { *d as f64 }
             Value::Timestamp(d) => {
@@ -180,12 +161,8 @@ impl AsProxy for Value {
             Value::DateTime(d) => {
                 d.timestamp_millis() as f64
             }
-            Value::Symbol(d) => { 0.0 }
             Value::Decimal128(d) => { d.to_string().parse().unwrap_or_default() }
-            Value::Undefined => { 0.0 }
-            Value::MaxKey => { 0.0 }
-            Value::MinKey => { 0.0 }
-            Value::DbPointer(p) => { 0.0 }
+            _ => { 0.0 }
         }
     }
 
