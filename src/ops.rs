@@ -1,7 +1,7 @@
 use std::borrow::{Cow, Borrow};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
-use std::ops::Deref;
+use std::ops::{Deref, Index};
 
 use serde::{Deserializer, Serializer};
 use std::cmp::Ordering::Less;
@@ -29,6 +29,9 @@ pub trait AsProxy {
     fn cast_string(&self) -> String;
     fn cast_i64(&self) -> i64;
     fn cast_f64(&self) -> f64;
+
+    //bracket string
+    fn bracket(&self) -> &str;
 }
 
 /// proxy bson::Document struct,support Deserializer, Serializer
@@ -226,6 +229,20 @@ impl AsProxy for Value {
             Value::Document(d) => { Some(d) }
             _ => { None }
         };
+    }
+
+    fn bracket(&self) -> &str {
+        let bracket = self.as_str().unwrap_or_default();
+        let start = bracket.find("(");
+        let end = bracket.find(")");
+        if let Some(start) = start {
+            if let Some(end) = end {
+                if end > (start+1) {
+                    return &bracket[start+1..end];
+                }
+            }
+        }
+        return bracket;
     }
 }
 
