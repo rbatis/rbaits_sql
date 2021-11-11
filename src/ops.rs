@@ -30,7 +30,7 @@ pub trait AsProxy {
     fn cast_i64(&self) -> i64;
     fn cast_f64(&self) -> f64;
 
-    //bracket string
+    //bracket str
     fn bracket(&self) -> &str;
 }
 
