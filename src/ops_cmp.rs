@@ -222,3 +222,33 @@ impl PartialOrd<&$ty> for &$ty{
 
 cmp_self!(cmp_i64[i8 i16 i32 i64 isize]);
 cmp_self!(cmp_f64[f32 f64]);
+
+impl PartialOrd<&str> for &str {
+    fn op_partial_cmp(&self, other: &&str) -> Option<Ordering> {
+         self.partial_cmp(other)
+    }
+}
+
+impl PartialOrd<&str> for String {
+    fn op_partial_cmp(&self, other: &&str) -> Option<Ordering> {
+        self.as_str().partial_cmp(other)
+    }
+}
+
+impl PartialOrd<String> for String {
+    fn op_partial_cmp(&self, other: &String) -> Option<Ordering> {
+        self.as_str().partial_cmp(other.as_str())
+    }
+}
+
+impl PartialOrd<&str> for &String {
+    fn op_partial_cmp(&self, other: &&str) -> Option<Ordering> {
+        self.as_str().partial_cmp(other)
+    }
+}
+
+impl PartialOrd<String> for &String {
+    fn op_partial_cmp(&self, other: &String) -> Option<Ordering> {
+        self.as_str().partial_cmp(other.as_str())
+    }
+}
