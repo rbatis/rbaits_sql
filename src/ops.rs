@@ -11,6 +11,8 @@ use bson::{Document, Timestamp};
 pub trait AsProxy {
     fn i32(&self) -> i32;
     fn i64(&self) -> i64;
+    fn u32(&self) -> u32;
+    fn u64(&self) -> u64;
     fn f64(&self) -> f64;
     fn str(&self) -> &str;
     fn string(&self) -> String;
@@ -29,7 +31,7 @@ pub trait AsProxy {
     fn cast_string(&self) -> String;
     fn cast_i64(&self) -> i64;
     fn cast_f64(&self) -> f64;
-
+    fn cast_u64(&self) -> u64;
     //bracket str
     fn bracket(&self) -> &str;
 }
@@ -50,24 +52,54 @@ impl AsProxy for Value {
     fn i32(&self) -> i32 {
         return match self {
             Value::Double(v) => { *v as i32 }
+            Value::UInt32(v) => { *v as i32 }
+            Value::UInt64(v) => { *v as i32 }
             Value::Int32(v) => { *v }
             Value::Int64(v) => { *v as i32 }
             _ => { 0 }
         };
     }
+
     fn i64(&self) -> i64 {
         return match self {
             Value::Double(v) => { *v as i64 }
+            Value::UInt32(v) => { *v as i64 }
+            Value::UInt64(v) => { *v as i64 }
             Value::Int32(v) => { *v as i64 }
             Value::Int64(v) => { *v }
             _ => { 0 }
         };
     }
+
+    fn u32(&self) -> u32 {
+        return match self {
+            Value::Double(v) => { *v as u32 }
+            Value::Int32(v) => { *v as u32 }
+            Value::Int64(v) => { *v as u32 }
+            Value::UInt32(v) => { *v }
+            Value::UInt64(v) => { *v as u32 }
+            _ => { 0 }
+        };
+    }
+
+    fn u64(&self) -> u64 {
+        return match self {
+            Value::Double(v) => { *v as u64 }
+            Value::Int32(v) => { *v as u64 }
+            Value::Int64(v) => { *v as u64 }
+            Value::UInt32(v) => { *v as u64 }
+            Value::UInt64(v) => { *v }
+            _ => { 0 }
+        };
+    }
+
     fn f64(&self) -> f64 {
         return match self {
             Value::Double(v) => { *v }
             Value::Int32(v) => { *v as f64 }
             Value::Int64(v) => { *v as f64 }
+            Value::UInt32(v) => { *v as f64 }
+            Value::UInt64(v) => { *v as f64 }
             _ => { 0.0 }
         };
     }
@@ -117,6 +149,10 @@ impl AsProxy for Value {
                 }
             }
             Value::Null => { 0 }
+            Value::UInt32(i) => { *i as i64 }
+            Value::UInt64(d) => {
+                *d as i64
+            }
             Value::Int32(i) => { *i as i64 }
             Value::Int64(d) => { *d }
             Value::Timestamp(d) => {
@@ -127,6 +163,44 @@ impl AsProxy for Value {
             }
             Value::DateTime(d) => {
                 d.timestamp_millis()
+            }
+            Value::Decimal128(d) => { d.to_string().parse().unwrap_or_default() }
+            _ => {
+                0
+            }
+        }
+    }
+
+    fn cast_u64(&self) -> u64 {
+        match self {
+            Value::Binary(b) => {
+                String::from_utf8(b.bytes.clone()).unwrap_or_default()
+                    .parse().unwrap_or_default()
+            }
+            Value::Double(d) => {
+                *d as u64
+            }
+            Value::String(d) => { d.to_string().parse().unwrap_or_default() }
+            Value::Boolean(d) => {
+                if *d == true {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+            Value::Null => { 0 }
+            Value::Int32(i) => { *i as u64 }
+            Value::Int64(d) => { *d as u64 }
+            Value::UInt32(i) => { *i as u64 }
+            Value::UInt64(d) => { *d }
+            Value::Timestamp(d) => {
+                as_timestamp(d) as u64
+            }
+            Value::ObjectId(d) => {
+                0
+            }
+            Value::DateTime(d) => {
+                d.timestamp_millis() as u64
             }
             Value::Decimal128(d) => { d.to_string().parse().unwrap_or_default() }
             _ => {
@@ -237,8 +311,8 @@ impl AsProxy for Value {
         let end = bracket.find(")");
         if let Some(start) = start {
             if let Some(end) = end {
-                if end > (start+1) {
-                    return &bracket[start+1..end];
+                if end > (start + 1) {
+                    return &bracket[start + 1..end];
                 }
             }
         }
@@ -557,7 +631,7 @@ pub trait AsSql {
 
 #[cfg(test)]
 mod test {
-    use bson::Bson;
+    use bson::{Bson, bson};
     use bson::spec::BinarySubtype;
     use crate::ops::AsProxy;
 
@@ -568,6 +642,14 @@ mod test {
             bytes: "s".as_bytes().to_owned(),
         });
         assert_eq!("s", b.string());
+    }
+
+    #[test]
+    fn test_cast() {
+        let b = bson!(u64::MAX);
+        assert_eq!(b.cast_i64(), -1);
+        let b = bson!(100u64);
+        assert_eq!(b.cast_i64(), 100i64);
     }
 }
 

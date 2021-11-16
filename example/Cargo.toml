@@ -13,6 +13,6 @@ rbatis_sql={ path = "../" ,features = ["debug_mode"]}
 #serde
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
-bson = "2.0.1"
+bson2 = "2.0.1"
 async-std = { version = "1.9", features = ["attributes"] }
 async-trait = "0.1"
