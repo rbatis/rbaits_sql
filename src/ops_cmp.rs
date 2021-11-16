@@ -3,6 +3,10 @@ use crate::ops::{Value, AsProxy};
 use crate::ops::PartialOrd;
 
 #[inline]
+fn cmp_u64(value: u64, other: u64) -> Option<Ordering> {
+    Some(value.cmp(&other))
+}
+#[inline]
 fn cmp_i64(value: i64, other: i64) -> Option<Ordering> {
     Some(value.cmp(&other))
 }
@@ -18,6 +22,16 @@ fn cmp_bool(value: bool, other: bool) -> Option<Ordering> {
 PartialOrd
  **/
 
+fn eq_u64(value: &Value, other: u64) -> Option<Ordering> {
+    let value = value.u64();
+    if value == other {
+        Some(Ordering::Equal)
+    } else if value > other {
+        Some(Ordering::Greater)
+    } else {
+        Some(Ordering::Less)
+    }
+}
 
 fn eq_i64(value: &Value, other: i64) -> Option<Ordering> {
     let value = value.i64();
@@ -60,6 +74,8 @@ impl PartialOrd<Value> for Value {
             Value::Boolean(b) => { cmp_bool(*b, other.bool()) }
             Value::Int32(n) => { cmp_f64(*n as f64, other.f64()) }
             Value::Int64(n) => { cmp_f64(*n as f64, other.f64()) }
+            Value::UInt32(n) => { cmp_u64(*n as u64, other.u64()) }
+            Value::UInt64(n) => { cmp_u64(*n as u64, other.u64()) }
             Value::Double(n) => { cmp_f64(*n, other.f64()) }
             Value::String(s) => { Some(s.cmp(&other.string())) }
             Value::Array(_) => { None }
@@ -76,6 +92,8 @@ impl PartialOrd<Value> for &Value {
             Value::Boolean(b) => { cmp_bool(*b, other.bool()) }
             Value::Int32(n) => { cmp_f64(*n as f64, other.f64()) }
             Value::Int64(n) => { cmp_f64(*n as f64, other.f64()) }
+            Value::UInt32(n) => { cmp_u64(*n as u64, other.u64()) }
+            Value::UInt64(n) => { cmp_u64(*n as u64, other.u64()) }
             Value::Double(n) => { cmp_f64(*n, other.f64()) }
             Value::String(s) => { Some(s.cmp(&other.string())) }
             Value::Array(_) => { None }
@@ -92,6 +110,8 @@ impl PartialOrd<&Value> for &Value {
             Value::Boolean(b) => { cmp_bool(*b, other.bool()) }
              Value::Int32(n) => { cmp_f64(*n as f64, other.f64()) }
             Value::Int64(n) => { cmp_f64(*n as f64, other.f64()) }
+            Value::UInt32(n) => { cmp_u64(*n as u64, other.u64()) }
+            Value::UInt64(n) => { cmp_u64(*n as u64, other.u64()) }
             Value::Double(n) => { cmp_f64(*n, other.f64()) }
             Value::String(s) => { Some(s.cmp(&other.string())) }
             Value::Array(_) => { None }
@@ -108,6 +128,8 @@ impl PartialOrd<&&Value> for &Value {
             Value::Boolean(b) => { cmp_bool(*b, other.bool()) }
              Value::Int32(n) => { cmp_f64(*n as f64, other.f64()) }
             Value::Int64(n) => { cmp_f64(*n as f64, other.f64()) }
+            Value::UInt32(n) => { cmp_u64(*n as u64, other.u64()) }
+            Value::UInt64(n) => { cmp_u64(*n as u64, other.u64()) }
             Value::Double(n) => { cmp_f64(*n, other.f64()) }
             Value::String(s) => { Some(s.cmp(&other.string())) }
             Value::Array(_) => { None }
@@ -124,6 +146,8 @@ impl PartialOrd<&Value> for Value {
             Value::Boolean(b) => { cmp_bool(*b, other.bool()) }
              Value::Int32(n) => { cmp_f64(*n as f64, other.f64()) }
             Value::Int64(n) => { cmp_f64(*n as f64, other.f64()) }
+            Value::UInt32(n) => { cmp_u64(*n as u64, other.u64()) }
+            Value::UInt64(n) => { cmp_u64(*n as u64, other.u64()) }
             Value::Double(n) => { cmp_f64(*n, other.f64()) }
             Value::String(s) => { Some(s.cmp(&other.string())) }
             Value::Array(_) => { None }
@@ -140,6 +164,8 @@ impl PartialOrd<&&Value> for Value {
             Value::Boolean(b) => { cmp_bool(*b, other.bool()) }
              Value::Int32(n) => { cmp_f64(*n as f64, other.f64()) }
             Value::Int64(n) => { cmp_f64(*n as f64, other.f64()) }
+            Value::UInt32(n) => { cmp_u64(*n as u64, other.u64()) }
+            Value::UInt64(n) => { cmp_u64(*n as u64, other.u64()) }
             Value::Double(n) => { cmp_f64(*n, other.f64()) }
             Value::String(s) => { Some(s.cmp(&other.string())) }
             Value::Array(_) => { None }
@@ -187,6 +213,7 @@ macro_rules! impl_numeric_cmp {
 }
 
 impl_numeric_cmp! {
+    eq_u64[u8 u16 u32 u64]
     eq_i64[i8 i16 i32 i64 isize]
     eq_f64[f32 f64]
     eq_bool[bool]
@@ -220,6 +247,7 @@ impl PartialOrd<&$ty> for &$ty{
     };
 }
 
+cmp_self!(cmp_u64[u8 u16 u32 u64]);
 cmp_self!(cmp_i64[i8 i16 i32 i64 isize]);
 cmp_self!(cmp_f64[f32 f64]);
 

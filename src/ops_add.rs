@@ -2,6 +2,9 @@ use crate::ops::{Add, AsProxy, Value};
 
 use std::borrow::Cow;
 
+fn op_add_u64(value: &Value, other: u64) -> u64 {
+    value.u64() + other
+}
 
 fn op_add_i64(value: &Value, other: i64) -> i64 {
     value.i64() + other
@@ -60,6 +63,7 @@ macro_rules! impl_numeric_add {
 }
 
 impl_numeric_add! {
+    op_add_u64[u8 u16 u32 u64] -> u64
     op_add_i64[i8 i16 i32 i64 isize] -> i64
     op_add_f64[f32 f64] -> f64
 }
@@ -77,6 +81,12 @@ impl Add<&Value> for Value {
             }
             Value::Int64(s) => {
                 Value::Int64(s + rhs.i64())
+            }
+            Value::UInt32(s)=> {
+                Value::UInt32(s + rhs.u32())
+            }
+            Value::UInt64(s) => {
+                Value::UInt64(s + rhs.u64())
             }
             Value::Double(s)=> {
                 Value::Double(s + rhs.as_f64().unwrap_or_default())
@@ -101,6 +111,12 @@ impl Add<&&Value> for Value {
             Value::Int64(s) => {
                 Value::Int64(s + rhs.i64())
             }
+            Value::UInt32(s)=> {
+                Value::UInt32(s + rhs.u32())
+            }
+            Value::UInt64(s) => {
+                Value::UInt64(s + rhs.u64())
+            }
             Value::Double(s)=> {
                 Value::Double(s + rhs.as_f64().unwrap_or_default())
             }
@@ -123,6 +139,12 @@ impl Add<Value> for Value {
             }
             Value::Int64(s) => {
                 Value::Int64(s + rhs.i64())
+            }
+            Value::UInt32(s)=> {
+                Value::UInt32(s + rhs.u32())
+            }
+            Value::UInt64(s) => {
+                Value::UInt64(s + rhs.u64())
             }
             Value::Double(s)=> {
                 Value::Double(s + rhs.as_f64().unwrap_or_default())
@@ -147,6 +169,12 @@ impl Add<&Value> for &Value {
             Value::Int64(s) => {
                 Value::Int64(s + rhs.i64())
             }
+            Value::UInt32(s)=> {
+                Value::UInt32(s + rhs.u32())
+            }
+            Value::UInt64(s) => {
+                Value::UInt64(s + rhs.u64())
+            }
             Value::Double(s)=> {
                 Value::Double(s + rhs.as_f64().unwrap_or_default())
             }
@@ -170,6 +198,12 @@ impl Add<&&Value> for &Value {
             Value::Int64(s) => {
                 Value::Int64(s + rhs.i64())
             }
+            Value::UInt32(s)=> {
+                Value::UInt32(s + rhs.u32())
+            }
+            Value::UInt64(s) => {
+                Value::UInt64(s + rhs.u64())
+            }
             Value::Double(s)=> {
                 Value::Double(s + rhs.as_f64().unwrap_or_default())
             }
@@ -192,6 +226,12 @@ impl Add<Value> for &Value {
             }
             Value::Int64(s) => {
                 Value::Int64(s + rhs.i64())
+            }
+            Value::UInt32(s)=> {
+                Value::UInt32(s + rhs.u32())
+            }
+            Value::UInt64(s) => {
+                Value::UInt64(s + rhs.u64())
             }
             Value::Double(s)=> {
                 Value::Double(s + rhs.as_f64().unwrap_or_default())
@@ -433,7 +473,7 @@ impl Add<&$ty> for &$ty{
         )*
     };
 }
-
+add_self!([u8 u16 u32 u64]);
 add_self!([i8 i16 i32 i64 isize]);
 add_self!([f32 f64]);
 

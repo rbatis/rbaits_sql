@@ -14,6 +14,14 @@ impl Mul<&Value> for Value {
                 let rhs = rhs.i64();
                 return Value::Int64(s * rhs);
             }
+            Value::UInt32(s) => {
+                let rhs = rhs.u32();
+                return Value::UInt32(s * rhs);
+            }
+            Value::UInt64(s) => {
+                let rhs = rhs.u64();
+                return Value::UInt64(s * rhs);
+            }
             Value::Double(s) => {
                 let rhs = rhs.as_f64().unwrap_or_default();
                 return Value::Double(s * rhs);
@@ -36,6 +44,14 @@ impl Mul<&&Value> for Value {
             Value::Int64(s) => {
                 let rhs = rhs.i64();
                 return Value::Int64(s * rhs);
+            }
+            Value::UInt32(s) => {
+                let rhs = rhs.u32();
+                return Value::UInt32(s * rhs);
+            }
+            Value::UInt64(s) => {
+                let rhs = rhs.u64();
+                return Value::UInt64(s * rhs);
             }
             Value::Double(s) => {
                 let rhs = rhs.as_f64().unwrap_or_default();
@@ -60,6 +76,14 @@ impl Mul<Value> for Value {
                 let rhs = rhs.i64();
                 return Value::Int64(s * rhs);
             }
+            Value::UInt32(s) => {
+                let rhs = rhs.u32();
+                return Value::UInt32(s * rhs);
+            }
+            Value::UInt64(s) => {
+                let rhs = rhs.u64();
+                return Value::UInt64(s * rhs);
+            }
             Value::Double(s) => {
                 let rhs = rhs.as_f64().unwrap_or_default();
                 return Value::Double(s * rhs);
@@ -82,6 +106,14 @@ impl Mul<&Value> for &Value {
             Value::Int64(s) => {
                 let rhs = rhs.i64();
                 return Value::Int64(s * rhs);
+            }
+            Value::UInt32(s) => {
+                let rhs = rhs.u32();
+                return Value::UInt32(s * rhs);
+            }
+            Value::UInt64(s) => {
+                let rhs = rhs.u64();
+                return Value::UInt64(s * rhs);
             }
             Value::Double(s) => {
                 let rhs = rhs.as_f64().unwrap_or_default();
@@ -106,6 +138,14 @@ impl Mul<&&Value> for &Value {
                 let rhs = rhs.i64();
                 return Value::Int64(s * rhs);
             }
+            Value::UInt32(s) => {
+                let rhs = rhs.u32();
+                return Value::UInt32(s * rhs);
+            }
+            Value::UInt64(s) => {
+                let rhs = rhs.u64();
+                return Value::UInt64(s * rhs);
+            }
             Value::Double(s) => {
                 let rhs = rhs.as_f64().unwrap_or_default();
                 return Value::Double(s * rhs);
@@ -129,6 +169,14 @@ impl Mul<Value> for &Value {
                 let rhs = rhs.i64();
                 return Value::Int64(s * rhs);
             }
+            Value::UInt32(s) => {
+                let rhs = rhs.u32();
+                return Value::UInt32(s * rhs);
+            }
+            Value::UInt64(s) => {
+                let rhs = rhs.u64();
+                return Value::UInt64(s * rhs);
+            }
             Value::Double(s) => {
                 let rhs = rhs.as_f64().unwrap_or_default();
                 return Value::Double(s * rhs);
@@ -140,6 +188,14 @@ impl Mul<Value> for &Value {
     }
 }
 
+
+fn op_mul_u32(value: &Value, other: u32) -> u32 {
+    value.u32() * other
+}
+
+fn op_mul_u64(value: &Value, other: u64) -> u64 {
+    value.u64() * other
+}
 
 fn op_mul_i32(value: &Value, other: i32) -> i32 {
     value.i32() * other
@@ -203,6 +259,7 @@ macro_rules! impl_numeric_mul {
 
 
 impl_numeric_mul! {
+    op_mul_u64[u8 u16 u32 u64] -> u64
     op_mul_i64[i8 i16 i32 i64 isize] -> i64
     op_mul_f64[f32 f64] -> f64
 }
@@ -240,6 +297,6 @@ impl Mul<&$ty> for &$ty{
         )*
     };
 }
-
+mul_self!([u8 u16 u32 u64]);
 mul_self!([i8 i16 i32 i64 isize]);
 mul_self!([f32 f64]);
