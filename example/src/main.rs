@@ -39,7 +39,7 @@ pub fn py_select_by_condition(arg: &mut bson::Bson) {}
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 fn main() {
-    let mut arg = bson::bson!({
+    let mut arg = bson2::bson!({
         "id":1,
         "order_by":["id","name"],
         "ids":[1,2,3],

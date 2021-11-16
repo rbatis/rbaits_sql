@@ -1,5 +1,5 @@
 use std::ops;
-use bson::Document;
+use bson2::Document;
 use crate::ops::{OpsIndex, OpsIndexMut, Value};
 
 /// A type that can be used to index into a `rbatis_sql::Value`.

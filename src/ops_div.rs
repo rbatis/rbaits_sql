@@ -1,4 +1,4 @@
-use bson::Bson;
+use bson2::Bson;
 use crate::ops::Div;
 
 use crate::ops::Value;

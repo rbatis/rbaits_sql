@@ -320,7 +320,7 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     let t = t.unwrap();
     let mut result_impl = quote! { result };
     if serialize_result {
-        result_impl = quote! {bson::bson!(result)};
+        result_impl = quote! {bson2::bson!(result)};
     }
     if func_name_ident.is_empty() || func_name_ident.eq("\"\"") {
         return quote! {
@@ -332,8 +332,8 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     } else {
         let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
         return quote! {
-        pub fn #func_name_ident(arg:&bson::Bson) -> bson::Bson {
-           use bson::Bson::Null;
+        pub fn #func_name_ident(arg:&bson2::Bson) -> bson2::Bson {
+           use bson2::Bson::Null;
            let result={#t};
            #result_impl
         }

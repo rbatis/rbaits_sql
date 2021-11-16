@@ -191,7 +191,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         string_data = string_data.replacen(&v, &"?", 1);
                         body = quote! {
                               #body
-                              args.push(bson::bson!(#method_name));
+                              args.push(bson2::bson!(#method_name));
                           };
                     } else {
                         if replaced.get(&v).is_none() {
@@ -240,7 +240,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 body = quote! {
                             #body
                             //bind
-                            let #name_expr = bson::bson!(#method_impl);
+                            let #name_expr = bson2::bson!(#method_impl);
                         };
                 ignore.push(name);
             }
@@ -400,7 +400,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson::Bson) -> (String,Vec<bson::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
@@ -419,7 +419,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson::Bson) -> (String,Vec<bson::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
 
                                let mut sql = String::with_capacity(1000);
@@ -439,7 +439,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson::Bson) -> (String,Vec<bson::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
 
                                let mut sql = String::with_capacity(1000);
@@ -459,7 +459,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", format_char, ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson::Bson) -> (String,Vec<bson::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
                                
                                let mut sql = String::with_capacity(1000);
