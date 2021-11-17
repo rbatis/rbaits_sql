@@ -26,12 +26,31 @@ pub struct BizActivity {
 }
 //
 //
-#[rb_html("example/example.html",'$')]
-pub fn select_by_condition(arg: &mut bson::Bson) {}
+// #[rb_html("example/example.html",'$')]
+// pub fn select_by_condition(arg: &mut bson::Bson) {}
 
-#[rb_py("select * from biz_activity where delete_flag = 0
-                  if name != '':
-                    and name like %#{name}%",'$')]
+#[rb_py("SELECT * FROM biz_activity
+    SELECT * FROM biz_activity
+    if  name != null:
+      AND delete_flag = #{del}
+      AND version = 1
+      if  age!=1:
+        AND version = 1
+      AND version = 1
+    AND a = 0
+      yes
+    for item in ids:
+      #{item}
+    for index,item in ids:
+      #{item}
+    trim 'AND':
+      AND delete_flag = #{del2}
+    choose:
+        when age==27:
+          AND age = 27
+        otherwise:
+          AND age = 0
+    WHERE id  = '2';",'$')]
 pub fn py_select_by_condition(arg: &mut bson::Bson) {}
 
 
@@ -63,9 +82,9 @@ fn main() {
     let (sql, args) = py_select_by_condition(&mut arg);
     println!("py->sql: {}", sql);
     println!("py->args: {}", serde_json::to_string(&args).unwrap());
-    let (sql, args) = select_by_condition(&mut arg);
-    println!("sql: {}", sql);
-    println!("args: {}", serde_json::to_string(&args).unwrap());
+    // let (sql, args) = select_by_condition(&mut arg);
+    // println!("sql: {}", sql);
+    // println!("args: {}", serde_json::to_string(&args).unwrap());
 }
 
 #[test]

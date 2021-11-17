@@ -132,16 +132,30 @@ impl NodeType {
                 test: trim_express.trim_start_matches("if ").to_string(),
             }));
         } else if trim_express.starts_with(ForEachNode::name()) {
-            if !trim_express.contains("in ") {
+            let for_tag="for";
+            if !trim_express.starts_with(for_tag) {
                 return Err(Error::from(
                     "[rbatis] parser express fail:".to_string() + source_str,
                 ));
             }
-            //let express = trim_express[Self::name().len()..].trim();
-            let in_index = trim_express.find("in ").unwrap();
-            let col = trim_express[in_index + "in ".len()..].trim();
-            let item = trim_express[..in_index].trim();
-            let index = "";
+            let in_tag=" in ";
+            if !trim_express.contains(in_tag) {
+                return Err(Error::from(
+                    "[rbatis] parser express fail:".to_string() + source_str,
+                ));
+            }
+            let in_index = trim_express.find(in_tag).unwrap();
+            let col = trim_express[in_index + in_tag.len()..].trim();
+            let mut item = trim_express[for_tag.len()..in_index].trim();
+            let mut index = "";
+            if item.contains(","){
+                let splits:Vec<&str> = item.split(",").collect();
+                if splits.len()!=2{
+                    panic!("[rbatis_sql] for node must be 'for key,item in col:'");
+                }
+                index = splits[0];
+                item = splits[1];
+            }
             return Ok(NodeType::NForEach(ForEachNode {
                 childs,
                 collection: col.to_string(),

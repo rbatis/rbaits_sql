@@ -294,13 +294,18 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let def_index = "index".to_string();
 
                 let collection = x.attributes.get("collection").unwrap_or(&empty_string).to_string();
-                let item = x.attributes.get("item").unwrap_or(&def_item).to_string();
-                let findex = x.attributes.get("index").unwrap_or(&def_index).to_string();
+                let mut item = x.attributes.get("item").unwrap_or(&def_item).to_string();
+                let mut findex = x.attributes.get("index").unwrap_or(&def_index).to_string();
                 let open = x.attributes.get("open").unwrap_or(&empty_string).to_string();
                 let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
-
+                if item.is_empty(){
+                    item = def_item;
+                }
+                if findex.is_empty(){
+                    findex = def_index;
+                }
                 let mut ignores = ignore.clone();
                 ignores.push(findex.to_string());
                 ignores.push(item.to_string());
@@ -329,8 +334,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                     sql.push_str(#close);
                     };
                 }
-
-
                 let item_ident = Ident::new(&item, Span::call_site());
                 let index_ident = Ident::new(&findex, Span::call_site());
 
