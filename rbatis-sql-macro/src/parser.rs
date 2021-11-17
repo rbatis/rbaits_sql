@@ -276,13 +276,13 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
                 body = quote! {
                 #body
-                let choose_strings = {
+                let mut do_choose = || -> String {
                          let mut sql = String::new();
                          #inner_body
                          return sql;
                 };
                 sql.push_str(" ");
-                sql.push_str(&choose_strings);
+                sql.push_str(&do_choose());
                 sql.push_str(" ");
               }
             }
