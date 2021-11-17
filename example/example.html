@@ -21,9 +21,11 @@
         id in #{ids}
         id in #{ids}
         id not in #{ids}
+        ${' '}
         <foreach collection="map">
             ${index} = #{item}
         </foreach>
+        ${' '}
         name like #{name}
         or
         name not like #{name}
