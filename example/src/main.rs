@@ -89,6 +89,7 @@ fn main() {
 
 #[test]
 fn bench() {
+    use bson2 as bson;
     let mut arg = bson::bson!({
         "id":1,
         "order_by":["id","name"],
@@ -120,6 +121,7 @@ fn bench() {
 
 #[cfg(test)]
 mod test {
+    use bson2::{bson, Bson};
     #[macro_use]
     use rbatis_sql;
     use rbatis_sql::error::Error;
@@ -170,6 +172,7 @@ mod test {
 
     #[test]
     fn test_node_run() {
+        use bson2 as bson;
         let arg = bson::bson!({
         "a":1,
         "b":2,
@@ -242,11 +245,11 @@ mod test {
     }
 
     #[expr("a+b*(e[0]+b)/2")]
-    pub fn gen(arg: &bson::Bson) -> bson::Bson {}
+    pub fn gen(arg: &bson2::Bson) -> bson2::Bson {}
 
     #[test]
     fn bench() {
-        let arg = bson::bson!({
+        let arg = bson2::bson!({
         "a":1,
         "b":2,
         "c":"c",
@@ -261,15 +264,17 @@ mod test {
         });
     }
 
-    // #[rb_html("example/example.html",'$')]
-    // pub fn test_include(arg: &serde_json::Value) {}
-    //
-    // #[test]
-    // fn test_include_file(){
-    //     let mut arg = Value::Boolean({
-    //     });
-    //     let (sql, args) = test_include(&mut arg);
-    //     println!("py->sql: {}", sql);
-    //     println!("py->args: {}", serde_json::to_string(&args).unwrap());
-    // }
+    #[rb_html("example/example.html",'$')]
+    pub fn insert(arg: &mut Bson) {}
+
+    #[test]
+    fn test_insert(){
+        let mut arg = bson!({
+            "name":"value",
+            "age":18
+        });
+        let (sql, args) = insert(&mut arg);
+        println!("py->sql: {}", sql);
+        println!("py->args: {}", serde_json::to_string(&args).unwrap());
+    }
 }
