@@ -29,7 +29,7 @@ pub struct BizActivity {
 #[rb_html("example/example.html",'$')]
 pub fn select_by_condition(arg: &mut bson::Bson) {}
 
-#[rb_py("SELECT * FROM biz_activity
+#[rb_py("
     SELECT * FROM biz_activity
     if  name != null:
       AND delete_flag = #{del}
@@ -39,10 +39,14 @@ pub fn select_by_condition(arg: &mut bson::Bson) {}
       AND version = 1
     AND a = 0
       yes
-    for item in ids:
-      #{item}
-    for index,item in ids:
-      #{item}
+    and id in (
+    trim ',': for item in ids:
+      #{item},
+    )
+    and id in (
+    trim ',': for index,item in ids:
+      #{item},
+    )
     trim 'AND':
       AND delete_flag = #{del2}
     choose:

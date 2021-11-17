@@ -389,7 +389,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 };
                 body = quote! {
                     #body
-                    sql.push_str(" ");
                 };
             }
 
