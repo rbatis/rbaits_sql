@@ -276,7 +276,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
                 body = quote! {
                 #body
-                let do_choose=||->String{
+                let mut do_choose = || -> String{
                    let mut sql = String::new();
                    #inner_body
                    return sql;
