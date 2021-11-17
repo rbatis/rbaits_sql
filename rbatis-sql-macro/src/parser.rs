@@ -223,10 +223,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "trim" => {
                 let empty_string = String::new();
                 let prefix = x.attributes.get("prefix").unwrap_or(&empty_string).to_string();
-                let mut suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
-                if suffix.is_empty() {
-                    suffix = " ".to_string();
-                }
+                let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
                 let prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
                 impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"), format_char, ignore);
