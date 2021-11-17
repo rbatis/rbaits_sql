@@ -149,6 +149,7 @@ impl NodeType {
                 item: item.to_string(),
             }));
         } else if trim_express.starts_with(TrimNode::name()) {
+            let trim_express = trim_express.trim().trim_start_matches("trim ").trim();
             if trim_express.starts_with("'") && trim_express.ends_with("'") {
                 let express = trim_express[1..trim_express.len() - 1].trim();
                 return Ok(NodeType::NTrim(TrimNode {
