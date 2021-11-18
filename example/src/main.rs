@@ -24,10 +24,10 @@ pub struct BizActivity {
     pub create_time: Option<String>,
     pub delete_flag: Option<i32>,
 }
-//
-//
-#[rb_html("example/example.html",'$')]
-pub fn select_by_condition(arg: &mut bson::Bson) {}
+
+
+#[rb_html("example/example.html")]
+pub fn select_by_condition(arg: &mut bson::Bson, _tag: char) {}
 
 #[rb_py("
     SELECT * FROM biz_activity
@@ -54,9 +54,8 @@ pub fn select_by_condition(arg: &mut bson::Bson) {}
           AND age = 27
         otherwise:
           AND age = 0
-    WHERE id  = '2';",'$')]
-pub fn py_select_by_condition(arg: &mut bson::Bson) {}
-
+    WHERE id  = '2';")]
+pub fn py_select_by_condition(arg: &mut bson::Bson, _tag: char) {}
 
 
 // #[expr("a+b*(e[0]+b)/2")]
@@ -83,10 +82,10 @@ fn main() {
         delete_flag: None,
     };
     //
-    let (sql, args) = py_select_by_condition(&mut arg);
+    let (sql, args) = py_select_by_condition(&mut arg, '$');
     println!("py->sql: {}", sql);
     println!("py->args: {}", serde_json::to_string(&args).unwrap());
-    let (sql, args) = select_by_condition(&mut arg);
+    let (sql, args) = select_by_condition(&mut arg, '$');
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());
 }
@@ -114,11 +113,11 @@ fn bench() {
         create_time: None,
         delete_flag: None,
     };
-    let (sql, args) = select_by_condition(&mut arg);
+    let (sql, args) = select_by_condition(&mut arg, '$');
     println!("sql: {}", sql);
     println!("args: {}", serde_json::to_string(&args).unwrap());
     bench!(1000000,{
-        select_by_condition(&mut arg);
+        select_by_condition(&mut arg,'$');
     });
 }
 
@@ -268,16 +267,16 @@ mod test {
         });
     }
 
-    #[rb_html("example/example.html",'$')]
-    pub fn insert(arg: &mut Bson) {}
+    #[rb_html("example/example.html", '$')]
+    pub fn insert(arg: &mut Bson, _tag: char) {}
 
     #[test]
-    fn test_insert(){
+    fn test_insert() {
         let mut arg = bson!({
             "name":"value",
             "age":18
         });
-        let (sql, args) = insert(&mut arg);
+        let (sql, args) = insert(&mut arg, '$');
         println!("py->sql: {}", sql);
         println!("py->args: {}", serde_json::to_string(&args).unwrap());
     }

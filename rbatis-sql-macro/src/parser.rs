@@ -15,7 +15,7 @@ use crate::proc_macro::TokenStream;
 use crate::py_sql::{NodeType, ParsePySql};
 use crate::string_util::find_convert_string;
 
-fn parse_html_str(html: &str, format_char: char, fn_name: &str, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
+fn parse_html_str(html: &str, fn_name: &str, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
     let datas = load_html(html).expect("load_html() fail!");
     let mut sql_map = HashMap::new();
     let datas = include_replace(datas, &mut sql_map);
@@ -26,7 +26,7 @@ fn parse_html_str(html: &str, format_char: char, fn_name: &str, ignore: &mut Vec
                 match x.attributes.get("id") {
                     Some(id) => {
                         if id.eq(fn_name) {
-                            return parse_html_node(vec![x], format_char, ignore);
+                            return parse_html_node(vec![x], ignore);
                         }
                     }
                     _ => {}
@@ -127,13 +127,13 @@ fn include_replace(htmls: Vec<Element>, sql_map: &mut HashMap<String, Vec<Elemen
     return results;
 }
 
-fn parse_html_node(htmls: Vec<Element>, format_char: char, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
+fn parse_html_node(htmls: Vec<Element>, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
     #[cfg(feature = "debug_mode")]
         {
             println!("load html:{:#?}", htmls);
         }
     let mut methods = quote!();
-    let fn_impl = parse(&htmls, &mut methods, "", format_char, ignore);
+    let fn_impl = parse(&htmls, &mut methods, "", ignore);
     let token = quote! {
         use rbatis_sql::ops::*;
         #methods
@@ -154,21 +154,21 @@ fn to_mod(m: &ItemMod, t: &proc_macro2::TokenStream) -> TokenStream {
 
 
 /// gen rust code
-fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
+fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
     let mut body = quote! {};
     let fix_sql = quote! {
-        rbatis_sql::sql_index!(sql,#format_char);
+        rbatis_sql::sql_index!(sql,_tag);
     };
     for x in arg {
         match x.tag.as_str() {
             "mapper" => {
-                return parse(&x.childs, methods, "mapper", format_char, ignore);
+                return parse(&x.childs, methods, "mapper", ignore);
             }
             "sql" => {
-                return parse(&x.childs, methods, "sql", format_char, ignore);
+                return parse(&x.childs, methods, "sql", ignore);
             }
             "include" => {
-                return parse(&x.childs, methods, "include", format_char, ignore);
+                return parse(&x.childs, methods, "include", ignore);
             }
             "println" => {
                 impl_println(x, &mut body, ignore);
@@ -216,9 +216,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
                 let mut if_tag_body = quote! {};
                 if x.childs.len() != 0 {
-                    if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
+                    if_tag_body = parse(&x.childs, methods, block_name, ignore);
                 }
-                impl_if(test_value, if_tag_body, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), format_char, ignore);
+                impl_if(test_value, if_tag_body, &mut body, methods, quote! {}, &format!("{}:{}", block_name, "if"), ignore);
             }
             "trim" => {
                 let empty_string = String::new();
@@ -226,7 +226,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
                 let prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
                 let suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
-                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"), format_char, ignore);
+                impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"), ignore);
             }
             "bind" => {
                 let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
@@ -243,7 +243,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "where" => {
-                impl_trim(" where ", " ", " |and |or ", " | and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"), format_char, ignore);
+                impl_trim(" where ", " ", " |and |or ", " | and| or", x, &mut body, arg, methods, &format!("{}:{}", block_name, "where:trim"), ignore);
                 body = quote! {
                             #body
                             //check ends with where
@@ -262,13 +262,13 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
                         let mut if_tag_body = quote! {};
                         if x.childs.len() != 0 {
-                            if_tag_body = parse(&x.childs, methods, block_name, format_char, ignore);
+                            if_tag_body = parse(&x.childs, methods, block_name, ignore);
                         }
-                        impl_if(test_value, if_tag_body, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), format_char, ignore);
+                        impl_if(test_value, if_tag_body, &mut inner_body, methods, quote! {return sql;}, &format!("{}:{}", block_name, "choose:when:if"), ignore);
                     }
                     if x.tag.eq("otherwise") {
-                        let child_body = parse(&x.childs, methods, block_name, format_char, ignore);
-                        impl_otherwise(child_body, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"), format_char, ignore);
+                        let child_body = parse(&x.childs, methods, block_name, ignore);
+                        impl_otherwise(child_body, &mut inner_body, methods, &format!("{}:{}", block_name, "choose:otherwise"), ignore);
                     }
                 }
                 body = quote! {
@@ -307,7 +307,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 ignores.push(findex.to_string());
                 ignores.push(item.to_string());
 
-                let impl_body = parse(&x.childs, methods, "foreach", format_char, &mut ignores);
+                let impl_body = parse(&x.childs, methods, "foreach", &mut ignores);
                 let (method_name_string, method_name) = gen_method_name(&format!("{}:{}", block_name, collection));
                 let method_impl = crate::func::impl_fn(&body.to_string(), "", &format!("\"{}\"", collection), false, false, ignore);
                 //check append value
@@ -390,15 +390,15 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "set" => {
-                impl_trim(" set ", " ", " |,", " |,", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"), format_char, ignore);
+                impl_trim(" set ", " ", " |,", " |,", x, &mut body, arg, methods, &format!("{}:{}", block_name, "set:trim"), ignore);
             }
 
             "select" => {
                 let id = x.attributes.get("id").expect("<select> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
+                let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson, _tag: char) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
@@ -415,9 +415,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "update" => {
                 let id = x.attributes.get("id").expect("<update> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
+                let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson, _tag: char) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
 
                                let mut sql = String::with_capacity(1000);
@@ -435,9 +435,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "insert" => {
                 let id = x.attributes.get("id").expect("<insert> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
+                let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson, _tag: char) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
 
                                let mut sql = String::with_capacity(1000);
@@ -455,9 +455,9 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             "delete" => {
                 let id = x.attributes.get("id").expect("<delete> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
-                let child_body = parse(&x.childs, methods, "select", format_char, ignore);
+                let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
-                            pub fn #method_name (arg:&bson2::Bson) -> (String,Vec<bson2::Bson>) {
+                            pub fn #method_name (arg:&bson2::Bson, _tag: char) -> (String,Vec<bson2::Bson>) {
                                use rbatis_sql::ops::AsProxy;
                                
                                let mut sql = String::with_capacity(1000);
@@ -522,7 +522,7 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &m
     return method_name;
 }
 
-fn impl_if(test_value: &str, if_tag_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
+fn impl_if(test_value: &str, if_tag_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, ignore: &mut Vec<String>) {
     let method_name = impl_method(test_value, body, ignore);
     *body = quote! {
                               #body
@@ -535,7 +535,7 @@ fn impl_if(test_value: &str, if_tag_body: proc_macro2::TokenStream, body: &mut p
                           };
 }
 
-fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
+fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, ignore: &mut Vec<String>) {
     *body = quote!(
                         #body
                         sql.push_str(" ");
@@ -545,8 +545,8 @@ fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::
 }
 
 
-fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, format_char: char, ignore: &mut Vec<String>) {
-    let trim_body = parse(&x.childs, methods, block_name, format_char, ignore);
+fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides: &str, x: &Element, body: &mut proc_macro2::TokenStream, arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name: &str, ignore: &mut Vec<String>) {
+    let trim_body = parse(&x.childs, methods, block_name, ignore);
     let prefixs: Vec<&str> = prefixOverrides.split("|").collect();
     let suffixs: Vec<&str> = suffixOverrides.split("|").collect();
     let have_trim = prefixs.len() != 0 && suffixs.len() != 0;
@@ -609,7 +609,7 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
             }
         };
     }
-    t = parse_html_str(&data, format_char, &fn_name, &mut vec![]);
+    t = parse_html_str(&data, &fn_name, &mut vec![]);
     return t.into();
 }
 
@@ -639,7 +639,7 @@ pub fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
         {
             println!("html:{}", htmls);
         }
-    t = parse_html_str(&htmls, format_char, &fn_name, &mut vec![]);
+    t = parse_html_str(&htmls, &fn_name, &mut vec![]);
     return t.into();
 }
 
