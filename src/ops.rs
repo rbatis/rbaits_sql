@@ -5,7 +5,7 @@ use std::ops::{Deref, Index};
 
 use serde::{Deserializer, Serializer};
 use std::cmp::Ordering::Less;
-use bson2::{Document, Timestamp};
+use rbson::{Document, Timestamp};
 
 /// convert Value to Value
 pub trait AsProxy {
@@ -17,7 +17,7 @@ pub trait AsProxy {
     fn str(&self) -> &str;
     fn string(&self) -> String;
     fn bool(&self) -> bool;
-    fn array(&self) -> Option<&bson2::Array>;
+    fn array(&self) -> Option<&rbson::Array>;
     fn object(&self) -> Option<&Document>;
 
     //is
@@ -36,10 +36,10 @@ pub trait AsProxy {
     fn bracket(&self) -> &str;
 }
 
-/// proxy bson2::Document struct,support Deserializer, Serializer
+/// proxy rbson::Document struct,support Deserializer, Serializer
 /// use Cow Optimize unnecessary clones
 /// This structure has a certain amount of computing power
-pub type Value = bson2::Bson;
+pub type Value = rbson::Bson;
 
 
 pub fn as_timestamp(arg: &Timestamp) -> i64 {
@@ -280,7 +280,7 @@ impl AsProxy for Value {
         };
     }
 
-    fn array(&self) -> Option<&bson2::Array> {
+    fn array(&self) -> Option<&rbson::Array> {
         return match self {
             Value::Array(arr) => { Some(arr) }
             _ => { None }
@@ -631,13 +631,13 @@ pub trait AsSql {
 
 #[cfg(test)]
 mod test {
-    use bson2::{Bson, bson};
-    use bson2::spec::BinarySubtype;
+    use rbson::{Bson, bson};
+    use rbson::spec::BinarySubtype;
     use crate::ops::AsProxy;
 
     #[test]
     fn test_string() {
-        let b = Bson::Binary(bson2::Binary {
+        let b = Bson::Binary(rbson::Binary {
             subtype: BinarySubtype::Generic,
             bytes: "s".as_bytes().to_owned(),
         });

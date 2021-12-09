@@ -24,7 +24,7 @@ debug_mode = ["rbatis_sql_macro/debug_mode"]
 [dependencies]
 #serde
 serde = { version = "1", features = ["derive"] }
-bson2 = "2.0.3"
+rbson = "2.0.3"
 dashmap = { version = "4" }
 rbatis_sql_macro = { version = "3.0.6", path = "rbatis-sql-macro" }
 base64 = "0.13"

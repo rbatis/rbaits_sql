@@ -61,7 +61,7 @@ pub fn py_select_by_condition(arg: &mut bson::Bson, _tag: char) {}
 // #[expr("a+b*(e[0]+b)/2")]
 // pub fn gen(arg: &serde_json::Value) -> serde_json::Value {}
 fn main() {
-    let mut arg = bson2::bson!({
+    let mut arg = rbson::bson!({
         "id":1,
         "order_by":["id","name"],
         "ids":[1,2,3],
@@ -92,7 +92,7 @@ fn main() {
 
 #[test]
 fn bench() {
-    use bson2 as bson;
+    use rbson as bson;
     let mut arg = bson::bson!({
         "id":1,
         "order_by":["id","name"],
@@ -124,7 +124,7 @@ fn bench() {
 
 #[cfg(test)]
 mod test {
-    use bson2::{bson, Bson};
+    use rbson::{bson, Bson};
     #[macro_use]
     use rbatis_sql;
     use rbatis_sql::error::Error;
@@ -175,7 +175,7 @@ mod test {
 
     #[test]
     fn test_node_run() {
-        use bson2 as bson;
+        use rbson as bson;
         let arg = bson::bson!({
         "a":1,
         "b":2,
@@ -248,11 +248,11 @@ mod test {
     }
 
     #[expr("a+b*(e[0]+b)/2")]
-    pub fn gen(arg: &bson2::Bson) -> bson2::Bson {}
+    pub fn gen(arg: &rbson::Bson) -> rbson::Bson {}
 
     #[test]
     fn bench() {
-        let arg = bson2::bson!({
+        let arg = rbson::bson!({
         "a":1,
         "b":2,
         "c":"c",

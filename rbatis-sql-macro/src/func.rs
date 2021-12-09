@@ -44,7 +44,7 @@ fn convert_to_arg_access(context: &str, arg: Expr, as_proxy: bool, ignore: &[Str
         Expr::Path(b) => {
             let token = b.to_token_stream().to_string();
             if token == "null" {
-                return syn::parse_str::<Expr>("bson2::Bson::Null").unwrap();
+                return syn::parse_str::<Expr>("rbson::Bson::Null").unwrap();
             }
             if token == "sql" {
                 return Expr::Path(b);
@@ -320,7 +320,7 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     let t = t.unwrap();
     let mut result_impl = quote! { result };
     if serialize_result {
-        result_impl = quote! {bson2::bson!(result)};
+        result_impl = quote! {rbson::bson!(result)};
     }
     if func_name_ident.is_empty() || func_name_ident.eq("\"\"") {
         return quote! {
@@ -332,7 +332,7 @@ pub fn impl_fn(context: &str, func_name_ident: &str, args: &str, serialize_resul
     } else {
         let func_name_ident = Ident::new(&func_name_ident.to_string(), Span::call_site());
         return quote! {
-        pub fn #func_name_ident(arg:&bson2::Bson) -> bson2::Bson {
+        pub fn #func_name_ident(arg:&rbson::Bson) -> rbson::Bson {
            let result={#t};
            #result_impl
         }
