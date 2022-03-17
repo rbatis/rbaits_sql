@@ -620,9 +620,9 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     #[cfg(feature = "debug_mode")]
     {
         let id = Ident::new(&format!("_include_{}", fn_name), Span::call_site());
-        let mut html_file_name = format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
-        if file_name_path_buf.is_absolute(){
-            html_file_name =  file_name.clone();
+        let mut html_file_name = file_name.clone();
+        if !file_name_path_buf.is_absolute(){
+            html_file_name =  format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
         }
         t = quote! {#t fn #id() {let _ = include_str!(#html_file_name);}};
     }
