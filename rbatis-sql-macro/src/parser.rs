@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env::current_dir;
 use std::fs::File;
 use std::io::{Read, Write};
 
@@ -129,9 +130,9 @@ fn include_replace(htmls: Vec<Element>, sql_map: &mut HashMap<String, Vec<Elemen
 
 fn parse_html_node(htmls: Vec<Element>, ignore: &mut Vec<String>) -> proc_macro2::TokenStream {
     #[cfg(feature = "debug_mode")]
-        {
-            println!("load html:{:#?}", htmls);
-        }
+    {
+        println!("load html:{:#?}", htmls);
+    }
     let mut methods = quote!();
     let fn_impl = parse(&htmls, &mut methods, "", ignore);
     let token = quote! {
@@ -297,10 +298,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
                 let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
 
-                if item.is_empty(){
+                if item.is_empty() {
                     item = def_item;
                 }
-                if findex.is_empty(){
+                if findex.is_empty() {
                     findex = def_index;
                 }
                 let mut ignores = ignore.clone();
@@ -459,7 +460,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let select = quote! {
                             pub fn #method_name (arg:&rbson::Bson, _tag: char) -> (String,Vec<rbson::Bson>) {
                                use rbatis_sql::ops::AsProxy;
-                               
+
                                let mut sql = String::with_capacity(1000);
                                let mut args = Vec::with_capacity(20);
                                #child_body
@@ -585,16 +586,17 @@ fn impl_trim(prefix: &str, suffix: &str, prefixOverrides: &str, suffixOverrides:
 }
 
 pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
+    let current_dir = current_dir().unwrap();
     let fn_name = m.sig.ident.to_string();
     let mut file_name = args.get(0).to_token_stream().to_string();
     if file_name.ne("\"\"") && file_name.starts_with("\"") && file_name.ends_with("\"") {
         file_name = file_name[1..file_name.len() - 1].to_string();
     }
-    let t;
+    let mut t;
     #[cfg(feature = "debug_mode")]
-        {
-            println!("try open file:{}", file_name);
-        }
+    {
+        println!("try open file:{}", file_name);
+    }
     let mut data = String::new();
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
     f.read_to_string(&mut data);
@@ -610,6 +612,13 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
         };
     }
     t = parse_html_str(&data, &fn_name, &mut vec![]);
+
+    #[cfg(feature = "debug_mode")]
+    {
+        let id = Ident::new(&format!("_include_{}", fn_name), Span::call_site());
+        let html_file_name = format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
+        t = quote! {#t fn #id() {let _ = include_str!(#html_file_name);}};
+    }
     return t.into();
 }
 
@@ -621,9 +630,9 @@ pub fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     }
     let t;
     #[cfg(feature = "debug_mode")]
-        {
-            println!("py_sql:{}", data);
-        }
+    {
+        println!("py_sql:{}", data);
+    }
     let mut format_char = '?';
     if args.len() > 1 {
         for x in args.get(1).to_token_stream().to_string().chars() {
@@ -636,9 +645,9 @@ pub fn impl_fn_py(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     let nodes = NodeType::parse(&data).expect("[rbatis] parse py_sql fail!");
     let htmls = crate::py_sql::to_html(&nodes, data.starts_with("select") || data.starts_with(" select"), &fn_name);
     #[cfg(feature = "debug_mode")]
-        {
-            println!("html:{}", htmls);
-        }
+    {
+        println!("html:{}", htmls);
+    }
     t = parse_html_str(&htmls, &fn_name, &mut vec![]);
     return t.into();
 }
