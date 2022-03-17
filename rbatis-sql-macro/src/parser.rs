@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::env::current_dir;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::PathBuf;
+use std::str::FromStr;
 
 use base64::{decode, encode};
 use proc_macro2::{Ident, Span};
@@ -597,6 +599,8 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     {
         println!("try open file:{}", file_name);
     }
+    let file_name_path_buf= PathBuf::from_str(&file_name).unwrap();
+
     let mut data = String::new();
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
     f.read_to_string(&mut data);
@@ -616,7 +620,10 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     #[cfg(feature = "debug_mode")]
     {
         let id = Ident::new(&format!("_include_{}", fn_name), Span::call_site());
-        let html_file_name = format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
+        let mut html_file_name = format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
+        if file_name_path_buf.is_absolute(){
+            html_file_name =  file_name.clone();
+        }
         t = quote! {#t fn #id() {let _ = include_str!(#html_file_name);}};
     }
     return t.into();
