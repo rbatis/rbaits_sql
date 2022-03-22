@@ -32,8 +32,12 @@ pub trait AsProxy {
     fn cast_i64(&self) -> i64;
     fn cast_f64(&self) -> f64;
     fn cast_u64(&self) -> u64;
-    //bracket str
+    /// bracket(xxxx) inner data
     fn bracket(&self) -> &str;
+    /// bracket(xxxx) inner data
+    fn inner(&self) -> &str{
+       self.bracket()
+    }
 }
 
 /// proxy rbson::Document struct,support Deserializer, Serializer
