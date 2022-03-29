@@ -7,7 +7,7 @@ members = [
 
 [package]
 name = "rbatis_sql"
-version = "3.0.16"
+version = "3.0.17"
 description = "Rust Json Object access macro"
 authors = ["zhuxiujie <zhuxiujia@qq.com>"]
 edition = "2018"
