@@ -283,7 +283,6 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 };
                 sql.push_str(" ");
                 sql.push_str(&do_choose());
-                sql.push_str(" ");
               }
             }
 
@@ -528,23 +527,20 @@ fn impl_method(test_value: &str, body: &mut proc_macro2::TokenStream, ignore: &m
 fn impl_if(test_value: &str, if_tag_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, appends: proc_macro2::TokenStream, block_name: &str, ignore: &mut Vec<String>) {
     let method_name = impl_method(test_value, body, ignore);
     *body = quote! {
-                              #body
-                              if #method_name {
-                                   sql.push_str(" ");
-                                   #if_tag_body
-                                   sql.push_str(" ");
-                                   #appends
-                              }
-                          };
+                  #body
+                  if #method_name {
+                     #if_tag_body
+                     #appends
+                  }
+            };
 }
 
 fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::TokenStream, methods: &mut proc_macro2::TokenStream, block_name: &str, ignore: &mut Vec<String>) {
     *body = quote!(
-                        #body
-                        sql.push_str(" ");
-                        #child_body
-                        sql.push_str(" ");
-                       );
+                   #body
+                   sql.push_str(" ");
+                   #child_body
+            );
 }
 
 
@@ -599,7 +595,7 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     {
         println!("try open file:{}", file_name);
     }
-    let file_name_path_buf= PathBuf::from_str(&file_name).unwrap();
+    let file_name_path_buf = PathBuf::from_str(&file_name).unwrap();
 
     let mut data = String::new();
     let mut f = File::open(file_name.as_str()).expect(&format!("File:\"{}\" does not exist", file_name));
@@ -621,8 +617,8 @@ pub fn impl_fn_html(m: &ItemFn, args: &AttributeArgs) -> TokenStream {
     {
         let id = Ident::new(&format!("_include_{}", fn_name), Span::call_site());
         let mut html_file_name = file_name.clone();
-        if !file_name_path_buf.is_absolute(){
-            html_file_name =  format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
+        if !file_name_path_buf.is_absolute() {
+            html_file_name = format!("{}/{}", current_dir.to_str().unwrap_or_default(), file_name);
         }
         t = quote! {#t fn #id() {let _ = include_str!(#html_file_name);}};
     }
