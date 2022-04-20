@@ -7,7 +7,7 @@ members = [
 
 [package]
 name = "rbatis_sql"
-version = "3.0.16"
+version = "3.0.17"
 description = "Rust Json Object access macro"
 authors = ["zhuxiujie <zhuxiujia@qq.com>"]
 edition = "2018"
@@ -26,6 +26,6 @@ debug_mode = ["rbatis_sql_macro/debug_mode"]
 serde = { version = "1", features = ["derive"] }
 rbson = "2.0.3"
 dashmap = { version = "4" }
-rbatis_sql_macro = { version = "3.0.9", path = "rbatis-sql-macro" }
+rbatis_sql_macro = { version = "3.0", path = "rbatis-sql-macro" }
 base64 = "0.13"
 async-trait = "0.1"
