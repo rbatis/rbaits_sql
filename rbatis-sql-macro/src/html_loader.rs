@@ -1,6 +1,12 @@
 use std::collections::HashMap;
-use html_parser::{Dom, Node, Result};
 use std::fmt::{Debug, Formatter};
+use std::iter;
+
+use xml5ever::tendril::{SliceExt};
+use xml5ever::{parse};
+use xml5ever::tree_builder::{TreeSink};
+use xml5ever::rcdom::{Handle, NodeEnum, RcDom, Text};
+
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Element {
@@ -32,7 +38,7 @@ impl Debug for Element {
 }
 
 
-pub fn as_element(args: &Vec<Node>) -> Vec<Element> {
+pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
     let mut els = vec![];
     for x in args {
         let mut el = Element {
@@ -41,34 +47,46 @@ pub fn as_element(args: &Vec<Node>) -> Vec<Element> {
             attributes: HashMap::new(),
             childs: vec![],
         };
-        match x {
-            Node::Text(txt) => {
-                el.data = txt.to_string();
+        let b=&x.borrow();
+        let n= &b.node;
+        match n{
+            NodeEnum::Document => {
             }
-            Node::Element(element) => {
-                el.tag = element.name.to_string();
-                if element.id.is_some() {
-                    el.attributes.insert("id".to_string(), element.id.as_ref().unwrap_or(&String::new()).clone());
+            NodeEnum::Doctype(_, _, _) => {
+            }
+            Text(txt) => {el.data = txt.to_string();}
+            NodeEnum::Comment(comment) => {
+                println!("comment:{}", comment);
+            }
+            NodeEnum::Element(n, attrs) => {
+                el.tag = n.local.to_string();
+                for attr in attrs {
+                    el.attributes.insert(attr.name.local.to_string(),attr.value.to_string());
                 }
-                for (k, v) in &element.attributes {
-                    el.attributes.insert(k.clone(), v.as_ref().unwrap_or(&String::new()).clone());
-                }
-                if !element.children.is_empty() {
-                    let childs = as_element(&element.children);
+                //         if !element.children.is_empty() {
+                //             let childs = as_element(&element.children);
+                //             el.childs = childs;
+                //         }
+                if !b.children.is_empty(){
+                    let childs = as_element(&b.children);
                     el.childs = childs;
                 }
             }
-            Node::Comment(comment) => {
-                println!("comment:{}", comment);
-            }
+            NodeEnum::PI(_, _) => {}
         }
         els.push(el);
     }
     els
 }
 
-pub fn load_html(html: &str) -> Result<Vec<Element>> {
-    let dom = Dom::parse(html)?;
-    let els = as_element(&dom.children);
+
+pub fn load_html(html: &str) -> Result<Vec<Element>,String> {
+    // Using SliceExt.to_tendril functions we can read stdin
+    let input = html.to_tendril();
+    // To parse XML into a tree form, we need a TreeSink
+    // luckily xml5ever comes with a static RC backed tree represetation.
+    let dom: RcDom = parse(iter::once(input), Default::default());
+    let b= dom.document.borrow();
+    let els = as_element(&b.children);
     return Ok(els);
 }

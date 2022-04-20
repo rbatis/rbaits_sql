@@ -8,6 +8,9 @@
 #![allow(unused_parens)]
 #![allow(unused_mut)]
 
+
+extern crate markup5ever_rcdom as rcdom;
+extern crate xml5ever;
 extern crate proc_macro;
 
 use syn::{AttributeArgs, DataStruct, ItemFn, parse_macro_input};

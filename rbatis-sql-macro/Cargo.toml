@@ -20,6 +20,9 @@ syn = { version = "1.0", features = ["full"] }
 
 base64 = "0.13"
 xml-rs = "0.8"
-html_parser = "0.6.2"
 async-trait = "0.1"
 url = "2.2.2"
+
+markup5ever_rcdom = "0.1"
+xml5ever = "0.2"
+tendril = "0.1"
