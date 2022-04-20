@@ -283,6 +283,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 };
                 sql.push_str(" ");
                 sql.push_str(&do_choose());
+                sql.push_str(" ");
               }
             }
 
@@ -540,6 +541,7 @@ fn impl_otherwise(child_body: proc_macro2::TokenStream, body: &mut proc_macro2::
                    #body
                    sql.push_str(" ");
                    #child_body
+                   sql.push_str(" ");
             );
 }
 
