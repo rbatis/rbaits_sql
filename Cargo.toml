@@ -1,6 +1,7 @@
 [workspace]
 members = [
     ".",
+    "rbatis-xml-parser",
     "rbatis-sql-macro",
     "example"
 ]

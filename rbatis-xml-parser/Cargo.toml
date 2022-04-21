@@ -1,0 +1,37 @@
+[package]
+name = "rbatis_xml_parser"
+version = "0.1.0"
+description = "Push based streaming parser for xml"
+homepage = "https://github.com/Ygg01/rbatis_xml_parser/blob/master/README.md"
+documentation = "https://ygg01.github.io/docs/rbatis_xml_parser/rbatis_xml_parser/index.html"
+repository = "https://github.com/Ygg01/rbatis_xml_parser"
+readme = "README.md"
+keywords = ["xml", "xml5", "parser", "parsing"]
+authors = ["The rbatis_xml_parser project developers"]
+license = "MIT / Apache-2.0"
+build = "build.rs"
+exclude = ["xml5lib-tests/*"]
+
+[features]
+unstable = ["tendril/unstable"]
+
+[dependencies]
+time = "0.3"
+log = "0.4"
+phf = "0.7"
+mac = "0.1"
+tendril = "0.2"
+html5ever-atoms = "0.1"
+
+[dev-dependencies]
+rustc-serialize = "0.3.15"
+
+[build-dependencies]
+phf_codegen = "0.7.3"
+rustc-serialize = "0.3.15"
+
+[profile.dev]
+debug = false
+
+[profile.test]
+debug = false

@@ -25,5 +25,5 @@ url = "2.2.2"
 
 time = "=0.3.7"
 markup5ever_rcdom = "0.1"
-xml5ever = "0.2"
 tendril = "0.1"
+rbatis_xml_parser = {version="0.1",path="../rbatis-xml-parser"}

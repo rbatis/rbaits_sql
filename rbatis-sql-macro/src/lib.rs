@@ -10,7 +10,7 @@
 
 
 extern crate markup5ever_rcdom as rcdom;
-extern crate xml5ever;
+extern crate rbatis_xml_parser;
 extern crate proc_macro;
 
 use syn::{AttributeArgs, DataStruct, ItemFn, parse_macro_input};

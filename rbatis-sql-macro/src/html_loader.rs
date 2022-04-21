@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 use std::iter;
 
-use xml5ever::tendril::{SliceExt};
-use xml5ever::{parse};
-use xml5ever::tree_builder::{TreeSink};
-use xml5ever::rcdom::{Handle, NodeEnum, RcDom, Text};
+use rbatis_xml_parser::tendril::{SliceExt};
+use rbatis_xml_parser::{parse};
+use rbatis_xml_parser::tree_builder::{TreeSink};
+use rbatis_xml_parser::rcdom::{Handle, NodeEnum, RcDom, Text};
 
 
 #[derive(Clone, Eq, PartialEq)]
