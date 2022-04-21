@@ -47,15 +47,16 @@ pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
             attrs: HashMap::new(),
             childs: vec![],
         };
-        let b=&x.borrow();
-        let n= &b.node;
-        match n{
-            NodeEnum::Document => {
-            }
-            NodeEnum::Doctype(_, _, _) => {
-            }
+        let b = &x.borrow();
+        let n = &b.node;
+        match n {
+            NodeEnum::Document => {}
+            NodeEnum::Doctype(_, _, _) => {}
             Text(txt) => {
                 el.data = txt.to_string().trim_start().trim_end_matches(" ").trim_end_matches("\n").to_string();
+                if el.data.is_empty() {
+                    continue;
+                }
             }
             NodeEnum::Comment(comment) => {
                 println!("comment:{}", comment);
@@ -69,7 +70,7 @@ pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
                 //             let childs = as_element(&element.children);
                 //             el.childs = childs;
                 //         }
-                if !b.children.is_empty(){
+                if !b.children.is_empty() {
                     let childs = as_element(&b.children);
                     el.childs = childs;
                 }
@@ -82,13 +83,13 @@ pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
 }
 
 
-pub fn load_html(html: &str) -> Result<Vec<Element>,String> {
+pub fn load_html(html: &str) -> Result<Vec<Element>, String> {
     // Using SliceExt.to_tendril functions we can read stdin
     let input = html.to_tendril();
     // To parse XML into a tree form, we need a TreeSink
     // luckily xml5ever comes with a static RC backed tree represetation.
     let dom: RcDom = parse(iter::once(input), Default::default());
-    let b= dom.document.borrow();
+    let b = dom.document.borrow();
     let els = as_element(&b.children);
     return Ok(els);
 }
