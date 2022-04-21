@@ -12,7 +12,7 @@ use xml5ever::rcdom::{Handle, NodeEnum, RcDom, Text};
 pub struct Element {
     pub tag: String,
     pub data: String,
-    pub attributes: HashMap<String, String>,
+    pub attrs: HashMap<String, String>,
     pub childs: Vec<Element>,
 }
 
@@ -25,8 +25,8 @@ impl Debug for Element {
             }
             _ => {
                 s.field("tag", &self.tag);
-                if !self.attributes.is_empty() {
-                    s.field("attributes", &self.attributes);
+                if !self.attrs.is_empty() {
+                    s.field("attributes", &self.attrs);
                 }
                 if !self.childs.is_empty() {
                     s.field("childs", &self.childs);
@@ -44,7 +44,7 @@ pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
         let mut el = Element {
             tag: "".to_string(),
             data: "".to_string(),
-            attributes: HashMap::new(),
+            attrs: HashMap::new(),
             childs: vec![],
         };
         let b=&x.borrow();
@@ -61,7 +61,7 @@ pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
             NodeEnum::Element(n, attrs) => {
                 el.tag = n.local.to_string();
                 for attr in attrs {
-                    el.attributes.insert(attr.name.local.to_string(),attr.value.to_string());
+                    el.attrs.insert(attr.name.local.to_string(), attr.value.to_string());
                 }
                 //         if !element.children.is_empty() {
                 //             let childs = as_element(&element.children);

@@ -26,7 +26,7 @@ fn parse_html_str(html: &str, fn_name: &str, ignore: &mut Vec<String>) -> proc_m
     for x in datas {
         if x.tag.eq("mapper") {
             for x in x.childs {
-                match x.attributes.get("id") {
+                match x.attrs.get("id") {
                     Some(id) => {
                         if id.eq(fn_name) {
                             return parse_html_node(vec![x], ignore);
@@ -51,7 +51,7 @@ fn find_element(id: &str, htmls: &Vec<Element>) -> Option<Element> {
                 return find;
             }
         }
-        match x.attributes.get("id") {
+        match x.attrs.get("id") {
             None => {}
             Some(id) => {
                 if id.eq(id) {
@@ -68,10 +68,10 @@ fn include_replace(htmls: Vec<Element>, sql_map: &mut HashMap<String, Vec<Elemen
     for mut x in htmls {
         match x.tag.as_str() {
             "sql" => {
-                sql_map.insert(x.attributes.get("id").expect("[rbatis] <sql> element must have id!").clone(), x.childs.clone());
+                sql_map.insert(x.attrs.get("id").expect("[rbatis] <sql> element must have id!").clone(), x.childs.clone());
             }
             "include" => {
-                let refid = x.attributes.get("refid").expect("[rbatis] <include> element must have refid!").clone();
+                let refid = x.attrs.get("refid").expect("[rbatis] <include> element must have refid!").clone();
                 let data_url = Url::parse(format!("url://{}", refid).as_str()).expect("[rbatis] parse include url fail!");
                 let mut find_file = false;
                 for (k, v) in data_url.query_pairs() {
@@ -102,7 +102,7 @@ fn include_replace(htmls: Vec<Element>, sql_map: &mut HashMap<String, Vec<Elemen
                 }
             }
             _ => {
-                match x.attributes.get("id") {
+                match x.attrs.get("id") {
                     None => {}
                     Some(id) => {
                         if !id.is_empty() {
@@ -216,7 +216,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 }
             }
             "if" => {
-                let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+                let test_value = x.attrs.get("test").expect(&format!("{} element must be have test field!", x.tag));
                 let mut if_tag_body = quote! {};
                 if x.childs.len() != 0 {
                     if_tag_body = parse(&x.childs, methods, block_name, ignore);
@@ -225,15 +225,15 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
             "trim" => {
                 let empty_string = String::new();
-                let prefix = x.attributes.get("prefix").unwrap_or(&empty_string).to_string();
-                let suffix = x.attributes.get("suffix").unwrap_or(&empty_string).to_string();
-                let prefixOverrides = x.attributes.get("prefixOverrides").unwrap_or(&empty_string).to_string();
-                let suffixOverrides = x.attributes.get("suffixOverrides").unwrap_or(&empty_string).to_string();
+                let prefix = x.attrs.get("prefix").unwrap_or(&empty_string).to_string();
+                let suffix = x.attrs.get("suffix").unwrap_or(&empty_string).to_string();
+                let prefixOverrides = x.attrs.get("prefixOverrides").unwrap_or(&empty_string).to_string();
+                let suffixOverrides = x.attrs.get("suffixOverrides").unwrap_or(&empty_string).to_string();
                 impl_trim(&prefix, &suffix, &prefixOverrides, &suffixOverrides, x, &mut body, arg, methods, &format!("{}:{}", block_name, "trim"), ignore);
             }
             "bind" => {
-                let name = x.attributes.get("name").expect("<bind> must be have name!").to_string();
-                let value = x.attributes.get("value").expect("<bind> element must be have value!").to_string();
+                let name = x.attrs.get("name").expect("<bind> must be have name!").to_string();
+                let value = x.attrs.get("value").expect("<bind> element must be have value!").to_string();
 
                 let name_expr = parse_expr(&name);
                 let method_impl = crate::func::impl_fn(&body.to_string(), "", &format!("\"{}\"", value), false, true, ignore);
@@ -262,7 +262,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         panic!("choose node's childs must be when node and otherwise node!");
                     }
                     if x.tag.eq("when") {
-                        let test_value = x.attributes.get("test").expect(&format!("{} element must be have test field!", x.tag));
+                        let test_value = x.attrs.get("test").expect(&format!("{} element must be have test field!", x.tag));
                         let mut if_tag_body = quote! {};
                         if x.childs.len() != 0 {
                             if_tag_body = parse(&x.childs, methods, block_name, ignore);
@@ -293,12 +293,12 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                 let def_item = "item".to_string();
                 let def_index = "index".to_string();
 
-                let collection = x.attributes.get("collection").unwrap_or(&empty_string).to_string();
-                let mut item = x.attributes.get("item").unwrap_or(&def_item).to_string();
-                let mut findex = x.attributes.get("index").unwrap_or(&def_index).to_string();
-                let open = x.attributes.get("open").unwrap_or(&empty_string).to_string();
-                let close = x.attributes.get("close").unwrap_or(&empty_string).to_string();
-                let separator = x.attributes.get("separator").unwrap_or(&empty_string).to_string();
+                let collection = x.attrs.get("collection").unwrap_or(&empty_string).to_string();
+                let mut item = x.attrs.get("item").unwrap_or(&def_item).to_string();
+                let mut findex = x.attrs.get("index").unwrap_or(&def_index).to_string();
+                let open = x.attrs.get("open").unwrap_or(&empty_string).to_string();
+                let close = x.attrs.get("close").unwrap_or(&empty_string).to_string();
+                let separator = x.attrs.get("separator").unwrap_or(&empty_string).to_string();
 
                 if item.is_empty() {
                     item = def_item;
@@ -397,7 +397,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
             }
 
             "select" => {
-                let id = x.attributes.get("id").expect("<select> element must be have id!");
+                let id = x.attrs.get("id").expect("<select> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
@@ -416,7 +416,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         };
             }
             "update" => {
-                let id = x.attributes.get("id").expect("<update> element must be have id!");
+                let id = x.attrs.get("id").expect("<update> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
@@ -436,7 +436,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         };
             }
             "insert" => {
-                let id = x.attributes.get("id").expect("<insert> element must be have id!");
+                let id = x.attrs.get("id").expect("<insert> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
@@ -456,7 +456,7 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
                         };
             }
             "delete" => {
-                let id = x.attributes.get("id").expect("<delete> element must be have id!");
+                let id = x.attrs.get("id").expect("<delete> element must be have id!");
                 let method_name = Ident::new(id, Span::call_site());
                 let child_body = parse(&x.childs, methods, "select", ignore);
                 let select = quote! {
@@ -485,10 +485,10 @@ fn parse(arg: &Vec<Element>, methods: &mut proc_macro2::TokenStream, block_name:
 
 
 fn impl_println(x: &Element, body: &mut proc_macro2::TokenStream, ignore: &mut Vec<String>) {
-    let value = x.attributes.get("value").expect(&format!("{} element must be have value field!", x.tag));
+    let value = x.attrs.get("value").expect(&format!("{} element must be have value field!", x.tag));
     let method_name = impl_method(value, body, ignore);
     let mut format = String::new();
-    if let Some(s) = x.attributes.get("format") {
+    if let Some(s) = x.attrs.get("format") {
         format = s.to_string();
     }
     if format.is_empty() {

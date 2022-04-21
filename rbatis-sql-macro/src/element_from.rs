@@ -19,7 +19,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "".to_string(),
                     data: n.value,
-                    attributes: Default::default(),
+                    attrs: Default::default(),
                     childs: vec![],
                 };
             }
@@ -29,7 +29,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "if".to_string(),
                     data: "".to_string(),
-                    attributes: m,
+                    attrs: m,
                     childs: as_elements(n.childs),
                 };
             }
@@ -39,7 +39,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "trim".to_string(),
                     data: "".to_string(),
-                    attributes: m,
+                    attrs: m,
                     childs: as_elements(n.childs),
                 };
             }
@@ -51,7 +51,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "foreach".to_string(),
                     data: "".to_string(),
-                    attributes: m,
+                    attrs: m,
                     childs: as_elements(n.childs),
                 };
             }
@@ -63,7 +63,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "choose".to_string(),
                     data: "".to_string(),
-                    attributes: Default::default(),
+                    attrs: Default::default(),
                     childs: whens,
                 };
             }
@@ -71,7 +71,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "otherwise".to_string(),
                     data: "".to_string(),
-                    attributes: Default::default(),
+                    attrs: Default::default(),
                     childs: as_elements(n.childs),
                 };
             }
@@ -81,7 +81,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "when".to_string(),
                     data: "".to_string(),
-                    attributes: m,
+                    attrs: m,
                     childs: as_elements(n.childs),
                 };
             }
@@ -92,7 +92,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "bind".to_string(),
                     data: "".to_string(),
-                    attributes: m,
+                    attrs: m,
                     childs: vec![],
                 };
             }
@@ -100,7 +100,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "set".to_string(),
                     data: "".to_string(),
-                    attributes: Default::default(),
+                    attrs: Default::default(),
                     childs: as_elements(n.childs),
                 };
             }
@@ -108,7 +108,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "where".to_string(),
                     data: "".to_string(),
-                    attributes: Default::default(),
+                    attrs: Default::default(),
                     childs: as_elements(n.childs),
                 };
             }
@@ -116,7 +116,7 @@ impl From<NodeType> for Element {
                 return Element {
                     tag: "println".to_string(),
                     data: "".to_string(),
-                    attributes: Default::default(),
+                    attrs: Default::default(),
                     childs: vec![],
                 };
             }
