@@ -23,6 +23,7 @@ xml-rs = "0.8"
 async-trait = "0.1"
 url = "2.2.2"
 
+time = "=0.3.7"
 markup5ever_rcdom = "0.1"
 xml5ever = "0.2"
 tendril = "0.1"
