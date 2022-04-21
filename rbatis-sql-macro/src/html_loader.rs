@@ -54,7 +54,9 @@ pub fn as_element(args: &Vec<Handle>) -> Vec<Element> {
             }
             NodeEnum::Doctype(_, _, _) => {
             }
-            Text(txt) => {el.data = txt.to_string();}
+            Text(txt) => {
+                el.data = txt.to_string().trim_start().trim_end_matches(" ").trim_end_matches("\n").to_string();
+            }
             NodeEnum::Comment(comment) => {
                 println!("comment:{}", comment);
             }
