@@ -530,6 +530,7 @@ fn impl_if(test_value: &str, if_tag_body: proc_macro2::TokenStream, body: &mut p
     *body = quote! {
                   #body
                   if #method_name {
+                     sql.push_str(" ");
                      #if_tag_body
                      #appends
                   }
