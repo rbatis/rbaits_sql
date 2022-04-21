@@ -8,8 +8,6 @@
 #![allow(unused_parens)]
 #![allow(unused_mut)]
 
-
-extern crate markup5ever_rcdom as rcdom;
 extern crate rbatis_xml_parser;
 extern crate proc_macro;
 
