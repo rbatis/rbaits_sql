@@ -1,14 +1,13 @@
 [workspace]
 members = [
     ".",
-    "rbatis-xml-parser",
     "rbatis-sql-macro",
     "example"
 ]
 
 [package]
 name = "rbatis_sql"
-version = "3.0.22"
+version = "3.0.23"
 description = "Rust Json Object access macro"
 authors = ["zhuxiujie <zhuxiujia@qq.com>"]
 edition = "2018"

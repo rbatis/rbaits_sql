@@ -12,7 +12,7 @@
         </foreach>
     </insert>
     <select id="select_by_condition">
-        select * from table where   
+        select * from table where
         <trim suffixOverrides="," suffix=" ">
             <if test="id > 0 && id == 1">
                 id = ${id},

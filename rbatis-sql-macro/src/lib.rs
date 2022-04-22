@@ -8,7 +8,6 @@
 #![allow(unused_parens)]
 #![allow(unused_mut)]
 
-extern crate rbatis_xml_parser;
 extern crate proc_macro;
 
 use syn::{AttributeArgs, DataStruct, ItemFn, parse_macro_input};

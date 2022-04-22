@@ -1,6 +1,6 @@
 [package]
 name = "rbatis_sql_macro"
-version = "3.0.14"
+version = "3.0.15"
 authors = ["zxj_pc <zhuxiujia@qq.com>"]
 edition = "2018"
 license = "Apache-2.0"
@@ -19,8 +19,7 @@ quote = "1.0"
 syn = { version = "1.0", features = ["full"] }
 
 base64 = "0.13"
-xml-rs = "0.8"
 async-trait = "0.1"
 url = "2.2.2"
 
-rbatis_xml_parser = {version="0.1",path="../rbatis-xml-parser"}
+html_parser = "0.6.3"

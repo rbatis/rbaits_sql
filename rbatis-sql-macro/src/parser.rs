@@ -10,8 +10,7 @@ use proc_macro2::{Ident, Span};
 use quote::{quote, ToTokens};
 use syn::{AttributeArgs, Expr, ItemFn, ItemMod, ItemStruct, Path};
 use url::Url;
-use xml::EventReader;
-use xml::reader::XmlEvent;
+
 
 use crate::html_loader::{Element, load_html};
 use crate::proc_macro::TokenStream;
