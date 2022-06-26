@@ -126,7 +126,6 @@ impl AsProxy for Value {
             Value::Int32(i) => { i.to_string() }
             Value::Int64(d) => { d.to_string() }
             Value::Timestamp(d) => { as_timestamp(d).to_string() }
-            Value::ObjectId(d) => { d.to_string() }
             Value::DateTime(d) => { d.to_string() }
             Value::Decimal128(d) => { d.to_string() }
             _ => {
@@ -161,9 +160,6 @@ impl AsProxy for Value {
             Value::Int64(d) => { *d }
             Value::Timestamp(d) => {
                 as_timestamp(d)
-            }
-            Value::ObjectId(d) => {
-                0
             }
             Value::DateTime(d) => {
                 d.timestamp_millis()
@@ -200,9 +196,6 @@ impl AsProxy for Value {
             Value::Timestamp(d) => {
                 as_timestamp(d) as u64
             }
-            Value::ObjectId(d) => {
-                0
-            }
             Value::DateTime(d) => {
                 d.timestamp_millis() as u64
             }
@@ -235,9 +228,6 @@ impl AsProxy for Value {
             Value::Int64(d) => { *d as f64 }
             Value::Timestamp(d) => {
                 as_timestamp(d) as f64
-            }
-            Value::ObjectId(d) => {
-                0.0
             }
             Value::DateTime(d) => {
                 d.timestamp_millis() as f64
