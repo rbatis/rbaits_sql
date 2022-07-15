@@ -247,7 +247,6 @@ impl NodeType {
 
 impl ParsePySql for NodeType {
     fn parse(arg: &str) -> Result<Vec<NodeType>, Error> {
-        let arg = arg.replace("\t","").replace("\r","");
         let line_space_map = Self::create_line_space_map(&arg);
         let mut main_node = vec![];
         let ls = arg.lines();
